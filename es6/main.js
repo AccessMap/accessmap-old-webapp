@@ -1,3 +1,7 @@
+import { requestElevationsUpdate } from './layers/elevation'
+import { requestStopsUpdate } from './layers/busdata'
+import { requestCurbsUpdate } from './layers/curbdata'
+import { requestConstructionPermitUpdate } from './layers/construction-permits'
 function App(tile_url, mapbox_token, geojson_api) {
   'use strict';
   let FEATUREZOOM = 17;

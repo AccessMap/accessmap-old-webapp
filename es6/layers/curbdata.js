@@ -1,22 +1,22 @@
-function requestCurbsUpdate(layerGroup, map, api_url) {
+export function requestCurbsUpdate(layerGroup, map, api_url) {
   function drawCurbs(data) {
     layerGroup.clearLayers();
     var bounds = map.getBounds();
 
-    make_circle = function(feature, latlon) {
-      coords = feature.geometry.coordinates;
+    function make_circle(feature, latlon) {
+      let coords = feature.geometry.coordinates;
       return L.circleMarker(latlon, {
         'radius': 3,
         'color': '#0000FF'
       });
     };
 
-    for (i = 0; i < data.features.length; i++) {
+    for (let i = 0; i < data.features.length; i++) {
       var feature = data.features[i];
       var coord = feature.geometry.coordinates;
       var latlng = [coord[1], coord[0]];
       if (bounds.contains(latlng)) {
-        point = L.geoJson(feature, {pointToLayer: make_circle});
+        let point = L.geoJson(feature, {pointToLayer: make_circle});
 
         //Display info when user clicks on the curb marker
         var popup = L.popup().setContent("<b>Curb Ramp</b>");
@@ -27,7 +27,7 @@ function requestCurbsUpdate(layerGroup, map, api_url) {
     }
   }
 
-bounds = map.getBounds().toBBoxString();
+let bounds = map.getBounds().toBBoxString();
 // Request data
 $.ajax({
   type: 'GET',
