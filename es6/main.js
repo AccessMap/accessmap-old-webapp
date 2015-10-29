@@ -1,11 +1,12 @@
-import { requestElevationsUpdate } from './layers/elevation'
-import { requestStopsUpdate } from './layers/busdata'
-import { requestCurbsUpdate } from './layers/curbdata'
-import { requestConstructionPermitUpdate } from './layers/construction-permits'
+import { requestElevationsUpdate } from './layers/elevation';
+import { requestStopsUpdate } from './layers/busdata';
+import { requestCurbsUpdate } from './layers/curbdata';
+import { requestConstructionPermitUpdate } from './layers/construction-permits';
 function App(tile_url, mapbox_token, geojson_api) {
   'use strict';
+
   let FEATUREZOOM = 17;
-  let map = L.map('map', {zoomControl: false})
+  let map = L.map('map', {zoomControl: false});
 
   let mapbox = L.tileLayer('http://api.tiles.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}@2x.png?access_token=' + mapbox_token, {
     attribution: 'Map data &copy;',
@@ -32,9 +33,8 @@ function App(tile_url, mapbox_token, geojson_api) {
     "User Reported Data":userData,
     "Elevators":elevators,
     "Elevation Change": elevationlayer,
-    "Sidewalk Closure Permits": permits,
-    "User Reported Data": userData
-  }
+    "Sidewalk Closure Permits": permits
+  };
 
   // Read in data to increase speed later on (generate a promise)
 
@@ -43,13 +43,11 @@ function App(tile_url, mapbox_token, geojson_api) {
     requestElevationsUpdate(elevationlayer, map, geojson_api);
     requestCurbsUpdate(curbs, map, geojson_api);
     requestConstructionPermitUpdate(permits, map, geojson_api);
-    //requestUserDataUpdate(userData, map);
-    //requestElevatorUpdate(elevators, map);
-  }
+  };
 
   map.on('load', function(e) {
     updateLayers();
-    map.setView([47.609700, -122.324638], FEATUREZOOM)
+    map.setView([47.609700, -122.324638], FEATUREZOOM);
   });
 
   map.on('moveend', function(e) {
@@ -64,23 +62,19 @@ function App(tile_url, mapbox_token, geojson_api) {
       map.removeLayer(elevationlayer);
       map.removeLayer(curbs);
       map.removeLayer(permits);
-      //map.removeLayer(userData);
-      //map.removeLayer(elevators);
       elevationTiles.addTo(map);
     } else {
       stops.addTo(map);
       elevationlayer.addTo(map);
       curbs.addTo(map);
       permits.addTo(map);
-      //userData.addTo(map);
-      //elevators.addTo(map);
       map.removeLayer(elevationTiles);
     }
   });
 
   map.on('contextmenu', function(e) {
     var popup = confirm("Do you want to report a new obstacle?");
-    if (popup == true) {
+    if (popup === true) {
         window.location.href = 'report?lat=' + e.latlng.lat + '&lon=' + e.latlng.lng;
     }
   });

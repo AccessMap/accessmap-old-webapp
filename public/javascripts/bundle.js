@@ -70,6 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function App(tile_url, mapbox_token, geojson_api) {
 	  'use strict';
+
 	  var FEATUREZOOM = 17;
 	  var map = L.map('map', { zoomControl: false });
 
@@ -98,8 +99,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    "User Reported Data": userData,
 	    "Elevators": elevators,
 	    "Elevation Change": elevationlayer,
-	    "Sidewalk Closure Permits": permits,
-	    "User Reported Data": userData
+	    "Sidewalk Closure Permits": permits
 	  };
 
 	  // Read in data to increase speed later on (generate a promise)
@@ -109,8 +109,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    (0, _layersElevation.requestElevationsUpdate)(elevationlayer, map, geojson_api);
 	    (0, _layersCurbdata.requestCurbsUpdate)(curbs, map, geojson_api);
 	    (0, _layersConstructionPermits.requestConstructionPermitUpdate)(permits, map, geojson_api);
-	    //requestUserDataUpdate(userData, map);
-	    //requestElevatorUpdate(elevators, map);
 	  };
 
 	  map.on('load', function (e) {
@@ -130,23 +128,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      map.removeLayer(elevationlayer);
 	      map.removeLayer(curbs);
 	      map.removeLayer(permits);
-	      //map.removeLayer(userData);
-	      //map.removeLayer(elevators);
 	      elevationTiles.addTo(map);
 	    } else {
 	      stops.addTo(map);
 	      elevationlayer.addTo(map);
 	      curbs.addTo(map);
 	      permits.addTo(map);
-	      //userData.addTo(map);
-	      //elevators.addTo(map);
 	      map.removeLayer(elevationTiles);
 	    }
 	  });
 
 	  map.on('contextmenu', function (e) {
 	    var popup = confirm("Do you want to report a new obstacle?");
-	    if (popup == true) {
+	    if (popup === true) {
 	      window.location.href = 'report?lat=' + e.latlng.lat + '&lon=' + e.latlng.lng;
 	    }
 	  });
@@ -197,9 +191,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
-	Object.defineProperty(exports, "__esModule", {
+	Object.defineProperty(exports, '__esModule', {
 	  value: true
 	});
 	exports.requestElevationsUpdate = requestElevationsUpdate;
@@ -213,6 +207,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    layerGroup.clearLayers();
 	    var bounds = map.getBounds();
 
+	    function setStyle(f) {
+	      if (f.properties.grade >= high) {
+	        return { 'color': '#FF0000',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      } else if (f.properties.grade > mid) {
+	        steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
+	        return { 'color': '#FFFF00',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      } else {
+	        steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
+	        return { 'color': '#00FF00',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      }
+	    }
+
 	    for (var i = 0; i < data.features.length; i++) {
 	      var feature = data.features[i];
 	      var coords = feature.geometry.coordinates;
@@ -221,23 +233,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
 	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
 	        var line = L.geoJson(feature, {
-	          'style': function style(f) {
-	            if (f.properties.grade >= high) {
-	              return { 'color': '#FF0000',
-	                'weight': 5,
-	                'opacity': 0.6 };
-	            } else if (f.properties.grade > mid) {
-	              steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
-	              return { 'color': '#FFFF00',
-	                'weight': 5,
-	                'opacity': 0.6 };
-	            } else {
-	              steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
-	              return { 'color': '#00FF00',
-	                'weight': 5,
-	                'opacity': 0.6 };
-	            }
-	          }
+	          'style': setStyle
 	        });
 
 	        //Display info when user clicks on the line
@@ -373,7 +369,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'radius': 3,
 	        'color': '#0000FF'
 	      });
-	    };
+	    }
 
 	    for (var i = 0; i < data.features.length; i++) {
 	      var feature = data.features[i];
@@ -430,15 +426,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    layerGroup.clearLayers();
 	    var bounds = map.getBounds();
 
+	    function setIcon(feature, latlng) {
+	      return L.marker(latlng, { icon: constructionIcon });
+	    }
+
 	    for (var i = 0; i < data.features.length; i++) {
 	      var feature = data.features[i];
 	      var coord = feature.geometry.coordinates;
 	      var latlng = [coord[1], coord[0]];
 	      if (bounds.contains(latlng)) {
 	        var permitFeature = L.geoJson(feature, {
-	          pointToLayer: function pointToLayer(f, latlng) {
-	            return L.marker(latlng, { icon: constructionIcon });
-	          }
+	          pointToLayer: setIcon
 	        });
 
 	        //Display info when user clicks

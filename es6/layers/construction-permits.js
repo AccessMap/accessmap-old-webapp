@@ -11,15 +11,17 @@ export function requestConstructionPermitUpdate(layerGroup, map, api_url) {
     layerGroup.clearLayers();
     var bounds = map.getBounds();
 
+    function setIcon(feature, latlng) {
+      return L.marker(latlng, {icon: constructionIcon});
+    }
+
     for (let i = 0; i < data.features.length; i++) {
       var feature = data.features[i];
       var coord = feature.geometry.coordinates;
       var latlng = [coord[1], coord[0]];
       if (bounds.contains(latlng)) {
         let permitFeature = L.geoJson(feature, {
-          pointToLayer: function(f, latlng) {
-            return L.marker(latlng, {icon: constructionIcon});
-          }
+          pointToLayer: setIcon
         });
 
         //Display info when user clicks

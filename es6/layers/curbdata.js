@@ -9,7 +9,7 @@ export function requestCurbsUpdate(layerGroup, map, api_url) {
         'radius': 3,
         'color': '#0000FF'
       });
-    };
+    }
 
     for (let i = 0; i < data.features.length; i++) {
       var feature = data.features[i];

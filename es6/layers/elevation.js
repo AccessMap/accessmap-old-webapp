@@ -7,6 +7,24 @@ export function requestElevationsUpdate(layerGroup, map, api_url) {
     layerGroup.clearLayers();
     let bounds = map.getBounds();
 
+    function setStyle(f) {
+      if (f.properties.grade >= high) {
+        return {'color': '#FF0000',
+                'weight': 5,
+                'opacity': 0.6};
+      } else if (f.properties.grade > mid) {
+        steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
+        return {'color': '#FFFF00',
+                'weight': 5,
+                'opacity': 0.6};
+      } else {
+        steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
+        return {'color': '#00FF00',
+                'weight': 5,
+                'opacity': 0.6};
+      }
+    }
+
     for (let i = 0; i < data.features.length; i++) {
       var feature = data.features[i];
       var coords = feature.geometry.coordinates;
@@ -15,23 +33,7 @@ export function requestElevationsUpdate(layerGroup, map, api_url) {
       var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
       if (bounds.contains(coord1) || bounds.contains(coord2)) {
         let line = L.geoJson(feature, {
-          'style': function(f) {
-            if (f.properties.grade >= high) {
-              return {'color': '#FF0000',
-                      'weight': 5,
-                      'opacity': 0.6};
-            } else if (f.properties.grade > mid) {
-              steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
-              return {'color': '#FFFF00',
-                      'weight': 5,
-                      'opacity': 0.6};
-            } else {
-              steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
-              return {'color': '#00FF00',
-                      'weight': 5,
-                      'opacity': 0.6};
-            }
-          }
+          'style': setStyle
         });
 
         //Display info when user clicks on the line
