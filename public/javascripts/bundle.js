@@ -54,6 +54,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
+	// Leaflet (upon which mapbox.js is based) forces a global window.L
+	// variable, leading to all kinds of problems for modular development.
+	// As a result, none of the modules on npm work due to clobbering L.
+
 	'use strict';
 
 	Object.defineProperty(exports, '__esModule', {
@@ -72,17 +76,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  var FEATUREZOOM = 17;
-	  var map = L.map('map', { zoomControl: false });
-
-	  var mapbox = L.tileLayer('http://api.tiles.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}@2x.png?access_token=' + mapbox_token, {
-	    attribution: 'Map data &copy;',
+	  L.mapbox.accessToken = mapbox_token;
+	  var map = L.mapbox.map('map', 'mapbox.streets', {
+	    zoomControl: false,
+	    attribution: 'Map data &copy',
 	    maxZoom: 18
 	  });
-	  mapbox.addTo(map);
 
-	  var elevationTiles = L.mapbox.tileLayer(tile_url, {
-	    accessToken: mapbox_token
-	  });
+	  var elevationTiles = L.mapbox.tileLayer(tile_url);
 	  elevationTiles.addTo(map);
 
 	  var stops = L.featureGroup({ minZoom: 8 });
@@ -148,40 +149,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  map.setView([47.652810, -122.308690], FEATUREZOOM);
 
 	  // Add geocoder
-	  var geocoder = new google.maps.Geocoder();
-	  function filterJSONCall(rawJson) {
-	    var json = {},
-	        key = [],
-	        loc = [],
-	        disp = [];
-
-	    for (var item in rawJson) {
-	      key = rawJson[item].formatted_address;
-	      loc = L.latLng(rawJson[item].geometry.location.lat(), rawJson[item].geometry.location.lng());
-	      json[key] = loc;
-	    }
-
-	    return json;
-	  }
-	  var searchControl = new L.Control.Search({
-	    callData: function callData(text, callResponse) {
-	      geocoder.geocode({ address: text,
-	        componentRestrictions: {
-	          country: 'US',
-	          locality: 'Seattle'
-	        }
-	      }, callResponse);
-	    },
-	    filterJSON: filterJSONCall,
-	    markerLocation: true,
-	    autoType: false,
-	    autoCollapse: true,
-	    minLength: 2
-	  });
-	  // Add controls to map
-	  map.addControl(searchControl);
+	  map.addControl(L.mapbox.geocoderControl('mapbox.places'));
+	  // Add zoom buttons
 	  new L.Control.Zoom().addTo(map);
-	  L.control.locate().addTo(map);
+
 	  L.control.layers(null, overlayMaps).addTo(map);
 	}
 	exports['default'] = App;

@@ -11,7 +11,10 @@ module.exports = {
     loaders: [
       { test: path.join(__dirname, 'es6'),
         exclude: /node_modules/,
-        loader: 'babel-loader' }
+        loader: 'babel-loader' },
+      // json-loader required for mapbox.js' referral to its own package.json
+      { test: /\.json$/,
+        loader: 'json'}
     ]
   }
 };
