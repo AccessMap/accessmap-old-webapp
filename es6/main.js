@@ -2,15 +2,16 @@
 // variable, leading to all kinds of problems for modular development.
 // As a result, none of the modules on npm work due to clobbering L.
 
-import { requestElevationsUpdate } from './layers/elevation';
+import { requestSidewalksUpdate } from './layers/sidewalks';
 import { requestStopsUpdate } from './layers/busdata';
-import { requestCurbsUpdate } from './layers/curbdata';
-import { requestConstructionPermitUpdate } from './layers/construction-permits';
+import { requestCurbsUpdate } from './layers/curbs';
+import { requestPermitsUpdate } from './layers/permits';
 
 
-function App(tile_url, mapbox_token, geojson_api) {
+function App(tile_url, mapbox_token, api_url) {
   'use strict';
 
+  let rawdata_api = api_url.replace(/\/?$/, '/') + 'api/';
   let FEATUREZOOM = 17;
   L.mapbox.accessToken = mapbox_token;
   let map = L.mapbox.map('map', 'mapbox.streets', {
@@ -43,9 +44,9 @@ function App(tile_url, mapbox_token, geojson_api) {
 
   let updateLayers = function() {
     requestStopsUpdate(stops, map);
-    requestElevationsUpdate(elevationlayer, map, geojson_api);
-    requestCurbsUpdate(curbs, map, geojson_api);
-    requestConstructionPermitUpdate(permits, map, geojson_api);
+    requestSidewalksUpdate(elevationlayer, map, rawdata_api);
+    requestCurbsUpdate(curbs, map, rawdata_api);
+    requestPermitsUpdate(permits, map, rawdata_api);
   };
 
   map.on('load', function(e) {
