@@ -75,7 +75,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function App(tile_url, mapbox_token, api_url) {
 	  'use strict';
 
-	  var rawdata_api = api_url.replace(/\/?$/, '/') + 'api/';
+	  var rawdata_api = api_url.replace(/\/?$/, '/') + 'data';
 	  var FEATUREZOOM = 17;
 	  L.mapbox.accessToken = mapbox_token;
 	  var map = L.mapbox.map('map', 'mapbox.streets', {
