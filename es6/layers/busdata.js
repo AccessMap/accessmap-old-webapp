@@ -2,7 +2,7 @@
 // Request stops in an area
 // Process the request data
 // Add the markers to the map
-function requestStopsUpdate(layerGroup, map) {
+export function requestStopsUpdate(layerGroup, map) {
   // Generates a layerGroup to add to / remove from map
   var OBA_URL = 'http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json';
   var RADIUS = 800;
@@ -36,7 +36,7 @@ function requestStopsUpdate(layerGroup, map) {
   }
 
   function addMarkers(request_data) {
-    data = request_data.data.list;
+    let data = request_data.data.list;
     // Destroy the layers in stopLayerGroup
     layerGroup.clearLayers();
     // Create the new ones
@@ -56,7 +56,7 @@ function requestStopsUpdate(layerGroup, map) {
           'routeIds': row.routeIds
         }
       };
-      marker = L.geoJson(geoJSON, {
+      let marker = L.geoJson(geoJSON, {
         pointToLayer: function(feature, latlng) {
           return L.marker(latlng, {icon: busIcon});
         }

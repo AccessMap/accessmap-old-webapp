@@ -1,4 +1,4 @@
-function requestConstructionPermitUpdate(layerGroup, map, api_url) {
+export function requestConstructionPermitUpdate(layerGroup, map, api_url) {
   var constructionIcon = L.icon({
       iconUrl: '../images/construction.png',
       iconSize: [30, 30],
@@ -11,15 +11,17 @@ function requestConstructionPermitUpdate(layerGroup, map, api_url) {
     layerGroup.clearLayers();
     var bounds = map.getBounds();
 
-    for (i = 0; i < data.features.length; i++) {
+    function setIcon(feature, latlng) {
+      return L.marker(latlng, {icon: constructionIcon});
+    }
+
+    for (let i = 0; i < data.features.length; i++) {
       var feature = data.features[i];
       var coord = feature.geometry.coordinates;
       var latlng = [coord[1], coord[0]];
       if (bounds.contains(latlng)) {
-        permitFeature = L.geoJson(feature, {
-          pointToLayer: function(f, latlng) {
-            return L.marker(latlng, {icon: constructionIcon});
-          }
+        let permitFeature = L.geoJson(feature, {
+          pointToLayer: setIcon
         });
 
         //Display info when user clicks
@@ -34,11 +36,11 @@ function requestConstructionPermitUpdate(layerGroup, map, api_url) {
     }
   }
 
-bounds = map.getBounds().toBBoxString();
+let bounds = map.getBounds().toBBoxString();
 // Request data
 $.ajax({
   type: 'GET',
-  url: api_url + '/permits.geojson',
+  url: api_url + '/raw-permits.geojson',
   data: {
     bbox: bounds
   },
