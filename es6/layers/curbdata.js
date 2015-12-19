@@ -31,7 +31,7 @@ let bounds = map.getBounds().toBBoxString();
 // Request data
 $.ajax({
   type: 'GET',
-  url: api_url + '/curbs.geojson',
+  url: api_url + '/raw-curbs.geojson',
   data: {
     bbox: bounds
   },

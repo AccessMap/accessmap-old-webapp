@@ -40,7 +40,7 @@ let bounds = map.getBounds().toBBoxString();
 // Request data
 $.ajax({
   type: 'GET',
-  url: api_url + '/permits.geojson',
+  url: api_url + '/raw-permits.geojson',
   data: {
     bbox: bounds
   },
