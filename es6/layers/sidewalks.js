@@ -1,4 +1,4 @@
-export function requestElevationsUpdate(layerGroup, map, api_url) {
+export function requestSidewalksUpdate(layerGroup, map, api_url) {
   // Gradations
   var high = 0.0833;
   var mid = 0.05;

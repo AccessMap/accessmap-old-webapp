@@ -1,4 +1,4 @@
-export function requestConstructionPermitUpdate(layerGroup, map, api_url) {
+export function requestPermitsUpdate(layerGroup, map, api_url) {
   var constructionIcon = L.icon({
       iconUrl: '../images/construction.png',
       iconSize: [30, 30],
