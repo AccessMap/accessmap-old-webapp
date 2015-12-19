@@ -64,17 +64,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _layersElevation = __webpack_require__(1);
+	var _layersSidewalks = __webpack_require__(5);
 
 	var _layersBusdata = __webpack_require__(2);
 
-	var _layersCurbdata = __webpack_require__(3);
+	var _layersCurbs = __webpack_require__(6);
 
-	var _layersConstructionPermits = __webpack_require__(4);
+	var _layersPermits = __webpack_require__(7);
 
-	function App(tile_url, mapbox_token, geojson_api) {
+	function App(tile_url, mapbox_token, api_url) {
 	  'use strict';
 
+	  var rawdata_api = api_url.replace(/\/?$/, '/') + 'api/';
 	  var FEATUREZOOM = 17;
 	  L.mapbox.accessToken = mapbox_token;
 	  var map = L.mapbox.map('map', 'mapbox.streets', {
@@ -107,9 +108,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var updateLayers = function updateLayers() {
 	    (0, _layersBusdata.requestStopsUpdate)(stops, map);
-	    (0, _layersElevation.requestElevationsUpdate)(elevationlayer, map, geojson_api);
-	    (0, _layersCurbdata.requestCurbsUpdate)(curbs, map, geojson_api);
-	    (0, _layersConstructionPermits.requestConstructionPermitUpdate)(permits, map, geojson_api);
+	    (0, _layersSidewalks.requestSidewalksUpdate)(elevationlayer, map, rawdata_api);
+	    (0, _layersCurbs.requestCurbsUpdate)(curbs, map, rawdata_api);
+	    (0, _layersPermits.requestPermitsUpdate)(permits, map, rawdata_api);
 	  };
 
 	  map.on('load', function (e) {
@@ -159,80 +160,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = exports['default'];
 
 /***/ },
-/* 1 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
-	exports.requestElevationsUpdate = requestElevationsUpdate;
-
-	function requestElevationsUpdate(layerGroup, map, api_url) {
-	  // Gradations
-	  var high = 0.0833;
-	  var mid = 0.05;
-
-	  function drawElevations(data) {
-	    layerGroup.clearLayers();
-	    var bounds = map.getBounds();
-
-	    function setStyle(f) {
-	      if (f.properties.grade >= high) {
-	        return { 'color': '#FF0000',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      } else if (f.properties.grade > mid) {
-	        steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
-	        return { 'color': '#FFFF00',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      } else {
-	        steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
-	        return { 'color': '#00FF00',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      }
-	    }
-
-	    for (var i = 0; i < data.features.length; i++) {
-	      var feature = data.features[i];
-	      var coords = feature.geometry.coordinates;
-	      var coord1 = [coords[0][1], coords[0][0]];
-	      var coord2 = [coords[1][1], coords[1][0]];
-	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
-	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
-	        var line = L.geoJson(feature, {
-	          'style': setStyle
-	        });
-
-	        //Display info when user clicks on the line
-	        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
-	        line.bindPopup(popup);
-
-	        layerGroup.addLayer(line);
-	      }
-	    }
-	  }
-
-	  var bounds = map.getBounds().toBBoxString();
-	  // Request data
-	  $.ajax({
-	    type: 'GET',
-	    url: api_url + '/raw-sidewalks.geojson',
-	    data: {
-	      bbox: bounds
-	    },
-	    dataType: 'json',
-	    success: function success(data) {
-	      drawElevations(data);
-	      layerGroup.bringToBack();
-	    }
-	  });
-	}
-
-/***/ },
+/* 1 */,
 /* 2 */
 /***/ function(module, exports) {
 
@@ -319,7 +247,83 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 3 */
+/* 3 */,
+/* 4 */,
+/* 5 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+	exports.requestSidewalksUpdate = requestSidewalksUpdate;
+
+	function requestSidewalksUpdate(layerGroup, map, api_url) {
+	  // Gradations
+	  var high = 0.0833;
+	  var mid = 0.05;
+
+	  function drawElevations(data) {
+	    layerGroup.clearLayers();
+	    var bounds = map.getBounds();
+
+	    function setStyle(f) {
+	      if (f.properties.grade >= high) {
+	        return { 'color': '#FF0000',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      } else if (f.properties.grade > mid) {
+	        steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
+	        return { 'color': '#FFFF00',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      } else {
+	        steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
+	        return { 'color': '#00FF00',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      }
+	    }
+
+	    for (var i = 0; i < data.features.length; i++) {
+	      var feature = data.features[i];
+	      var coords = feature.geometry.coordinates;
+	      var coord1 = [coords[0][1], coords[0][0]];
+	      var coord2 = [coords[1][1], coords[1][0]];
+	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
+	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
+	        var line = L.geoJson(feature, {
+	          'style': setStyle
+	        });
+
+	        //Display info when user clicks on the line
+	        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
+	        line.bindPopup(popup);
+
+	        layerGroup.addLayer(line);
+	      }
+	    }
+	  }
+
+	  var bounds = map.getBounds().toBBoxString();
+	  // Request data
+	  $.ajax({
+	    type: 'GET',
+	    url: api_url + '/raw-sidewalks.geojson',
+	    data: {
+	      bbox: bounds
+	    },
+	    dataType: 'json',
+	    success: function success(data) {
+	      drawElevations(data);
+	      layerGroup.bringToBack();
+	    }
+	  });
+	}
+
+/***/ },
+/* 6 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -374,7 +378,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 4 */
+/* 7 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -382,9 +386,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.requestConstructionPermitUpdate = requestConstructionPermitUpdate;
+	exports.requestPermitsUpdate = requestPermitsUpdate;
 
-	function requestConstructionPermitUpdate(layerGroup, map, api_url) {
+	function requestPermitsUpdate(layerGroup, map, api_url) {
 	  var constructionIcon = L.icon({
 	    iconUrl: '../images/construction.png',
 	    iconSize: [30, 30],
