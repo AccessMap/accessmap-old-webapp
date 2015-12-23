@@ -11,7 +11,9 @@ import { requestPermitsUpdate } from './layers/permits';
 function App(tile_url, mapbox_token, api_url) {
   'use strict';
 
-  let rawdata_api = api_url.replace(/\/?$/, '/') + 'data';
+  let rawdataUrl = api_url.replace(/\/?$/, '/') + 'data';
+  let routingUrl = api_url.replace(/\/?$/, '/') + 'routing';
+
   let FEATUREZOOM = 17;
   L.mapbox.accessToken = mapbox_token;
   let map = L.mapbox.map('map', 'mapbox.streets', {
@@ -44,9 +46,9 @@ function App(tile_url, mapbox_token, api_url) {
 
   let updateLayers = function() {
     requestStopsUpdate(stops, map);
-    requestSidewalksUpdate(elevationlayer, map, rawdata_api);
-    requestCurbsUpdate(curbs, map, rawdata_api);
-    requestPermitsUpdate(permits, map, rawdata_api);
+    requestSidewalksUpdate(elevationlayer, map, rawdataUrl);
+    requestCurbsUpdate(curbs, map, rawdataUrl);
+    requestPermitsUpdate(permits, map, rawdataUrl);
   };
 
   map.on('load', function(e) {
@@ -89,6 +91,22 @@ function App(tile_url, mapbox_token, api_url) {
   map.addControl(L.mapbox.geocoderControl('mapbox.places'));
   // Add zoom buttons
   new L.Control.Zoom().addTo(map);
+
+  // Routing (via leaflet-routing-machine and lrm-accessmap)
+  let routingEndpoint = routingUrl + '/route.json';
+  L.Routing.control({
+    waypoints: [
+      L.latLng([47.606138, -122.335956]),
+      L.latLng([47.603599, -122.330580])
+    ],
+    router: new L.Routing.AccessMap({'serviceUrl': routingEndpoint}),
+    routeWhileDragging: true,
+    lineOptions: {
+      styles: [{color: 'black', opacity: 0.15, weight: 9},
+               {color: 'white', opacity: 0.8, weight: 6},
+               {color: 'blue', opacity: 1, weight: 2}]
+    }
+  }).addTo(map);
 
   L.control.layers(null, overlayMaps).addTo(map);
 }

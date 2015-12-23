@@ -5,6 +5,7 @@ append head
   link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css')
   link(rel='stylesheet', href='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.24.0/L.Control.Locate.css')
   link(rel='stylesheet', href='/stylesheets/leaflet-search.css')
+  link(rel='stylesheet', href='/stylesheets/leaflet-routing-machine.css')
   style.
     body {
       padding: 0;
@@ -20,6 +21,10 @@ block content
 
   script(src='https://api.tiles.mapbox.com/mapbox.js/v2.1.8/mapbox.js')
   script(src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.24.0/L.Control.Locate.js')
+
+  script(src='/javascripts/leaflet-routing-machine.js')
+  script(src='/javascripts/corslite.js')
+  script(src='/javascripts/lrm-accessmap.js')
 
   script(src='javascripts/bundle.js')
   script.
