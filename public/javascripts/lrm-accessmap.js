@@ -54,7 +54,6 @@
 				clearTimeout(timer);
 				if (!timedOut) {
 					if (!err) {
-            console.log(resp.responseText);
 						data = JSON.parse(resp.responseText);
 						this._routeDone(data, wps, callback, context);
 					} else {
@@ -101,7 +100,6 @@
 		},
 
     _lineStringToCoords: function(lineString) {
-      console.log(lineString);
       var coordinates = lineString.coordinates,
         latlngs = [],
         latlng;
@@ -222,7 +220,8 @@
 				wpIndex = 0,
 				stepIndex = 0,
 				wp = waypoints[wpIndex],
-				stepCoord = instructions[stepIndex].maneuver.location.coordinates,
+        step = instructions[stepIndex],
+				stepCoord = step ? step.maneuver.location.coordinates : false,
 			    i,
 			    c;
 
