@@ -4,7 +4,7 @@
 
 import { requestSidewalksUpdate } from './layers/sidewalks';
 import { requestStopsUpdate } from './layers/busdata';
-import { requestCurbsUpdate } from './layers/curbs';
+import { requestCurbsUpdate } from './layers/curbramps';
 // Permits disabled until data.seattle.gov data source is restored
 // import { requestPermitsUpdate } from './layers/permits';
 

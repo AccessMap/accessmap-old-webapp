@@ -68,7 +68,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _layersBusdata = __webpack_require__(2);
 
-	var _layersCurbs = __webpack_require__(3);
+	var _layersCurbramps = __webpack_require__(3);
 
 	// Permits disabled until data.seattle.gov data source is restored
 	// import { requestPermitsUpdate } from './layers/permits';
@@ -110,7 +110,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var updateLayers = function updateLayers() {
 	    (0, _layersBusdata.requestStopsUpdate)(stops, map);
 	    (0, _layersSidewalks.requestSidewalksUpdate)(elevationlayer, map, rawdata_api);
-	    (0, _layersCurbs.requestCurbsUpdate)(curbs, map, rawdata_api);
+	    (0, _layersCurbramps.requestCurbsUpdate)(curbs, map, rawdata_api);
 	    //    requestPermitsUpdate(permits, map, rawdata_api);
 	  };
 
@@ -222,7 +222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Request data
 	  $.ajax({
 	    type: 'GET',
-	    url: api_url + '/raw-sidewalks.geojson',
+	    url: api_url + '/sidewalks-data.geojson',
 	    data: {
 	      bbox: bounds
 	    },
@@ -364,7 +364,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Request data
 	  $.ajax({
 	    type: 'GET',
-	    url: api_url + '/raw-curbs.geojson',
+	    url: api_url + '/curbramps-data.geojson',
 	    data: {
 	      bbox: bounds
 	    },

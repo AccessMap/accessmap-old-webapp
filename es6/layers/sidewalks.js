@@ -49,7 +49,7 @@ let bounds = map.getBounds().toBBoxString();
 // Request data
 $.ajax({
   type: 'GET',
-  url: api_url + '/raw-sidewalks.geojson',
+  url: api_url + '/sidewalks-data.geojson',
   data: {
     bbox: bounds
   },
