@@ -5,7 +5,8 @@
 import { requestSidewalksUpdate } from './layers/sidewalks';
 import { requestStopsUpdate } from './layers/busdata';
 import { requestCurbsUpdate } from './layers/curbs';
-import { requestPermitsUpdate } from './layers/permits';
+// Permits disabled until data.seattle.gov data source is restored
+// import { requestPermitsUpdate } from './layers/permits';
 
 
 function App(tile_url, mapbox_token, api_url) {
@@ -28,7 +29,7 @@ function App(tile_url, mapbox_token, api_url) {
   let curbs = L.featureGroup({minZoom: 8});
   let userData = L.featureGroup({minZoom: 8});
   let elevators = L.featureGroup({minZoom: 8});
-  let permits = L.featureGroup({minZoom: 8});
+//  let permits = L.featureGroup({minZoom: 8});
 
   //Create filter checkboxes for the overlays
   let overlayMaps = {
@@ -36,8 +37,8 @@ function App(tile_url, mapbox_token, api_url) {
     "Curb Ramps": curbs,
     "User Reported Data":userData,
     "Elevators":elevators,
-    "Elevation Change": elevationlayer,
-    "Sidewalk Closure Permits": permits
+    "Elevation Change": elevationlayer
+//    "Sidewalk Closure Permits": permits
   };
 
   // Read in data to increase speed later on (generate a promise)
@@ -46,7 +47,7 @@ function App(tile_url, mapbox_token, api_url) {
     requestStopsUpdate(stops, map);
     requestSidewalksUpdate(elevationlayer, map, rawdata_api);
     requestCurbsUpdate(curbs, map, rawdata_api);
-    requestPermitsUpdate(permits, map, rawdata_api);
+//    requestPermitsUpdate(permits, map, rawdata_api);
   };
 
   map.on('load', function(e) {
@@ -65,13 +66,13 @@ function App(tile_url, mapbox_token, api_url) {
       map.removeLayer(stops);
       map.removeLayer(elevationlayer);
       map.removeLayer(curbs);
-      map.removeLayer(permits);
+//      map.removeLayer(permits);
       elevationTiles.addTo(map);
     } else {
       stops.addTo(map);
       elevationlayer.addTo(map);
       curbs.addTo(map);
-      permits.addTo(map);
+//      permits.addTo(map);
       map.removeLayer(elevationTiles);
     }
   });

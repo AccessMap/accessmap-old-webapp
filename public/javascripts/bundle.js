@@ -64,13 +64,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _layersSidewalks = __webpack_require__(5);
+	var _layersSidewalks = __webpack_require__(1);
 
 	var _layersBusdata = __webpack_require__(2);
 
-	var _layersCurbs = __webpack_require__(6);
+	var _layersCurbs = __webpack_require__(3);
 
-	var _layersPermits = __webpack_require__(7);
+	// Permits disabled until data.seattle.gov data source is restored
+	// import { requestPermitsUpdate } from './layers/permits';
 
 	function App(tile_url, mapbox_token, api_url) {
 	  'use strict';
@@ -92,7 +93,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var curbs = L.featureGroup({ minZoom: 8 });
 	  var userData = L.featureGroup({ minZoom: 8 });
 	  var elevators = L.featureGroup({ minZoom: 8 });
-	  var permits = L.featureGroup({ minZoom: 8 });
+	  //  let permits = L.featureGroup({minZoom: 8});
 
 	  //Create filter checkboxes for the overlays
 	  var overlayMaps = {
@@ -100,8 +101,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    "Curb Ramps": curbs,
 	    "User Reported Data": userData,
 	    "Elevators": elevators,
-	    "Elevation Change": elevationlayer,
-	    "Sidewalk Closure Permits": permits
+	    "Elevation Change": elevationlayer
+	    //    "Sidewalk Closure Permits": permits
 	  };
 
 	  // Read in data to increase speed later on (generate a promise)
@@ -110,7 +111,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    (0, _layersBusdata.requestStopsUpdate)(stops, map);
 	    (0, _layersSidewalks.requestSidewalksUpdate)(elevationlayer, map, rawdata_api);
 	    (0, _layersCurbs.requestCurbsUpdate)(curbs, map, rawdata_api);
-	    (0, _layersPermits.requestPermitsUpdate)(permits, map, rawdata_api);
+	    //    requestPermitsUpdate(permits, map, rawdata_api);
 	  };
 
 	  map.on('load', function (e) {
@@ -129,13 +130,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      map.removeLayer(stops);
 	      map.removeLayer(elevationlayer);
 	      map.removeLayer(curbs);
-	      map.removeLayer(permits);
+	      //      map.removeLayer(permits);
 	      elevationTiles.addTo(map);
 	    } else {
 	      stops.addTo(map);
 	      elevationlayer.addTo(map);
 	      curbs.addTo(map);
-	      permits.addTo(map);
+	      //      permits.addTo(map);
 	      map.removeLayer(elevationTiles);
 	    }
 	  });
@@ -160,7 +161,80 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = exports['default'];
 
 /***/ },
-/* 1 */,
+/* 1 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+	exports.requestSidewalksUpdate = requestSidewalksUpdate;
+
+	function requestSidewalksUpdate(layerGroup, map, api_url) {
+	  // Gradations
+	  var high = 0.0833;
+	  var mid = 0.05;
+
+	  function drawElevations(data) {
+	    layerGroup.clearLayers();
+	    var bounds = map.getBounds();
+
+	    function setStyle(f) {
+	      if (f.properties.grade >= high) {
+	        return { 'color': '#FF0000',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      } else if (f.properties.grade > mid) {
+	        steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
+	        return { 'color': '#FFFF00',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      } else {
+	        steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
+	        return { 'color': '#00FF00',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      }
+	    }
+
+	    for (var i = 0; i < data.features.length; i++) {
+	      var feature = data.features[i];
+	      var coords = feature.geometry.coordinates;
+	      var coord1 = [coords[0][1], coords[0][0]];
+	      var coord2 = [coords[1][1], coords[1][0]];
+	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
+	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
+	        var line = L.geoJson(feature, {
+	          'style': setStyle
+	        });
+
+	        //Display info when user clicks on the line
+	        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
+	        line.bindPopup(popup);
+
+	        layerGroup.addLayer(line);
+	      }
+	    }
+	  }
+
+	  var bounds = map.getBounds().toBBoxString();
+	  // Request data
+	  $.ajax({
+	    type: 'GET',
+	    url: api_url + '/raw-sidewalks.geojson',
+	    data: {
+	      bbox: bounds
+	    },
+	    dataType: 'json',
+	    success: function success(data) {
+	      drawElevations(data);
+	      layerGroup.bringToBack();
+	    }
+	  });
+	}
+
+/***/ },
 /* 2 */
 /***/ function(module, exports) {
 
@@ -247,83 +321,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 3 */,
-/* 4 */,
-/* 5 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
-	exports.requestSidewalksUpdate = requestSidewalksUpdate;
-
-	function requestSidewalksUpdate(layerGroup, map, api_url) {
-	  // Gradations
-	  var high = 0.0833;
-	  var mid = 0.05;
-
-	  function drawElevations(data) {
-	    layerGroup.clearLayers();
-	    var bounds = map.getBounds();
-
-	    function setStyle(f) {
-	      if (f.properties.grade >= high) {
-	        return { 'color': '#FF0000',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      } else if (f.properties.grade > mid) {
-	        steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
-	        return { 'color': '#FFFF00',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      } else {
-	        steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
-	        return { 'color': '#00FF00',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      }
-	    }
-
-	    for (var i = 0; i < data.features.length; i++) {
-	      var feature = data.features[i];
-	      var coords = feature.geometry.coordinates;
-	      var coord1 = [coords[0][1], coords[0][0]];
-	      var coord2 = [coords[1][1], coords[1][0]];
-	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
-	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
-	        var line = L.geoJson(feature, {
-	          'style': setStyle
-	        });
-
-	        //Display info when user clicks on the line
-	        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
-	        line.bindPopup(popup);
-
-	        layerGroup.addLayer(line);
-	      }
-	    }
-	  }
-
-	  var bounds = map.getBounds().toBBoxString();
-	  // Request data
-	  $.ajax({
-	    type: 'GET',
-	    url: api_url + '/raw-sidewalks.geojson',
-	    data: {
-	      bbox: bounds
-	    },
-	    dataType: 'json',
-	    success: function success(data) {
-	      drawElevations(data);
-	      layerGroup.bringToBack();
-	    }
-	  });
-	}
-
-/***/ },
-/* 6 */
+/* 3 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -373,68 +371,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    dataType: 'json',
 	    success: function success(data) {
 	      drawCurbs(data);
-	    }
-	  });
-	}
-
-/***/ },
-/* 7 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.requestPermitsUpdate = requestPermitsUpdate;
-
-	function requestPermitsUpdate(layerGroup, map, api_url) {
-	  var constructionIcon = L.icon({
-	    iconUrl: '../images/construction.png',
-	    iconSize: [30, 30],
-	    iconAnchor: [10, 0]
-	  });
-
-	  function drawConstruction(data) {
-	    // TODO: turn this into map tiles for several zoom levels to speed
-	    // things up (slowness is due to drawing so many lines)
-	    layerGroup.clearLayers();
-	    var bounds = map.getBounds();
-
-	    function setIcon(feature, latlng) {
-	      return L.marker(latlng, { icon: constructionIcon });
-	    }
-
-	    for (var i = 0; i < data.features.length; i++) {
-	      var feature = data.features[i];
-	      var coord = feature.geometry.coordinates;
-	      var latlng = [coord[1], coord[0]];
-	      if (bounds.contains(latlng)) {
-	        var permitFeature = L.geoJson(feature, {
-	          pointToLayer: setIcon
-	        });
-
-	        //Display info when user clicks
-	        var props = feature.properties;
-	        var popup = L.popup().setContent("<b>Construction Permit</b><br>" + "Permit no. " + props.permit_no + "<br>" + "Mobility impact: " + props.mobility_impact_text);
-	        permitFeature.bindPopup(popup);
-
-	        layerGroup.addLayer(permitFeature);
-	      }
-	    }
-	  }
-
-	  var bounds = map.getBounds().toBBoxString();
-	  // Request data
-	  $.ajax({
-	    type: 'GET',
-	    url: api_url + '/raw-permits.geojson',
-	    data: {
-	      bbox: bounds
-	    },
-	    dataType: 'json',
-	    success: function success(data) {
-	      drawConstruction(data);
 	    }
 	  });
 	}
