@@ -222,7 +222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Request data
 	  $.ajax({
 	    type: 'GET',
-	    url: api_url + '/sidewalks-data.geojson',
+	    url: api_url + '/v1/sidewalks.geojson',
 	    data: {
 	      bbox: bounds
 	    },
@@ -364,7 +364,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Request data
 	  $.ajax({
 	    type: 'GET',
-	    url: api_url + '/curbramps-data.geojson',
+	    url: api_url + '/v1/curbramps.geojson',
 	    data: {
 	      bbox: bounds
 	    },
