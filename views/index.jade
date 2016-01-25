@@ -30,7 +30,7 @@ block content
       p
         a.btn.btn-primary.btn-lg(href='./map', role='button') Try It Now &raquo
         a.btn.btn-default.btn-lg(href="#getinvolved", style='margin-right:5px;') Get Involved
-        a.btn.btn-default.btn-lg(href="https://www.washington.edu/giving/make-a-gift/?page=funds&source_typ=3&source=TASKAR", style='margin-right:5px;') Donate
+        a.btn.btn-default.btn-lg(href="#donate") Donate
 
   div.container
     div.row
@@ -93,11 +93,18 @@ block content
 
     div.row
       div.col-md-12
+        a(name='donate')
+        h2 Donate
+        a.btn.btn-default.btn-lg(href="https://www.washington.edu/giving/make-a-gift/?page=funds&source_typ=3&source=TASKAR", style='margin-right:5px;') Donate
+        p If you would like to make a donation to AccessMap, click the Donate button above and donate to the Taskar Center for Accessible Technology with a comment mentioning the AccessMap project.
+
+    div.row
+      div.col-md-12
         a(name='support')
         h2 Support
         p This project would not be where it is today without the help of the following people and organizations:
         ul.list-unstyled
-          li The Taskar Center for Accessible Technology
+          li The Taskar Center for Accessible Technology and its director, Anat Caspi
           li Alan Borning, Department of Computer Science and Engineering at UW
           li The Seattle Commission for People with Disabilities
           li Seattle Department of Transportation
