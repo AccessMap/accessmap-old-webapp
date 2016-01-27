@@ -14,4 +14,10 @@ router.get('/map', function(req, res, next) {
                       api_url: JSON.stringify(process.env.API_URL) });
 });
 
+/* GET isochrones page. */
+router.get('/isochrones', function(req, res, next) {
+  res.render('isochrones', { title: 'AccessMap Isochrones',
+                      api_url: JSON.stringify(process.env.API_URL) });
+});
+
 module.exports = router;

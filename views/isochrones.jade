@@ -1,0 +1,109 @@
+extends layout
+
+append head
+  link(rel='stylesheet', href='//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css')
+  link(rel='stylesheet', href='stylesheets/l.geosearch.css')
+  style.
+    body {
+      padding: 0;
+      margin: 0;
+    }
+    html, body, #map {
+        height: 100%;
+        width: 100%;
+    }
+
+block content
+  div#map
+  script(src='https://code.jquery.com/jquery-2.2.0.min.js')
+  script(src='//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js')
+  script(src='javascripts/l.control.geosearch.js')
+  script(src='javascripts/l.geosearch.provider.openstreetmap.js')
+  script(src='https://api.tiles.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js')
+  script.
+    var START = [47.604564, -122.334448];
+    var map = L.map('map').setView(START, 16);
+    var tiles = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    isochrone_lg = L.layerGroup();
+    isochrone_lg.addTo(map);
+
+    startMarker = L.marker(START, {draggable: true});
+    startMarker.on('dragend', function(e) {
+      var marker = e.target;
+      var latlon = marker.getLatLng();
+      make_isochrone([latlon.lat, latlon.lng], isochrone_lg);
+    });
+
+    startMarker.addTo(map);
+
+    geosearch = new L.Control.GeoSearch({
+     provider: new L.GeoSearch.Provider.OpenStreetMap()
+    })
+    geosearch._processResults = function(results) {
+        result = results[0];
+        latlon = [result.Y, result.X];
+        map.setView(latlon);
+        startMarker.setLatLng(latlon);
+        make_isochrone(latlon, isochrone_lg);
+    }
+    geosearch.addTo(map);
+
+    make_isochrone(START, isochrone_lg);
+
+    function make_isochrone(latlon, layerGroup) {
+      $.getJSON(!{api_url} + 'routing/isochrone.json?lon=' + latlon[1] + '&lat=' + latlon[0], function() {
+      })
+        .done(function(data) {
+          function getColor(d, n) {
+            // ColorBrewer discrete color maps from D3
+            var RdYlGn = {
+              3: ["#fc8d59","#ffffbf","#91cf60"],
+              4: ["#d7191c","#fdae61","#a6d96a","#1a9641"],
+              5: ["#d7191c","#fdae61","#ffffbf","#a6d96a","#1a9641"],
+              6: ["#d73027","#fc8d59","#fee08b","#d9ef8b","#91cf60","#1a9850"],
+              7: ["#d73027","#fc8d59","#fee08b","#ffffbf","#d9ef8b","#91cf60",
+                  "#1a9850"],
+              8: ["#d73027","#f46d43","#fdae61","#fee08b","#d9ef8b","#a6d96a",
+                  "#66bd63","#1a9850"],
+              9: ["#d73027","#f46d43","#fdae61","#fee08b","#ffffbf","#d9ef8b",
+                  "#a6d96a","#66bd63","#1a9850"],
+              10: ["#a50026","#d73027","#f46d43","#fdae61","#fee08b","#d9ef8b",
+                   "#a6d96a","#66bd63","#1a9850","#006837"],
+              11: ["#a50026","#d73027","#f46d43","#fdae61","#fee08b","#ffffbf",
+                   "#d9ef8b","#a6d96a","#66bd63","#1a9850","#006837"]
+            };
+
+            var colors = RdYlGn[n];
+            colors.reverse();
+            var min_cost = 0;
+            var max_cost = 10000;
+            // Assign color based on data value
+            var step = (max_cost - min_cost) / n;
+            level = Math.floor(d / step);
+
+            return colors[level - 1];
+          }
+
+          var n = 8;
+
+          function style(feature) {
+            color = getColor(feature.properties.cost_max, n);
+            return {
+              fillColor: color,
+              color: color,
+              weight: 1,
+              opacity: .9,
+              fillOpacity: 0.6
+            };
+          }
+          layerGroup.clearLayers();
+          bands = L.geoJson(data, {style: style});
+          bands.addTo(layerGroup);
+        })
+        .fail(function() {
+          console.log('failed!');
+        });
+    }
