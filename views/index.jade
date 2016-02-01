@@ -1,96 +1,120 @@
-extends layout
+extends layout_wfooter
 
 block content
-  div.jumbotron
-    div.container
-      h1 Welcome to AccessMap!
-      p Our application is still in beta, but we would love for you to try it out. Click below to go to the map, keep reading to get more information about the project, or click 'Donate' to make a tax-deductible contribution to the AccessMap project through the Taskar Center for Accessible Technology.
-      p
-        a.btn.btn-primary.btn-lg(href='./map', role='button') Try It Now &raquo
-        a.btn.btn-default.btn-lg(href="#getinvolved", style='margin-right:5px;') Get Involved
-        a.btn.btn-default.btn-lg(href="#donate") Donate
+  .container(style='width: 100%; padding: 0px 0px;')
+    .jumbotron.text-center
+      .container
+        .row
+          h1 Welcome to AccessMap!
+          p Our application is still in beta, but we would love for you to try it out. Click below to go to the map, keep reading to get more information about the project, or click 'Donate' to make a tax-deductible contribution to the AccessMap project through the Taskar Center for Accessible Technology.
+          br
+        .row
+          .col-sm-3.col-sm-offset-1.text-center
+            a.btn.btn-primary.btn-lg(href='./map')
+              i.fa.fa-map
+              p Try It Now &raquo
+          .col-sm-3.col-sm-offset-1.text-center
+            a.btn.btn-primary.btn-lg(href="#getinvolved")
+              i.fa.fa-flag
+              p Get Involved
+          .col-sm-3.col-sm-offset-1.text-center
+            a.btn.btn-primary.btn-lg(href="#donate")
+              i.fa.fa-gift
+              p Donate
 
-  div.container
-    div.row
-      div.col-md-12
-        a(name='about')
-        h2 About
-        p Our application is a map which displays a variety of possible obstacles for people with limited mobility. It can be easily viewed on both desktop and mobile. To remove some of the data from the map, simply hover over (or tap on mobile) the Layers icon in the top right-hand corner of the screen. This will allow you to turn on and off various data sets. To search for a specific location, use the search icon on the left-hand side of the screen. If you find that you are unable to see any information on the map other than elevation data, please try zooming in more, as some information does not appear until you are zoomed in closely. For more information about what each of the symbols on the map mean, please see the legend below:
-        table
-          tr
-            th(colspan='2', style='text-align:center;') Legend
-          tr
-            td
-              b Elevation
-            td Green, Yellow, and Red sidewalk segments
-          tr
-            td
-              b Curb Ramps
-            td
-              img(src='/images/blue_circle.png')
-          tr
-            td
-              b Construction
-            td
-              img(src='/images/construction.png')
-              p Missing until data.seattle.gov data source works again
-          tr
-            td
-              b Bus Stop
-            td
-              img(src='/images/bus.png')
-          tr
-            td
-              b Elevator
-            td
-              img(src='/images/elevator.png')
-    div.row
-      div.col-md-12
-        a(name='datasources')
-        h2 Data Sources
-        p Our data comes from many places, so we want to call attention to the organizations that are providing the data we need to make our application work.
-          dl.dl-horizontal
-            dt Map
-            dd
-              a(href='https://mapbox.com/') Mapbox
-            dt Sidewalk & Construction
-            dd
-              a(href='https://data.seattle.gov/') SDOT through data.seattle.gov
-            dt Elevation
-            dd
-              a(href='http://nationalmap.gov/elevation.html') National Elevation Dataset
-            dt Bus Stops
-            dd
-              a(href='http://pugetsound.onebusaway.org/p/OneBusAwayApiService.action') OneBusAway
+    .container
+      .row
+        .col-md-12
+          a(name='about')
+          h2 About
+          p The AccessMap project is an effort to enable accessible sidewalk trip planning for people with limited mobility.
+      .row
+        .col-md-12
+          a(name='The map')
+          h2 The Map
+          p The legend below describes the elements that can be seen on the default map.
+          .table-responsive
+            table.table.table-bordered.table-striped
+              thead.thead-default
+                tr
+                  th: b Feature
+                  th: b Displayed on map
+              tr
+                td: b Elevation
+                td Green, Yellow, and Red sidewalk segments
+              tr
+                td: b Curb Ramps
+                td: img(src='/images/blue_circle.png')
+              tr
+                td: b Construction
+                td
+                  img(src='/images/construction.png')
+                  |  (Temporarily removed from the map)
+              tr
+                td: b Bus Stop
+                td: img(src='/images/bus.png')
+              tr
+                td: b Elevator
+                td: img(src='/images/elevator.png')
+      .row
+        .col-md-12
+          a(name='datasources')
+          h2 Data Sources
+          p Our data comes from many places, so we want to call attention to the organizations that are providing the data we need to make our application work.
+            dl.dl-horizontal
+              dt Map
+              dd
+                a(href='https://mapbox.com/') Mapbox
+              dt Sidewalk & Construction
+              dd
+                a(href='https://data.seattle.gov/') SDOT through data.seattle.gov
+              dt Elevation
+              dd
+                a(href='http://nationalmap.gov/elevation.html') National Elevation Dataset
+              dt Bus Stops
+              dd
+                a(href='http://pugetsound.onebusaway.org/p/OneBusAwayApiService.action') OneBusAway
 
-    div.row
-      div.col-md-12
-        a(name='getinvolved')
-        h2 Get Involved
-        p We are looking for people to help us in our efforts. Right now, there are two ways you can help. If you have limited mobility, we would love to get some feedback from you about our application! Please fill out <a href="https://docs.google.com/forms/d/1nVlY14QMSAjwPB6iV2pQiTodjujX2U-mX0Tth2lxR-4/viewform">this short survey</a>, and we will get back to you as soon as possible to hear your thoughts. If you are a developer who is interested in helping us out, please <a href="https://github.com/Hackcessible/hackcessible-webapp">check out our GitHub repository</a> or email us at <a href="mailto:developers@accessmapseattle.com">developers@accessmapseattle.com</a> to find out how you can get involved. Right now, we are really looking for someone with map and routing experience, but don’t let the lack of those skills stop you from helping.
+      .row
+        .col-md-12
+          a(name='getinvolved')
+          h2 Get Involved
+      .row
+          p You can help us make automatic routing possible by #[a(href='/improve') selecting sidewalks that should be connected], #[a(href='https://docs.google.com/forms/d/1nVlY14QMSAjwPB6iV2pQiTodjujX2U-mX0Tth2lxR-4/viewform') fill out our survey] if you have limited mobility, or #[a(href='mailto:developers@accessmapseattle.com') contact us] if you're interested in helping with development.
+      .row.buttonlist
+        .col-md-4
+          a.btn.btn-primary.btn-lg(href='./improve')
+            i.fa.fa-map-signs
+            p Improve the map
+        .col-md-4
+          a.btn.btn-primary.btn-lg(href='https://docs.google.com/forms/d/1nVlY14QMSAjwPB6iV2pQiTodjujX2U-mX0Tth2lxR-4/viewform')
+            i.fa.fa-pencil
+            p Take our survey
+        .col-md-4
+          a.btn.btn-primary.btn-lg(href='mailto:developers@accessmapseattle.com')
+            i.fa.fa-envelope
+            p Help develop AccessMap
 
-    div.row
-      div.col-md-12
-        a(name='donate')
-        h2 Donate
-        a.btn.btn-default.btn-lg(href="https://www.washington.edu/giving/make-a-gift/?page=funds&source_typ=3&source=TASKAR", style='margin-right:5px;') Donate
+      .row
+        .col-md-12
+          a(name='donate')
+          h2 Donate
+      .row
         p If you would like to make a donation to AccessMap, click the Donate button above and donate to the Taskar Center for Accessible Technology with a comment mentioning the AccessMap project.
+      .row.buttonlist
+        a.btn.btn-success.btn-lg(href="https://www.washington.edu/giving/make-a-gift/?page=funds&source_typ=3&source=TASKAR", style='margin-right:5px;')
+          li.fa.fa-gift
+          p Donate to AccessMap through TCAT
 
-    div.row
-      div.col-md-12
-        a(name='support')
-        h2 Support
-        p This project would not be where it is today without the help of the following people and organizations:
-        ul.list-unstyled
-          li The Taskar Center for Accessible Technology and its director, Anat Caspi
-          li Alan Borning, Department of Computer Science and Engineering at UW
-          li The Seattle Commission for People with Disabilities
-          li Seattle Department of Transportation
+      .row
+        .col-md-12
+          a(name='support')
+          h2 Support
+          p This project would not be where it is today without the help of the following people and organizations:
+          ul.list-unstyled
+            li The Taskar Center for Accessible Technology and its director, Anat Caspi
+            li Alan Borning, Department of Computer Science and Engineering at UW
+            li The Seattle Commission for People with Disabilities
+            li Seattle Department of Transportation
 
-  hr
-
-  footer(style='margin-bottom:20px;')
-    span &copy; Access Map 2015
-    span(style='float:right;') Contact Us:
-      a(href='mailto:info@accessmapseattle.com') info@accessmapseattle.com
-      a(href='https://twitter.com/accessmapsea')  @AccessMapSea
+    hr

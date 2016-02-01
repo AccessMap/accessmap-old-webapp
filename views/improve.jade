@@ -1,0 +1,67 @@
+extends layout_wfooter
+
+block content
+  .container(style='width: 100%; padding: 0px 0px;')
+    .jumbotron
+      .container
+        .row.text-center
+          h1 Improving AccessMap
+          p We need your help to make AccessMap better.
+
+  .container.buttonlist
+    .row.text-center
+      h2 We want to make sidewalks routable
+      .col-md-5
+        img(src='images/improve/routing_problem_broken.png')
+        h4 Disconnected - can't route
+      .col-md-5
+        img(src='images/improve/routing_problem_connected.png')
+        h4 Connected - can route
+    .row.text-center
+      p We want to make a reliable, safe trip planner for people with limited mobility (like a Google Maps for sidewalks). To make routing happen, we need to represent the sidewalks of Seattle as lines that are connected to one another.
+
+    .row.text-center
+      h2 But the data is messy
+      .col-md-6.col-md-offset-3
+        img(src='images/improve/messy_data.png')
+    .row.text-center
+      p The Seattle Department of Transportation has provided an extensive, metadata-rich dataset of Seattle's sidewalks at #[a(href='data.seattle.gov') data.seattle.gov]. Like most municipal sources of sidewalk data that we have found, while the extent is impressive, the exact placement of each sidewalk isn't perfectly accurate. As a result, the lines that represent the sidewalks don't match up perfectly end-to-end, making routing impossible.
+
+    .row.text-center
+      h2 Cleaning the data
+      .col-md-10.col-md-offset-1
+        img(src='images/improve/cleaning.png')
+    .row.text-center
+      p Over the summer of 2015, AccessMap was supported by the #[a(href='http://escience.washington.edu/get-involved/data-science-for-social-good/') Data Science for Social Good] project through the UW eScience Institute, which provided us with the brainpower (#[a(href='http://escience.washington.edu/research-project/sidewalk-maps-for-low-mobility-citizens/') listed here]) to write algorithms that clean up the sidewalk data. The algorithms written do a very good job of cleaning up the data, but it's very difficult to independently verify the accuracy. Additionally, we want to generalize our approach to even more cities - cities with slightly different data and different streets, where the algorithms for Seattle probably won't work.
+
+    .row.text-center
+      h2 How you can help
+      p We have developed machine learning approaches that do a very good job of learning how to connect sidewalks. However, our only point of reference is the algorithms written over the summer. We need your help to identify which sidewalk lines should be connected into one, big sidewalk, and which should not be connected (e.g., they cross a street). We've developed an interactive process (almost a game) that lets you select, one at a time, the correct way that sidewalks are connected.
+
+    .row.text-center
+      .col-md-10.col-md-offset-1
+        img(src='images/improve/example_connect.png')
+    .row.text-center
+      h2 Connect lines that should be part of one connected sidewalk
+      p You will be presented with a map of two sidewalk lines (in blue) connected by a green line. We draw the green line just to tell you which ends of the sidewalks we're asking about. In the example above, the sidewalks should definitely be connected. #[b If in doubt, click the 'satellite' toggle to get an aerial view].
+      p If the blue lines should be considered one sidewalk, click #[b Yes].
+
+    .row.text-center
+      h2 Don't connect lines that cross the street
+      .col-md-10.col-md-offset-1
+        img(src='images/improve/example_disconnect.png')
+    .row.text-center
+      p If the blue sidewalk lines would be connected across the street, they are clearly disconnected - you'd have to cross the street!
+      p If the blue lines should be considered separate sidewalk, click #[b No].
+
+    .row.text-center
+      h2 Beware of noisy data
+      .col-md-10.col-md-offset-1
+        img(src='images/improve/example_popup.png')
+    .row.text-center
+      p Sometimes, the data is so noisy that sidewalks will appear to cross the street. You can click on the sidewalks to show information about the sidewalk, e.g. the side of the street (S = South) and the streets bordering the sidewalk (the map is oriented with North at the top). If you're still unsure after checking the popups, hit refresh (F5) on your browser to get a new sidewalk.
+
+    .row.text-center
+      h2 Improve the map
+      br
+      a.btn.btn-primary.btn-large(href='/learnsidewalks') #[h3 Click here to improve the sidewalks]

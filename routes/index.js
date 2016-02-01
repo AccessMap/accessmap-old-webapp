@@ -28,6 +28,10 @@ router.get('/map', function(req, res, next) {
   });
 });
 
+router.get('/improve', function(req, res, next) {
+  res.render('improve', { title: 'Improve AccessMap' });
+});
+
 router.get('/learnsidewalks', function(req, res, next) {
   var sess = req.session;
   if (!sess.email) {

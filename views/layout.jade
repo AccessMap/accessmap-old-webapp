@@ -9,8 +9,9 @@ html
 
     link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
     link(rel='stylesheet', href='/stylesheets/bootstrap-theme.min.css')
+    link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css')
+    link(rel='stylesheet', href='https://fonts.googleapis.com/css?family=Montserrat:400,700')
     link(rel='stylesheet', href='/stylesheets/style.css')
-    link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Roboto:400,700')
 
     script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
     script(src='javascripts/bootstrap.min.js')
@@ -28,7 +29,7 @@ html
       })(window,document,'script','dataLayer','GTM-KRXQGQ');
 
     .navbar.navbar-inverse.navbar-fixed-top(role='navigation')
-      .container
+      .container-fluid
         .navbar-header
           button.navbar-toggle.collapsed(type='button',
                                          data-toggle='collapse',
@@ -39,17 +40,25 @@ html
             span.icon-bar
             span.icon-bar
             span.icon-bar
-          a.navbar-brand(href='/') AccessMap Seattle
-        #navbarcollapse.navbar-collapse.collapse
+          a.navbar-brand(href='/')
+            span
+              img(alt='AccessMap', src='/images/accessmap.png', height='50')
+              | Seattle
+        #navbarcollapse.collapse.navbar-collapse
           ul.nav.navbar-nav.navbar-right
             li
               a(href='#')
               span.sr-only (current)
+            li
+              a(href='mailto:info@accessmapseattle.com')
+                i.fa.fa-envelope
+            li
+              a(href='http://twitter.com/AccessMapSea')
+                i.fa.fa-twitter
             li: a(href='/map') The Map
             li: a(href='/#about') About
-            li: a(href='/#datasources') Data Sources
-            li: a(href='/#getinvolved') Get Involved
-            li: a(href='/learnsidewalks') Improve AccessMap
+            li: a(href='/improve') Improve AccessMap
 
-    .container.fill
+    .container-fluid.fill
       block content
+      block footer
