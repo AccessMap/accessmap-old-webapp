@@ -32,11 +32,13 @@ function App(learn_url, mapbox_token) {
       url: learn_url + '/submit',
       data: JSON.stringify({geojson: geojson,
         classification: classification
-      }),
-      dataType: 'json'
+      })
     })
       .done(function() {
         location.reload();
+      })
+      .fail(function(e) {
+        console.log('Error: ' + e);
       });
   }
 
