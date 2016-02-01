@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 function App(learn_url, mapbox_token, email) {
   L.mapbox.accessToken = mapbox_token;
   var map = L.map('map');
@@ -14,7 +16,7 @@ function App(learn_url, mapbox_token, email) {
 
   var currentDat;
   // this gets the data
-  jQuery.get(learn_url + '/getdata', function(data){
+  $.get(learn_url + '/getdata', function(data){
     // adds to the map the first feature
     L.geoJson(data.features[0]).addTo(map);
     L.geoJson(data.features[1]).addTo(map);

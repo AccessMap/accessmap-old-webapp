@@ -2,6 +2,9 @@
 // Request stops in an area
 // Process the request data
 // Add the markers to the map
+import $ from 'jquery';
+
+
 export function requestStopsUpdate(layerGroup, map) {
   // Generates a layerGroup to add to / remove from map
   var OBA_URL = 'http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json';

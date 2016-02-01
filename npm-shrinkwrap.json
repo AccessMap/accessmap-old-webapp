@@ -708,6 +708,11 @@
         }
       }
     },
+    "jquery": {
+      "version": "2.2.0",
+      "from": "jquery@*",
+      "resolved": "https://registry.npmjs.org/jquery/-/jquery-2.2.0.tgz"
+    },
     "json-loader": {
       "version": "0.5.4",
       "from": "json-loader@*",

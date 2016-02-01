@@ -1,3 +1,6 @@
+import $ from 'jquery';
+
+
 export function requestCurbsUpdate(layerGroup, map, api_url) {
   function drawCurbs(data) {
     layerGroup.clearLayers();
