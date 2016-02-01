@@ -3,7 +3,6 @@ import $ from 'jquery';
 function App(learn_url, mapbox_token, email) {
   L.mapbox.accessToken = mapbox_token;
   var map = L.map('map');
-  map.setView([47.5719,-122.2186], 18);
 
   var layers = {
     streets: L.mapbox.tileLayer('mapbox.streets'),

@@ -64,7 +64,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "bf4d28a5f26ec04bde3a"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "2b826dfce7cb2688bc69"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -573,7 +573,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	function App(learn_url, mapbox_token, email) {
 	  L.mapbox.accessToken = mapbox_token;
 	  var map = L.map('map');
-	  map.setView([47.5719, -122.2186], 18);
 
 	  var layers = {
 	    streets: L.mapbox.tileLayer('mapbox.streets'),
