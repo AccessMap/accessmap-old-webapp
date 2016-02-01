@@ -26,9 +26,14 @@ function App(learn_url, mapbox_token) {
   });
 
   function submitResult(learn_url, geojson, classification) {
-    $.post(learn_url + '/submit', {
-      geojson: JSON.stringify(geojson),
-      classification: classification
+    $.ajax({
+      type: 'POST',
+      contentType: 'application/json; charset=utf-8',
+      url: learn_url + '/submit',
+      data: JSON.stringify({geojson: geojson,
+        classification: classification
+      }),
+      dataType: 'json'
     })
       .done(function() {
         location.reload();

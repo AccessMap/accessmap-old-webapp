@@ -64,7 +64,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "906d00706f2fb4ac25c5"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "49ddb85a3223a492f22d"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -591,9 +591,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 
 	  function submitResult(learn_url, geojson, classification) {
-	    $.post(learn_url + '/submit', {
-	      geojson: JSON.stringify(geojson),
-	      classification: classification
+	    $.ajax({
+	      type: 'POST',
+	      contentType: 'application/json; charset=utf-8',
+	      url: learn_url + '/submit',
+	      data: JSON.stringify({ geojson: geojson,
+	        classification: classification
+	      }),
+	      dataType: 'json'
 	    }).done(function () {
 	      location.reload();
 	    });
