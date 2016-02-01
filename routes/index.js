@@ -6,6 +6,18 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'AccessMap' });
 });
 
+/* GET login page. */
+router.get('/login', function(req, res, next) {
+  res.render('login', { title: 'Log in to AccessMap' });
+});
+
+/* POST login page. */
+router.post('/login', function(req, res, next) {
+  var sess = req.session;
+  sess.email = req.body.email;
+  res.redirect('/learnsidewalks');
+});
+
 /* GET map page. */
 router.get('/map', function(req, res, next) {
   res.render('map', {
@@ -17,10 +29,16 @@ router.get('/map', function(req, res, next) {
 });
 
 router.get('/learnsidewalks', function(req, res, next) {
+  var email = '';
+  var sess = req.session;
+  if (sess.email) {
+    email = sess.email;
+  }
   res.render('learnsidewalks', {
     title: 'Help Improve AccessMap',
     mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
-    learn_url: JSON.stringify(process.env.LEARN_URL)
+    learn_url: JSON.stringify(process.env.LEARN_URL),
+    email: email
   });
 });
 

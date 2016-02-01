@@ -64,7 +64,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "b6f4e2effa4c08cf6dc4"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "dd0926f236666fdbc69b"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -563,7 +563,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, '__esModule', {
 	  value: true
 	});
-	function App(learn_url, mapbox_token) {
+	function App(learn_url, mapbox_token, email) {
 	  L.mapbox.accessToken = mapbox_token;
 	  var map = L.map('map');
 	  map.setView([47.5719, -122.2186], 18);
@@ -595,7 +595,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      type: 'POST',
 	      contentType: 'application/json; charset=utf-8',
 	      url: learn_url + '/submit',
-	      data: JSON.stringify({ geojson: geojson,
+	      data: JSON.stringify({
+	        email: email,
+	        geojson: geojson,
 	        classification: classification
 	      })
 	    }).done(function () {

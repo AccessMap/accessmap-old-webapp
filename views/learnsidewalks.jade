@@ -28,9 +28,8 @@ block content
         p Guidelines:
         p The data we're showing you is messy. The exact locations of the sidewalks are not perfect and may sometimes cross streets, cross each other, etc. Make your best guess at whether the blue lines should be one sidewalk (connected by the green line) or separate ones. e.g., if the blue lines are on opposite sides of the street, they are clearly not one connected sidewalk, so you'd select 'Separate Sidewalks'. On the other hand, if the sidewalks are on the same block and their ends nearly touch, you'd select 'One Sidewalk'.
 
-
   script(src='https://api.tiles.mapbox.com/mapbox.js/v2.1.8/mapbox.js')
 
   script(src='javascripts/learnsidewalks-bundle.js')
   script.
-    App(!{learn_url}, !{mapbox_token});
+    App(!{learn_url}, !{mapbox_token}, "!{email}");

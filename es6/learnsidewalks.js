@@ -1,4 +1,4 @@
-function App(learn_url, mapbox_token) {
+function App(learn_url, mapbox_token, email) {
   L.mapbox.accessToken = mapbox_token;
   var map = L.map('map');
   map.setView([47.5719,-122.2186], 18);
@@ -30,7 +30,9 @@ function App(learn_url, mapbox_token) {
       type: 'POST',
       contentType: 'application/json; charset=utf-8',
       url: learn_url + '/submit',
-      data: JSON.stringify({geojson: geojson,
+      data: JSON.stringify({
+        email: email,
+        geojson: geojson,
         classification: classification
       })
     })

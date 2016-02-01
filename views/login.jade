@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  div.col-md-4.col-md-offset-4
+    h2 Log in
+    br
+    p Thanks for helping improve AccessMap! Our crowdsourcing effort is in alpha and don't have secure user authentication set up, so we don't ask for a password. We will use your email for only two purposes: (1) to associate your results with a unique user and (2) to send out a single sign-up invitation email once we do have secure user authentication set up. We won't contact you for any other purpose.
+    div
+      form(action='/login', method='POST')
+        p
+          input.form-control(name='email', type='text', placeholder='youremail@domain.com')
+        p
+          button.btn.btn-lg.btn-primary.btn-block(type='submit') Log in
