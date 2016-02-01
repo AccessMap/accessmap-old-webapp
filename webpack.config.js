@@ -1,9 +1,12 @@
 var path = require('path');
 module.exports = {
-  entry: './es6/main.js',
+  entry: {
+    map: './es6/main.js',
+    learnsidewalks: './es6/learnsidewalks.js'
+  },
   output: {
     path: __dirname,
-    filename: 'public/javascripts/bundle.js',
+    filename: 'public/javascripts/[name]-bundle.js',
     library: 'App',
     libraryTarget: 'umd'
   },

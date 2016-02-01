@@ -1,0 +1,36 @@
+extends layout
+
+append head
+  link(rel='stylesheet', href='https://api.tiles.mapbox.com/mapbox.js/v2.1.8/mapbox.css')
+  style.
+    body {
+      padding: 0;
+      margin: 0;
+    }
+    html, body, #map {
+        height: 80%;
+        width: 100%;
+    }
+
+block content
+  div#map
+  div.container
+    div.row
+      div.col-md-10.col-md-offset-2
+        h2 Should the blue lines be one sidewalk or separate sidewalks?
+        div.row
+          div.col-md-2
+            button.btn#conn One Sidewalk
+          div.col-md-2
+            button.btn#Noconn Separate Sidewalks
+        div.row
+        br
+        p Guidelines:
+        p The data we're showing you is messy. The exact locations of the sidewalks are not perfect and may sometimes cross streets, cross each other, etc. Make your best guess at whether the blue lines should be one sidewalk (connected by the green line) or separate ones. e.g., if the blue lines are on opposite sides of the street, they are clearly not one connected sidewalk, so you'd select 'Separate Sidewalks'. On the other hand, if the sidewalks are on the same block and their ends nearly touch, you'd select 'One Sidewalk'.
+
+
+  script(src='https://api.tiles.mapbox.com/mapbox.js/v2.1.8/mapbox.js')
+
+  script(src='javascripts/learnsidewalks-bundle.js')
+  script.
+    App(!{learn_url}, !{mapbox_token});
