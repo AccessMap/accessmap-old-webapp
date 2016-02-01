@@ -29,16 +29,15 @@ router.get('/map', function(req, res, next) {
 });
 
 router.get('/learnsidewalks', function(req, res, next) {
-  var email = '';
   var sess = req.session;
-  if (sess.email) {
-    email = sess.email;
+  if (!sess.email) {
+    res.redirect('/login');
   }
   res.render('learnsidewalks', {
     title: 'Help Improve AccessMap',
     mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
     learn_url: JSON.stringify(process.env.LEARN_URL),
-    email: email
+    email: sess.email
   });
 });
 
