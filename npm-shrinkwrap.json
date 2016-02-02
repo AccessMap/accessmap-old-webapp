@@ -123,7 +123,7 @@
     },
     "connect-flash": {
       "version": "0.1.1",
-      "from": "connect-flash@*",
+      "from": "https://registry.npmjs.org/connect-flash/-/connect-flash-0.1.1.tgz",
       "resolved": "https://registry.npmjs.org/connect-flash/-/connect-flash-0.1.1.tgz"
     },
     "cookie-parser": {
@@ -382,7 +382,7 @@
     },
     "express-session": {
       "version": "1.13.0",
-      "from": "express-session@*",
+      "from": "https://registry.npmjs.org/express-session/-/express-session-1.13.0.tgz",
       "resolved": "https://registry.npmjs.org/express-session/-/express-session-1.13.0.tgz",
       "dependencies": {
         "cookie": {
