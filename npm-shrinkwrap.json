@@ -2,22 +2,10 @@
   "name": "accessmap",
   "version": "1.0.0",
   "dependencies": {
-    "bcrypt": {
-      "version": "0.8.5",
-      "from": "bcrypt@*",
-      "resolved": "https://registry.npmjs.org/bcrypt/-/bcrypt-0.8.5.tgz",
-      "dependencies": {
-        "bindings": {
-          "version": "1.2.1",
-          "from": "bindings@1.2.1",
-          "resolved": "https://registry.npmjs.org/bindings/-/bindings-1.2.1.tgz"
-        },
-        "nan": {
-          "version": "2.0.5",
-          "from": "nan@2.0.5",
-          "resolved": "https://registry.npmjs.org/nan/-/nan-2.0.5.tgz"
-        }
-      }
+    "bcrypt-nodejs": {
+      "version": "0.0.3",
+      "from": "bcrypt-nodejs@*",
+      "resolved": "https://registry.npmjs.org/bcrypt-nodejs/-/bcrypt-nodejs-0.0.3.tgz"
     },
     "body-parser": {
       "version": "1.13.3",

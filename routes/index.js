@@ -1,6 +1,6 @@
 var passport = require('passport'),
     express = require('express'),
-    bcrypt = require('bcrypt');
+    bcrypt = require('bcrypt-nodejs');
 
 var User = require('../models/user');
 

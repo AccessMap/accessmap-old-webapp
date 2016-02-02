@@ -8,7 +8,7 @@ var express = require('express'),
 var session = require('express-session'),
     flash = require('connect-flash'),
     passport = require('passport'),
-    bcrypt = require('bcrypt'),
+    bcrypt = require('bcrypt-nodejs'),
     LocalStrategy = require('passport-local').Strategy;
 
 var User = require('./models/user'),
