@@ -108,7 +108,7 @@ router.get('/learnsidewalks', isAuthenticated, function(req, res, next) {
   res.render('learnsidewalks', {
     mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
     learn_url: JSON.stringify(process.env.LEARN_URL),
-    user: req.user
+    user: req.user.username
   });
 });
 
