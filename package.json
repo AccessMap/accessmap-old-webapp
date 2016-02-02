@@ -21,7 +21,7 @@
     "esnext": true
   },
   "dependencies": {
-    "bcrypt": "^0.8.5",
+    "bcrypt": "https://registry.npmjs.org/bcrypt/-/bcrypt-0.8.5.tgz",
     "body-parser": "~1.13.2",
     "connect-flash": "https://registry.npmjs.org/connect-flash/-/connect-flash-0.1.1.tgz",
     "cookie-parser": "~1.3.5",
