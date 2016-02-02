@@ -25,32 +25,35 @@ block content
       .col-md-6.col-md-offset-2
         img(src='images/improve/cleaning.png')
     .row.text-center
-      p The Seattle Department of Transportation has provided us a fantastic #[ahref('http://data.seattle.gov') dataset] of Seattle's sidewalks, but the exact locations for each sidewalk aren't perfectly accurate. As a result, the lines that represent the sidewalks don't match up perfectly end-to-end, making routing impossible.
-      p Over the summer of 2015, the #[a(href='http://escience.washington.edu/get-involved/data-science-for-social-good/') UW Data Science for Social Good] project provided us with #[a(href='http://escience.washington.edu/research-project/sidewalk-maps-for-low-mobility-citizens/') the brainpower] to write algorithms that clean up the sidewalk data. Using that method, we have developed machine learning methods that we hope will make it easy to expand AccessMap to other cities.
+      p The Seattle Department of Transportation has provided us with a fantastic #[ahref('http://data.seattle.gov') dataset] of Seattle's sidewalks, but the exact GPS coordinates for each sidewalk aren't perfectly accurate. If the coordinates undershoot their correct location, it can prevent routing, while if they overshoot it can lead to other errors (like a sidewalk line that crosses the street). To make routing work, we need the sidewalks to meet neatly, end-to-end.
+      p Over the summer of 2015, the #[a(href='http://escience.washington.edu/get-involved/data-science-for-social-good/') UW Data Science for Social Good] project provided us with #[a(href='http://escience.washington.edu/research-project/sidewalk-maps-for-low-mobility-citizens/') the brainpower] to write algorithms that clean up the sidewalk data. Using the result of the DSSG project, we have developed machine learning methods that we hope will make it easy to expand AccessMap to other cities.
 
     .row.text-center
       h2 How you can help - connect sidewalks that don't cross streets
       .col-md-10.col-md-offset-1
         img(src='images/improve/example_connect.png')
     .row.text-center
-      p We need help your help in verifying where the sidewalks really are. For this, we've developed a game of sorts, where you identify whether a sidewalk crosses a street or not. This can sometimes be a difficult task, since the sidewalk locations are so messy.
-      p You will be presented with a map of two sidewalk lines (in blue) connected by a green line. We draw the green line just to tell you which ends of the sidewalks we're asking about. In the example above, the sidewalks should definitely be connected. #[b If in doubt, click the 'satellite' toggle to get an aerial view].
-      p If the blue lines should be considered one sidewalk, click #[b Yes].
+      p We need help your help in verifying where the sidewalks really are. For this, we've developed an interactive mapping game, where you identify whether a sidewalk crosses a street or not. This can sometimes be a difficult task, since the sidewalk locations are so messy.
+      p During each round, you will be presented with a map showing three lines: two blue lines (sidewalks) from the messy dataset and one green line that to tell you which ends of the sidewalk we're interested in. Your job is to identify whether the sidewalks (blue lines) can be connected without crossing the street. In the example above ,the sidewalks should definitely be connected, so you would click #[b Yes].
+      p: b "Why don't I want sidewalks to cross the street?"
+      p You might be asking yourself why we're asking you about lines and whether they cross a street. What we really want to know is, "are these two GPS lines just one connected sidewalk, or not?". Once we know that, we can get to work on cleaning the data.
 
     .row.text-center
       h2 Don't connect lines that cross the street
       .col-md-10.col-md-offset-1
         img(src='images/improve/example_disconnect.png')
     .row.text-center
-      p If the blue sidewalk lines would be connected across the street, they are clearly disconnected - you'd have to cross the street!
-      p If the blue lines should be considered separate sidewalk, click #[b No].
+      p Sidewalk segments (blue lines) that are separated by a street shouldn't be connected, because they are clearly separate sidewalks. You'd have to cross a street to travel that path, and we're only interested in paths where you're always on the sidewalk.
+      p If the sidewalks (blue lines) should be considered separate, click #[b No].
 
     .row.text-center
       h2 Beware of noisy data
       .col-md-10.col-md-offset-1
         img(src='images/improve/example_popup.png')
     .row.text-center
-      p Sometimes, the data is so noisy that sidewalks will appear to cross the street. You can click on the sidewalks to show information about the sidewalk, e.g. the side of the street (S = South) and the streets bordering the sidewalk (the map is oriented with North at the top). If you're still unsure after checking the popups, hit refresh (F5) on your browser to get a new sidewalk.
+      p Sometimes, the data is so noisy that sidewalks will appear to cross the street, making it difficult to tell which block they're on. You can click on the sidewalks to show information about the sidewalk, e.g. the side of the street (S = South) and the streets bordering the sidewalk (the map is oriented with North at the top).
+      p #[b If in doubt, click the 'satellite' toggle to get an aerial view].
+      p If you're still unsure after checking the popups, hit refresh (F5) on your browser to get a new sidewalk.
 
     .row.text-center
       h2 Improve the map
