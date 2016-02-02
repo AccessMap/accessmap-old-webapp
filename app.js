@@ -1,12 +1,18 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var session = require('express-session');
+var express = require('express'),
+    path = require('path'),
+    favicon = require('serve-favicon'),
+    logger = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
+var session = require('express-session'),
+    flash = require('connect-flash'),
+    passport = require('passport'),
+    bcrypt = require('bcrypt'),
+    LocalStrategy = require('passport-local').Strategy;
+
+var User = require('./models/user'),
+    routes = require('./routes/index');
 
 var app = express();
 
@@ -14,16 +20,68 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'public/favicon.ico')));
 app.use(session({
   secret: 'reallybadsecret'
 }));
+app.use(flash());
+app.use(function(req, res, next) {
+  res.locals.errorMessage = req.flash('error');
+  next();
+});
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Passport (login)
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+    User.findOne({
+      where: {
+        'username': username
+      }
+    }).then(function (user) {
+      var failed = false;
+      if (user === null) {
+        return done(null, false, { message: 'Incorrect username of pass.' });
+      }
+
+      var hashedPassword = bcrypt.hashSync(password, user.salt);
+
+      if (user.password === hashedPassword) {
+        return done(null, user);
+      }
+
+      return done(null, false, { message: 'Incorrect username of pass.' });
+      });
+    }
+  ));
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findOne({
+    where: {
+      'id': id
+    }
+  }).then(function (user) {
+    if (user === null) {
+      done(new Error('Wrong user id.'));
+    }
+
+    done(null, user);
+  });
+});
+
+// Routes
 app.use('/', routes);
 
 // catch 404 and forward to error handler

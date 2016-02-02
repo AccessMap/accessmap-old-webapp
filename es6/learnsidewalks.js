@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-function App(learn_url, mapbox_token, email) {
+function App(learn_url, mapbox_token, user) {
   L.mapbox.accessToken = mapbox_token;
   var map = L.map('map');
 
@@ -51,7 +51,7 @@ function App(learn_url, mapbox_token, email) {
       contentType: 'application/json; charset=utf-8',
       url: learn_url + '/submit',
       data: JSON.stringify({
-        email: email,
+        user: user,
         geojson: geojson,
         classification: classification
       })

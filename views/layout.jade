@@ -1,7 +1,7 @@
 doctype html
 html
   head
-    title= title
+    title AccessMap
 
     meta(content='utf-8', http-equiv='encoding')
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
@@ -49,15 +49,31 @@ html
               a(href='#')
               span.sr-only (current)
             li
-              a(href='mailto:info@accessmapseattle.com')
-                i.fa.fa-envelope
+              a(href='http://github.com/accessmap')
+                i.fa.fa-github
             li
               a(href='http://twitter.com/AccessMapSea')
                 i.fa.fa-twitter
+            li
+              a(href='mailto:info@accessmapseattle.com')
+                i.fa.fa-envelope
             li: a(href='/map') The Map
             li: a(href='/#about') About
             li: a(href='/improve') Improve AccessMap
+            if (!user)
+              li: a(href='/login') Log in
+              li: a(href='/register') Register
+            if (user)
+              li: a(href='/profile') Profile
+
 
     .container-fluid.fill
+      // Handle flash messages
+      if errorMessage
+        if errorMessage.length > 0
+          .alert.alert-danger
+           button.close(type='button', data-dismiss='alert') x
+           p !{errorMessage}
+
       block content
       block footer
