@@ -41,10 +41,6 @@ body {
   padding-bottom: 40px;
 }
 
-.buttonlist .fa > i {
-  font-size: 130%;
-}
-
 table img {
   width: 30px;
 }
@@ -64,8 +60,17 @@ h2 {
 }
 
 .navbar-brand {
-  padding-top: 0;
-  padding-bottom: 0;
+  padding: 0px;
+}
+
+.navbar-brand > img {
+  height: 100%;
+  padding: 5px;
+  width: auto;
+}
+
+.navbar .fa {
+  font-size: 130%;
 }
 
 .navbar-inverse .navbar-nav>li>a{
