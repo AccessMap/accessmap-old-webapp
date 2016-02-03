@@ -15,11 +15,6 @@ function App(learn_url, mapbox_token, user) {
   });
   layersControl.addTo(map);
 
-  var polyline_options2 = {
-    fillColor: '#FFF',
-    color: '#0D0'
-  };
-
   var currentDat;
   // this gets the data
   $.get(learn_url + '/getdata', function(data){
@@ -32,13 +27,46 @@ function App(learn_url, mapbox_token, user) {
       }
     }
 
+    var dashStyle = {
+      opacity: 1,
+      color: '#0D0'
+    };
+
+    L.geoJson(data.features[2], {
+      onEachFeature: function(feature, layer ) {
+        L.polylineDecorator(layer, {
+          patterns: [
+            {offset: 0,
+             repeat: 7,
+             symbol: L.Symbol.dash({pixelSize: 1, pathOptions: dashStyle})}
+          ]
+        }).addTo(map);
+      }
+    });
+
     L.geoJson(data.features[0], {
+      opacity: 1,
+      color: 'white',
+      weight: 8,
+      onEachFeature: makePopup
+    }).addTo(map);
+    L.geoJson(data.features[0], {
+      opacity: 0.9,
+      weight: 4,
+      onEachFeature: makePopup
+    }).addTo(map);
+
+    L.geoJson(data.features[1], {
+      opacity: 1,
+      color: 'white',
+      weight: 8,
       onEachFeature: makePopup
     }).addTo(map);
     L.geoJson(data.features[1], {
+      opacity: 0.9,
+      weight: 4,
       onEachFeature: makePopup
     }).addTo(map);
-    L.geoJson(data.features[2],polyline_options2).addTo(map);
 
     var LongLat = data.features[1].geometry.coordinates[1];
     map.setView([LongLat[1],LongLat[0]], 18);
