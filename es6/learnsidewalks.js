@@ -1,33 +1,34 @@
 import $ from 'jquery';
 
+
 function App(learn_url, mapbox_token, user) {
   L.mapbox.accessToken = mapbox_token;
-  var map = L.map('map');
+  let map = L.map('map');
 
-  var layers = {
+  let layers = {
     streets: L.mapbox.tileLayer('mapbox.streets'),
     satellite: L.mapbox.tileLayer('mapbox.streets-satellite'),
   };
 
   layers.streets.addTo(map);
-  var layersControl = L.control.layers(layers, null, {
+  let layersControl = L.control.layers(layers, null, {
     collapsed: false
   });
   layersControl.addTo(map);
 
-  var currentDat;
+  let currentDat;
   // this gets the data
   $.get(learn_url + '/getdata', function(data){
     // adds to the map the first feature
     function makePopup(feature, layer){
       if (feature.properties && (feature.properties.type === 'sw')) {
-        var desc = '<p>' + feature.properties.desc + '</p>';
-        var side = '<p>Side: ' + feature.properties.side + '</p';
+        let desc = '<p>' + feature.properties.desc + '</p>';
+        let side = '<p>Side: ' + feature.properties.side + '</p';
         layer.bindPopup(desc + side);
       }
     }
 
-    var dashStyle = {
+    let dashStyle = {
       opacity: 1,
       color: '#0D0'
     };
@@ -68,7 +69,7 @@ function App(learn_url, mapbox_token, user) {
       onEachFeature: makePopup
     }).addTo(map);
 
-    var LongLat = data.features[1].geometry.coordinates[1];
+    let LongLat = data.features[1].geometry.coordinates[1];
     map.setView([LongLat[1],LongLat[0]], 18);
     currentDat = data;
   });
@@ -84,21 +85,13 @@ function App(learn_url, mapbox_token, user) {
         classification: classification
       })
     })
-      .done(function() {
-        location.reload();
-      })
-      .fail(function(e) {
-        console.log('Error: ' + e);
-      });
+      .done(() => location.reload())
+      .fail(e => console.log('Error: ' + e));
   }
 
-  $('#conn').click(function() {
-    submitResult(learn_url, currentDat, 1);
-  });
+  $('#conn').click(() => submitResult(learn_url, currentDat, 1));
 
-  $('#Noconn').click(function() {
-    submitResult(learn_url, currentDat, 0);
-  });
+  $('#Noconn').click(() => submitResult(learn_url, currentDat, 0));
 }
 
 export default App;

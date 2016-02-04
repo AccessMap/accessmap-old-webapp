@@ -2,9 +2,9 @@
 // variable, leading to all kinds of problems for modular development.
 // As a result, none of the modules on npm work due to clobbering L.
 
-import { requestSidewalksUpdate } from './layers/sidewalks';
-import { requestStopsUpdate } from './layers/busdata';
-import { requestCurbsUpdate } from './layers/curbramps';
+import requestSidewalksUpdate from './layers/sidewalks';
+import requestStopsUpdate from './layers/busdata';
+import requestCurbsUpdate from './layers/curbramps';
 // Permits disabled until data.seattle.gov data source is restored
 // import { requestPermitsUpdate } from './layers/permits';
 

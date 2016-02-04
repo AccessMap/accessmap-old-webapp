@@ -5,18 +5,18 @@
 import $ from 'jquery';
 
 
-export function requestStopsUpdate(layerGroup, map) {
+function requestStopsUpdate(layerGroup, map) {
   // Generates a layerGroup to add to / remove from map
-  var OBA_URL = 'http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json';
-  var RADIUS = 800;
-  var latlng = map.getCenter();
-  var centerLat = latlng.lat;
-  var centerLon = latlng.lng;
+  let OBA_URL = 'http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json';
+  let RADIUS = 800;
+  let latlng = map.getCenter();
+  let centerLat = latlng.lat;
+  let centerLon = latlng.lng;
 
-  var bounds = map.getBounds();
-  var latlonspan = [Math.abs(bounds.getNorth() - bounds.getSouth()), Math.abs(bounds.getWest() - bounds.getEast())];
+  let bounds = map.getBounds();
+  let latlonspan = [Math.abs(bounds.getNorth() - bounds.getSouth()), Math.abs(bounds.getWest() - bounds.getEast())];
 
-  var busIcon = L.icon({
+  let busIcon = L.icon({
     iconUrl: '../images/bus.png',
     iconSize: [30, 30],
     iconAnchor: [10, 0]
@@ -44,9 +44,9 @@ export function requestStopsUpdate(layerGroup, map) {
     layerGroup.clearLayers();
     // Create the new ones
     for (var i = 0; i < data.length; i++) {
-      var row = data[i];
+      let row = data[i];
       // Turn it into geoJSON
-      var geoJSON = {
+      let geoJSON = {
         'type': 'Feature',
         'geometry': {
           'type': 'Point',
@@ -66,7 +66,7 @@ export function requestStopsUpdate(layerGroup, map) {
       });
 
       //Display info when user clicks on the bus stop
-      var popup = L.popup().setContent("<b>Bus Stop at " + row.name + "</b>");
+      let popup = L.popup().setContent("<b>Bus Stop at " + row.name + "</b>");
       marker.bindPopup(popup);
 
       layerGroup.addLayer(marker);
@@ -75,3 +75,6 @@ export function requestStopsUpdate(layerGroup, map) {
 
   requestStops(addMarkers);
 }
+
+
+export default requestStopsUpdate

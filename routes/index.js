@@ -24,8 +24,9 @@ function isAuthenticated(req, res, next) {
     return next();
   }
 
+  req.session.returnTo = req.path;
   req.flash('error', 'You have to be logged in to access this page.');
-  res.redirect('/');
+  res.redirect('/login');
 }
 
 /* GET register. */
@@ -69,7 +70,7 @@ router.get('/login', function(req, res) {
 
 /* POST login page. */
 router.post('/login', passport.authenticate('local', {
-  successRedirect: '/',
+  successReturnToOrRedirect: '/',
   failureRedirect: '/login',
   failureFlash: true
 }));

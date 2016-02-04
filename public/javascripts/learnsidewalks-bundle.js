@@ -81,7 +81,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	  layersControl.addTo(map);
 
-	  var currentDat;
+	  var currentDat = undefined;
 	  // this gets the data
 	  _jquery2['default'].get(learn_url + '/getdata', function (data) {
 	    // adds to the map the first feature
@@ -148,18 +148,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        classification: classification
 	      })
 	    }).done(function () {
-	      location.reload();
+	      return location.reload();
 	    }).fail(function (e) {
-	      console.log('Error: ' + e);
+	      return console.log('Error: ' + e);
 	    });
 	  }
 
 	  (0, _jquery2['default'])('#conn').click(function () {
-	    submitResult(learn_url, currentDat, 1);
+	    return submitResult(learn_url, currentDat, 1);
 	  });
 
 	  (0, _jquery2['default'])('#Noconn').click(function () {
-	    submitResult(learn_url, currentDat, 0);
+	    return submitResult(learn_url, currentDat, 0);
 	  });
 	}
 

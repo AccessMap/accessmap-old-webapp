@@ -64,11 +64,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
 	var _layersSidewalks = __webpack_require__(2);
+
+	var _layersSidewalks2 = _interopRequireDefault(_layersSidewalks);
 
 	var _layersBusdata = __webpack_require__(3);
 
+	var _layersBusdata2 = _interopRequireDefault(_layersBusdata);
+
 	var _layersCurbramps = __webpack_require__(4);
+
+	var _layersCurbramps2 = _interopRequireDefault(_layersCurbramps);
 
 	// Permits disabled until data.seattle.gov data source is restored
 	// import { requestPermitsUpdate } from './layers/permits';
@@ -108,9 +116,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Read in data to increase speed later on (generate a promise)
 
 	  var updateLayers = function updateLayers() {
-	    (0, _layersBusdata.requestStopsUpdate)(stops, map);
-	    (0, _layersSidewalks.requestSidewalksUpdate)(elevationlayer, map, rawdata_api);
-	    (0, _layersCurbramps.requestCurbsUpdate)(curbs, map, rawdata_api);
+	    (0, _layersBusdata2['default'])(stops, map);
+	    (0, _layersSidewalks2['default'])(elevationlayer, map, rawdata_api);
+	    (0, _layersCurbramps2['default'])(curbs, map, rawdata_api);
 	    //    requestPermitsUpdate(permits, map, rawdata_api);
 	  };
 
@@ -10006,7 +10014,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, '__esModule', {
 	  value: true
 	});
-	exports.requestSidewalksUpdate = requestSidewalksUpdate;
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -10029,12 +10036,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          'weight': 5,
 	          'opacity': 0.6 };
 	      } else if (f.properties.grade > mid) {
-	        steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
+	        var steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
 	        return { 'color': '#FFFF00',
 	          'weight': 5,
 	          'opacity': 0.6 };
 	      } else {
-	        steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
+	        var steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
 	        return { 'color': '#00FF00',
 	          'weight': 5,
 	          'opacity': 0.6 };
@@ -10077,6 +10084,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
+	exports['default'] = requestSidewalksUpdate;
+	module.exports = exports['default'];
+
 /***/ },
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
@@ -10090,7 +10100,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, '__esModule', {
 	  value: true
 	});
-	exports.requestStopsUpdate = requestStopsUpdate;
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -10169,6 +10178,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  requestStops(addMarkers);
 	}
 
+	exports['default'] = requestStopsUpdate;
+	module.exports = exports['default'];
+
 /***/ },
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
@@ -10178,7 +10190,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, '__esModule', {
 	  value: true
 	});
-	exports.requestCurbsUpdate = requestCurbsUpdate;
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -10229,6 +10240,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  });
 	}
+
+	exports['default'] = requestCurbsUpdate;
+	module.exports = exports['default'];
 
 /***/ }
 /******/ ])
