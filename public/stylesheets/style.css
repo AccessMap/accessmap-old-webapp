@@ -84,6 +84,14 @@ h2 {
   color: #1A4274;
 }
 
+.navbar-inverse .navbar-nav>li>span>a{
+  color: white;
+  font-size: 120%;
+  text-shadow: none;
+  padding: 5px 5px;
+  line-height: 50px;
+}
+
 .navbar-inverse .navbar-header>a{
   color: white;
   font-family: 'Montserrat', sans-serif;
