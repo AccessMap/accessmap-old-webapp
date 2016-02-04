@@ -57,13 +57,13 @@ html
               a(href='mailto:info@accessmapseattle.com')
                 i.fa.fa-envelope
             li: a(href='/map') The Map
-            li: a(href='/#about') About
             li: a(href='/improve') Improve AccessMap
             if (!user)
               li: a(href='/login') Log in
               li: a(href='/register') Register
             if (user)
               li: a(href='/profile') Profile
+              li: a(href='/logout') Log out
 
 
     .container-fluid.fill
@@ -71,8 +71,13 @@ html
       if errorMessage
         if errorMessage.length > 0
           .alert.alert-danger
-           button.close(type='button', data-dismiss='alert') x
-           p !{errorMessage}
+            button.close(type='button', data-dismiss='alert') x
+            p !{errorMessage}
+      if successMessage
+        if successMessage.length > 0
+          .alert.alert-success
+            button.close(type='button', data-dismiss='alert') x
+            p !{successMessage}
 
       block content
       block footer

@@ -4,6 +4,9 @@
 # Node installed modules
 node_modules
 
+# Logs
+*.log
+
 # Build files
 *.hot-update.js
 *.hot-update.json
