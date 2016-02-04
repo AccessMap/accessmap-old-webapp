@@ -27,19 +27,37 @@ function App(learn_url, mapbox_token, user) {
         layer.bindPopup(desc + side);
       }
     }
-
-    let dashStyle = {
-      opacity: 1,
-      color: '#0D0'
-    };
+    L.geoJson(data.features[2], {
+      onEachFeature: function(feature, layer ) {
+        L.polylineDecorator(layer, {
+          patterns: [
+            {offset: 0,
+             repeat: 8,
+             symbol: L.Symbol.dash({
+              pixelSize: 1, pathOptions: {
+                weight: 6,
+                opacity: 1,
+                color: '#0c0'
+              }
+             })}
+          ]
+        }).addTo(map);
+      }
+    });
 
     L.geoJson(data.features[2], {
       onEachFeature: function(feature, layer ) {
         L.polylineDecorator(layer, {
           patterns: [
             {offset: 0,
-             repeat: 7,
-             symbol: L.Symbol.dash({pixelSize: 1, pathOptions: dashStyle})}
+             repeat: 8,
+             symbol: L.Symbol.dash({
+              pixelSize: 1, pathOptions: {
+                weight: 5,
+                opacity: 1,
+                color: '#0f0'
+              }
+             })}
           ]
         }).addTo(map);
       }
@@ -47,7 +65,7 @@ function App(learn_url, mapbox_token, user) {
 
     L.geoJson(data.features[0], {
       opacity: 1,
-      color: 'white',
+      color: '#cdf',
       weight: 8,
       onEachFeature: makePopup
     }).addTo(map);
@@ -59,7 +77,7 @@ function App(learn_url, mapbox_token, user) {
 
     L.geoJson(data.features[1], {
       opacity: 1,
-      color: 'white',
+      color: '#cdf',
       weight: 8,
       onEachFeature: makePopup
     }).addTo(map);

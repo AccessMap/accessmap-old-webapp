@@ -92,25 +92,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	        layer.bindPopup(desc + side);
 	      }
 	    }
-
-	    var dashStyle = {
-	      opacity: 1,
-	      color: '#0D0'
-	    };
+	    L.geoJson(data.features[2], {
+	      onEachFeature: function onEachFeature(feature, layer) {
+	        L.polylineDecorator(layer, {
+	          patterns: [{ offset: 0,
+	            repeat: 8,
+	            symbol: L.Symbol.dash({
+	              pixelSize: 1, pathOptions: {
+	                weight: 6,
+	                opacity: 1,
+	                color: '#0c0'
+	              }
+	            }) }]
+	        }).addTo(map);
+	      }
+	    });
 
 	    L.geoJson(data.features[2], {
 	      onEachFeature: function onEachFeature(feature, layer) {
 	        L.polylineDecorator(layer, {
 	          patterns: [{ offset: 0,
-	            repeat: 7,
-	            symbol: L.Symbol.dash({ pixelSize: 1, pathOptions: dashStyle }) }]
+	            repeat: 8,
+	            symbol: L.Symbol.dash({
+	              pixelSize: 1, pathOptions: {
+	                weight: 5,
+	                opacity: 1,
+	                color: '#0f0'
+	              }
+	            }) }]
 	        }).addTo(map);
 	      }
 	    });
 
 	    L.geoJson(data.features[0], {
 	      opacity: 1,
-	      color: 'white',
+	      color: '#cdf',
 	      weight: 8,
 	      onEachFeature: makePopup
 	    }).addTo(map);
@@ -122,7 +138,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    L.geoJson(data.features[1], {
 	      opacity: 1,
-	      color: 'white',
+	      color: '#cdf',
 	      weight: 8,
 	      onEachFeature: makePopup
 	    }).addTo(map);
