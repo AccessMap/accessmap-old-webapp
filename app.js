@@ -22,7 +22,9 @@ app.set('view engine', 'jade');
 
 app.use(favicon(path.join(__dirname, 'public/favicon.ico')));
 app.use(session({
-  secret: 'reallybadsecret'
+  store: new (require('connect-pg-simple')(session))(),
+  secret: 'reallybadsecret',
+  resave: false
 }));
 app.use(flash());
 app.use(function(req, res, next) {
@@ -50,7 +52,7 @@ passport.use(new LocalStrategy(
     }).then(function (user) {
       var failed = false;
       if (user === null) {
-        return done(null, false, { message: 'Incorrect username of pass.' });
+        return done(null, false, { message: 'Incorrect username or pass.' });
       }
 
       var hashedPassword = bcrypt.hashSync(password, user.salt);
@@ -59,7 +61,7 @@ passport.use(new LocalStrategy(
         return done(null, user);
       }
 
-      return done(null, false, { message: 'Incorrect username of pass.' });
+      return done(null, false, { message: 'Incorrect username or pass.' });
       });
     }
   ));

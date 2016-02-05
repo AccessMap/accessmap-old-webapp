@@ -1,6 +1,6 @@
 var Sequelize = require('sequelize');
 
-var mydb = new Sequelize(process.env.DBSTRING);
+var mydb = new Sequelize(process.env.DATABASE_URL);
 
 var user_attributes = {
   username: {
