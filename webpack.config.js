@@ -1,7 +1,7 @@
 var path = require('path');
 module.exports = {
   entry: {
-    map: './es6/main.js',
+    map: './es6/map.js',
     learnsidewalks: './es6/learnsidewalks.js'
   },
   output: {

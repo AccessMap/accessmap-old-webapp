@@ -1,6 +1,8 @@
 var passport = require('passport'),
     express = require('express'),
-    bcrypt = require('bcrypt-nodejs');
+    bcrypt = require('bcrypt-nodejs'),
+    request = require('request'),
+    path = require('path');
 
 var User = require('../models/user');
 
@@ -106,11 +108,20 @@ router.get('/improve', function(req, res) {
 });
 
 router.get('/learnsidewalks', isAuthenticated, function(req, res, next) {
-  var sess = req.session;
   res.render('learnsidewalks', {
     mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
     learn_url: JSON.stringify(process.env.LEARN_URL),
     user: req.user.username
+  });
+});
+
+router.get('/getdata', isAuthenticated, function(req, res, next) {
+  request(process.env.LEARN_URL + '/getdata' + '?user=' + req.user.username, function(e, r, b) {
+    if (e) {
+      res.send('Error: ' + e);
+    } else {
+      res.send(b);
+    }
   });
 });
 
