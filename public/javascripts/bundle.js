@@ -80,11 +80,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var FEATUREZOOM = 17;
 	  L.mapbox.accessToken = mapbox_token;
-	  var map = L.mapbox.map('map', 'mapbox.streets', {
+	  var map = L.map('map', {
 	    zoomControl: false,
-	    attribution: 'Map data &copy',
 	    maxZoom: 18
 	  });
+
+	  var tiles = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
+	    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	  }).addTo(map);
 
 	  var elevationTiles = L.mapbox.tileLayer(tile_url);
 	  elevationTiles.addTo(map);
@@ -109,10 +112,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Read in data to increase speed later on (generate a promise)
 
 	  var updateLayers = function updateLayers() {
-	    (0, _layersBusdata.requestStopsUpdate)(stops, map);
+	    //    requestStopsUpdate(stops, map);
 	    (0, _layersSidewalks.requestSidewalksUpdate)(elevationlayer, map, rawdataUrl);
-	    (0, _layersCurbs.requestCurbsUpdate)(curbs, map, rawdataUrl);
-	    (0, _layersPermits.requestPermitsUpdate)(permits, map, rawdataUrl);
+	    //    requestCurbsUpdate(curbs, map, rawdataUrl);
+	    //    requestPermitsUpdate(permits, map, rawdataUrl);
 	  };
 
 	  map.on('load', function (e) {
@@ -128,16 +131,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  map.on('zoomend', function () {
 	    if (map.getZoom() < FEATUREZOOM) {
-	      map.removeLayer(stops);
+	      //      map.removeLayer(stops);
 	      map.removeLayer(elevationlayer);
-	      map.removeLayer(curbs);
-	      map.removeLayer(permits);
+	      //      map.removeLayer(curbs);
+	      //      map.removeLayer(permits);
 	      elevationTiles.addTo(map);
 	    } else {
-	      stops.addTo(map);
+	      //      stops.addTo(map);
 	      elevationlayer.addTo(map);
-	      curbs.addTo(map);
-	      permits.addTo(map);
+	      //      curbs.addTo(map);
+	      //      permits.addTo(map);
 	      map.removeLayer(elevationTiles);
 	    }
 	  });
@@ -234,7 +237,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Request data
 	  $.ajax({
 	    type: 'GET',
-	    url: api_url + '/raw-sidewalks.geojson',
+	    url: api_url + '/v1/sidewalks.geojson',
 	    data: {
 	      bbox: bounds
 	    },

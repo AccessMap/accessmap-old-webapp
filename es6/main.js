@@ -16,11 +16,14 @@ function App(tile_url, mapbox_token, api_url) {
 
   let FEATUREZOOM = 17;
   L.mapbox.accessToken = mapbox_token;
-  let map = L.mapbox.map('map', 'mapbox.streets', {
+  let map = L.map('map', {
     zoomControl: false,
-    attribution: 'Map data &copy',
     maxZoom: 18
   });
+
+  var tiles = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
 
   let elevationTiles = L.mapbox.tileLayer(tile_url);
   elevationTiles.addTo(map);
@@ -45,10 +48,10 @@ function App(tile_url, mapbox_token, api_url) {
   // Read in data to increase speed later on (generate a promise)
 
   let updateLayers = function() {
-    requestStopsUpdate(stops, map);
+//    requestStopsUpdate(stops, map);
     requestSidewalksUpdate(elevationlayer, map, rawdataUrl);
-    requestCurbsUpdate(curbs, map, rawdataUrl);
-    requestPermitsUpdate(permits, map, rawdataUrl);
+//    requestCurbsUpdate(curbs, map, rawdataUrl);
+//    requestPermitsUpdate(permits, map, rawdataUrl);
   };
 
   map.on('load', function(e) {
@@ -64,16 +67,16 @@ function App(tile_url, mapbox_token, api_url) {
 
   map.on('zoomend', function() {
     if (map.getZoom() < FEATUREZOOM) {
-      map.removeLayer(stops);
+//      map.removeLayer(stops);
       map.removeLayer(elevationlayer);
-      map.removeLayer(curbs);
-      map.removeLayer(permits);
+//      map.removeLayer(curbs);
+//      map.removeLayer(permits);
       elevationTiles.addTo(map);
     } else {
-      stops.addTo(map);
+//      stops.addTo(map);
       elevationlayer.addTo(map);
-      curbs.addTo(map);
-      permits.addTo(map);
+//      curbs.addTo(map);
+//      permits.addTo(map);
       map.removeLayer(elevationTiles);
     }
   });
