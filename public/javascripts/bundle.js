@@ -75,8 +75,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function App(tile_url, mapbox_token, api_url) {
 	  'use strict';
 
-	  var rawdataUrl = api_url.replace(/\/?$/, '/') + 'data';
-	  var routingUrl = api_url.replace(/\/?$/, '/') + 'routing';
+	  var rawdataUrl = api_url.replace(/\/?$/, '/');
+	  var routingUrl = api_url.replace(/\/?$/, '/');
 
 	  var FEATUREZOOM = 17;
 	  L.mapbox.accessToken = mapbox_token;
@@ -164,7 +164,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  new L.Control.Zoom().addTo(map);
 
 	  // Routing (via leaflet-routing-machine and lrm-accessmap)
-	  var routingEndpoint = routingUrl + '/route.json';
+	  var routingEndpoint = routingUrl + '/v2/route.json';
 	  L.Routing.control({
 	    waypoints: [L.latLng([47.606138, -122.335956]), L.latLng([47.603599, -122.330580])],
 	    router: new L.Routing.AccessMap({ 'serviceUrl': routingEndpoint }),
@@ -241,7 +241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Request data
 	  $.ajax({
 	    type: 'GET',
-	    url: api_url + '/v1/sidewalks.geojson',
+	    url: api_url + '/v2/sidewalks.geojson',
 	    data: {
 	      bbox: bounds
 	    },

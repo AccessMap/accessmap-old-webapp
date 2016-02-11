@@ -11,8 +11,8 @@ import { requestPermitsUpdate } from './layers/permits';
 function App(tile_url, mapbox_token, api_url) {
   'use strict';
 
-  let rawdataUrl = api_url.replace(/\/?$/, '/') + 'data';
-  let routingUrl = api_url.replace(/\/?$/, '/') + 'routing';
+  let rawdataUrl = api_url.replace(/\/?$/, '/');
+  let routingUrl = api_url.replace(/\/?$/, '/');
 
   let FEATUREZOOM = 17;
   L.mapbox.accessToken = mapbox_token;
@@ -100,7 +100,7 @@ function App(tile_url, mapbox_token, api_url) {
   new L.Control.Zoom().addTo(map);
 
   // Routing (via leaflet-routing-machine and lrm-accessmap)
-  let routingEndpoint = routingUrl + '/route.json';
+  let routingEndpoint = routingUrl + '/v2/route.json';
   L.Routing.control({
     waypoints: [
       L.latLng([47.606138, -122.335956]),
