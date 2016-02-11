@@ -68,7 +68,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _layersBusdata = __webpack_require__(2);
 
-	var _layersCurbramps = __webpack_require__(3);
+	var _layersCurbramps = __webpack_require__(5);
 
 	// Permits disabled until data.seattle.gov data source is restored
 	// import { requestPermitsUpdate } from './layers/permits';
@@ -76,7 +76,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function App(tile_url, mapbox_token, api_url) {
 	  'use strict';
 
-	  var rawdata_api = api_url.replace(/\/?$/, '/') + 'data';
+	  var rawdata_api = api_url.replace(/\/?$/, '/');
 	  var FEATUREZOOM = 17;
 	  L.mapbox.accessToken = mapbox_token;
 	  var map = L.mapbox.map('map', 'mapbox.streets', {
@@ -321,7 +321,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 3 */
+/* 3 */,
+/* 4 */,
+/* 5 */
 /***/ function(module, exports) {
 
 	'use strict';

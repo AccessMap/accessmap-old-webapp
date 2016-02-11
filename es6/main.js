@@ -12,7 +12,7 @@ import { requestCurbsUpdate } from './layers/curbramps';
 function App(tile_url, mapbox_token, api_url) {
   'use strict';
 
-  let rawdata_api = api_url.replace(/\/?$/, '/') + 'data';
+  let rawdata_api = api_url.replace(/\/?$/, '/');
   let FEATUREZOOM = 17;
   L.mapbox.accessToken = mapbox_token;
   let map = L.mapbox.map('map', 'mapbox.streets', {
