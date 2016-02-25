@@ -2,8 +2,7 @@ var bcrypt = require('bcrypt-nodejs'),
     express = require('express'),
     passport = require('passport'),
     path = require('path'),
-    request = require('request'),
-    url = require('url');
+    request = require('request');
 
 var User = require('../models/user');
 
@@ -96,17 +95,9 @@ router.get('/profile', function(req, res) {
 
 /* GET map page. */
 router.get('/map', function(req, res) {
-  // Get mapbox credentials from API
-  request(url.resolve(process.env.API_URL, '/v1/mapinfo'), function(e, r, b) {
-    if (!e) {
-      mapinfo = JSON.parse(b);
-      res.render('map', {
-        mapbox_tiles: JSON.stringify(mapinfo.tiles),
-        mapbox_token: JSON.stringify(mapinfo.token),
-        api_url: JSON.stringify(process.env.API_URL),
-        user: req.user
-      });
-    }
+  res.render('map', {
+    api_url: JSON.stringify(process.env.API_URL),
+    user: req.user
   });
 });
 
@@ -115,15 +106,10 @@ router.get('/improve', function(req, res) {
 });
 
 router.get('/learnsidewalks', isAuthenticated, function(req, res, next) {
-  request(url.resolve(process.env.API_URL, '/v1/mapinfo'), function(e, r, b) {
-    if (!e) {
-      mapinfo = JSON.parse(b);
-      res.render('learnsidewalks', {
-        mapbox_token: JSON.stringify(mapinfo.token),
-        learn_url: JSON.stringify(process.env.LEARN_URL),
-        user: req.user.username
-      });
-    }
+  res.render('learnsidewalks', {
+    learn_url: JSON.stringify(process.env.LEARN_URL),
+    api_url: JSON.stringify(process.env.API_URL),
+    user: req.user.username
   });
 });
 

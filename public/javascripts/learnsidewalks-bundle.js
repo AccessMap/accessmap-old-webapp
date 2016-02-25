@@ -70,153 +70,161 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _path2 = _interopRequireDefault(_path);
 
-	function App(learn_url, mapbox_token, user) {
-	  L.mapbox.accessToken = mapbox_token;
-	  var map = L.map('map');
-
-	  var layers = {
-	    streets: L.mapbox.tileLayer('mapbox.streets'),
-	    satellite: L.mapbox.tileLayer('mapbox.streets-satellite')
-	  };
-
-	  layers.streets.addTo(map);
-
-	  var layersControl = L.control.layers(layers, null, {
-	    collapsed: false
-	  });
-	  layersControl.addTo(map);
-
-	  // Add score control
-	  var scoreControl = L.Control.extend({
-	    initialize: function initialize(foo, options) {
-	      L.Util.setOptions(this, options);
-	    },
-	    options: {
-	      position: 'bottomleft'
-	    },
-	    onAdd: function onAdd(map) {
-	      this._container = L.DomUtil.create('div', 'leaflet-score-control leaflet-bar');
-	      this._container.innerHTML = 'Added: ';
-	      return this._container;
-	    },
-	    updateScore: function updateScore(score) {
-	      console.log(score);
-	      this._container.innerHTML = 'Added: ' + score;
-	    }
+	function App(learn_url, api_url, user) {
+	  'use strict';
+	  var api = api_url.replace(/\/?$/, '/') + 'v1';
+	  var mapinfo = _jquery2['default'].ajax({
+	    url: api + '/mapinfo',
+	    dataType: 'json'
 	  });
 
-	  var sControl = new scoreControl();
+	  mapinfo.done(function (mapdata) {
+	    L.mapbox.accessToken = mapdata.token;
+	    var map = L.map('map');
 
-	  var currentDat = undefined;
-	  // this gets the data
-	  _jquery2['default'].ajax({
-	    type: 'GET',
-	    contentType: 'application/json; charset=utf-8',
-	    url: '/getdata'
-	  }).done(function (data) {
-	    // Parse FeatureCollection and username
-	    var fc = JSON.parse(data);
-	    var score = fc.features[2].properties.score;
-	    if (score === undefined) {
-	      var _score = 'NA';
-	    }
+	    var layers = {
+	      streets: L.mapbox.tileLayer('mapbox.streets'),
+	      satellite: L.mapbox.tileLayer('mapbox.streets-satellite')
+	    };
 
-	    // adds to the map the first feature
-	    function makePopup(feature, layer) {
-	      if (feature.properties && feature.properties.type === 'sw') {
-	        var desc = '<p>' + feature.properties.desc + '</p>';
-	        var side = '<p>Side: ' + feature.properties.side + '</p';
-	        layer.bindPopup(desc + side);
-	      }
-	    }
-	    L.geoJson(fc.features[2], {
-	      onEachFeature: function onEachFeature(feature, layer) {
-	        L.polylineDecorator(layer, {
-	          patterns: [{ offset: 0,
-	            repeat: 8,
-	            symbol: L.Symbol.dash({
-	              pixelSize: 1, pathOptions: {
-	                weight: 6,
-	                opacity: 1,
-	                color: '#0c0'
-	              }
-	            }) }]
-	        }).addTo(map);
+	    layers.streets.addTo(map);
+
+	    var layersControl = L.control.layers(layers, null, {
+	      collapsed: false
+	    });
+	    layersControl.addTo(map);
+
+	    // Add score control
+	    var scoreControl = L.Control.extend({
+	      initialize: function initialize(foo, options) {
+	        L.Util.setOptions(this, options);
+	      },
+	      options: {
+	        position: 'bottomleft'
+	      },
+	      onAdd: function onAdd(map) {
+	        this._container = L.DomUtil.create('div', 'leaflet-score-control leaflet-bar');
+	        this._container.innerHTML = 'Added: ';
+	        return this._container;
+	      },
+	      updateScore: function updateScore(score) {
+	        this._container.innerHTML = 'Added: ' + score;
 	      }
 	    });
 
-	    L.geoJson(fc.features[2], {
-	      onEachFeature: function onEachFeature(feature, layer) {
-	        L.polylineDecorator(layer, {
-	          patterns: [{ offset: 0,
-	            repeat: 8,
-	            symbol: L.Symbol.dash({
-	              pixelSize: 1, pathOptions: {
-	                weight: 5,
-	                opacity: 1,
-	                color: '#0f0'
-	              }
-	            }) }]
-	        }).addTo(map);
-	      }
-	    });
+	    var sControl = new scoreControl();
 
-	    L.geoJson(fc.features[0], {
-	      opacity: 1,
-	      color: '#cdf',
-	      weight: 8,
-	      onEachFeature: makePopup
-	    }).addTo(map);
-	    L.geoJson(fc.features[0], {
-	      opacity: 0.9,
-	      weight: 4,
-	      onEachFeature: makePopup
-	    }).addTo(map);
-
-	    L.geoJson(fc.features[1], {
-	      opacity: 1,
-	      color: '#cdf',
-	      weight: 8,
-	      onEachFeature: makePopup
-	    }).addTo(map);
-	    L.geoJson(fc.features[1], {
-	      opacity: 0.9,
-	      weight: 4,
-	      onEachFeature: makePopup
-	    }).addTo(map);
-
-	    var LongLat = fc.features[1].geometry.coordinates[1];
-	    map.setView([LongLat[1], LongLat[0]], 18);
-	    currentDat = fc;
-
-	    // Update score control
-	    sControl.addTo(map);
-	    sControl.updateScore(score);
-	  });
-
-	  function submitResult(learn_url, geojson, classification) {
+	    var currentDat = undefined;
+	    // this gets the data
 	    _jquery2['default'].ajax({
-	      type: 'POST',
+	      type: 'GET',
 	      contentType: 'application/json; charset=utf-8',
-	      url: learn_url + '/submit',
-	      data: JSON.stringify({
-	        user: user,
-	        geojson: geojson,
-	        classification: classification
-	      })
-	    }).done(function () {
-	      return location.reload();
-	    }).fail(function (e) {
-	      return console.log('Error: ' + e);
+	      url: '/getdata'
+	    }).done(function (data) {
+	      // Parse FeatureCollection and username
+	      var fc = JSON.parse(data);
+	      var score = fc.features[2].properties.score;
+	      if (score === undefined) {
+	        var _score = 'NA';
+	      }
+
+	      // adds to the map the first feature
+	      function makePopup(feature, layer) {
+	        if (feature.properties && feature.properties.type === 'sw') {
+	          var desc = '<p>' + feature.properties.desc + '</p>';
+	          var side = '<p>Side: ' + feature.properties.side + '</p';
+	          layer.bindPopup(desc + side);
+	        }
+	      }
+	      L.geoJson(fc.features[2], {
+	        onEachFeature: function onEachFeature(feature, layer) {
+	          L.polylineDecorator(layer, {
+	            patterns: [{ offset: 0,
+	              repeat: 8,
+	              symbol: L.Symbol.dash({
+	                pixelSize: 1, pathOptions: {
+	                  weight: 6,
+	                  opacity: 1,
+	                  color: '#0c0'
+	                }
+	              }) }]
+	          }).addTo(map);
+	        }
+	      });
+
+	      L.geoJson(fc.features[2], {
+	        onEachFeature: function onEachFeature(feature, layer) {
+	          L.polylineDecorator(layer, {
+	            patterns: [{ offset: 0,
+	              repeat: 8,
+	              symbol: L.Symbol.dash({
+	                pixelSize: 1, pathOptions: {
+	                  weight: 5,
+	                  opacity: 1,
+	                  color: '#0f0'
+	                }
+	              }) }]
+	          }).addTo(map);
+	        }
+	      });
+
+	      L.geoJson(fc.features[0], {
+	        opacity: 1,
+	        color: '#cdf',
+	        weight: 8,
+	        onEachFeature: makePopup
+	      }).addTo(map);
+	      L.geoJson(fc.features[0], {
+	        opacity: 0.9,
+	        weight: 4,
+	        onEachFeature: makePopup
+	      }).addTo(map);
+
+	      L.geoJson(fc.features[1], {
+	        opacity: 1,
+	        color: '#cdf',
+	        weight: 8,
+	        onEachFeature: makePopup
+	      }).addTo(map);
+	      L.geoJson(fc.features[1], {
+	        opacity: 0.9,
+	        weight: 4,
+	        onEachFeature: makePopup
+	      }).addTo(map);
+
+	      var LongLat = fc.features[1].geometry.coordinates[1];
+	      map.setView([LongLat[1], LongLat[0]], 18);
+	      currentDat = fc;
+
+	      // Update score control
+	      sControl.addTo(map);
+	      sControl.updateScore(score);
 	    });
-	  }
 
-	  (0, _jquery2['default'])('#conn').click(function () {
-	    return submitResult(learn_url, currentDat, 1);
-	  });
+	    function submitResult(learn_url, geojson, classification) {
+	      _jquery2['default'].ajax({
+	        type: 'POST',
+	        contentType: 'application/json; charset=utf-8',
+	        url: learn_url + '/submit',
+	        data: JSON.stringify({
+	          user: user,
+	          geojson: geojson,
+	          classification: classification
+	        })
+	      }).done(function () {
+	        return location.reload();
+	      }).fail(function (e) {
+	        return console.log('Error: ' + e);
+	      });
+	    }
 
-	  (0, _jquery2['default'])('#Noconn').click(function () {
-	    return submitResult(learn_url, currentDat, 0);
+	    (0, _jquery2['default'])('#conn').click(function () {
+	      return submitResult(learn_url, currentDat, 1);
+	    });
+
+	    (0, _jquery2['default'])('#Noconn').click(function () {
+	      return submitResult(learn_url, currentDat, 0);
+	    });
 	  });
 	}
 

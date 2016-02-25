@@ -78,93 +78,104 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _layersCurbramps2 = _interopRequireDefault(_layersCurbramps);
 
+	var _jquery = __webpack_require__(1);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
 	// Permits disabled until data.seattle.gov data source is restored
 	// import { requestPermitsUpdate } from './layers/permits';
 
-	function App(tile_url, mapbox_token, api_url) {
+	function App(api_url) {
 	  'use strict';
-
-	  var data_api = api_url.replace(/\/?$/, '/') + 'v1';
-	  var FEATUREZOOM = 17;
-	  L.mapbox.accessToken = mapbox_token;
-	  var map = L.mapbox.map('map', 'mapbox.streets', {
-	    zoomControl: false,
-	    attribution: 'Map data &copy',
-	    maxZoom: 18
+	  var api = api_url.replace(/\/?$/, '/') + 'v1';
+	  var mapinfo = _jquery2['default'].ajax({
+	    url: api + '/mapinfo',
+	    dataType: 'json'
 	  });
 
-	  var elevationTiles = L.mapbox.tileLayer(tile_url);
-	  elevationTiles.addTo(map);
+	  mapinfo.done(function (mapdata) {
+	    var FEATUREZOOM = 17;
+	    L.mapbox.accessToken = mapdata.token;
+	    var map = L.mapbox.map('map', 'mapbox.streets', {
+	      zoomControl: false,
+	      attribution: 'Map data &copy',
+	      maxZoom: 18
+	    });
 
-	  var stops = L.featureGroup({ minZoom: 8 });
-	  var elevationlayer = L.featureGroup({ minZoom: 8 });
-	  var curbs = L.featureGroup({ minZoom: 8 });
-	  var userData = L.featureGroup({ minZoom: 8 });
-	  var elevators = L.featureGroup({ minZoom: 8 });
-	  //  let permits = L.featureGroup({minZoom: 8});
+	    var elevationTiles = L.mapbox.tileLayer(mapdata.tiles);
+	    elevationTiles.addTo(map);
 
-	  //Create filter checkboxes for the overlays
-	  var overlayMaps = {
-	    "Bus Stops": stops,
-	    "Curb Ramps": curbs,
-	    "User Reported Data": userData,
-	    "Elevators": elevators,
-	    "Elevation Change": elevationlayer
-	    //    "Sidewalk Closure Permits": permits
-	  };
+	    var stops = L.featureGroup({ minZoom: 8 });
+	    var elevationlayer = L.featureGroup({ minZoom: 8 });
+	    var curbs = L.featureGroup({ minZoom: 8 });
+	    var userData = L.featureGroup({ minZoom: 8 });
+	    var elevators = L.featureGroup({ minZoom: 8 });
+	    //    let permits = L.featureGroup({minZoom: 8});
 
-	  // Read in data to increase speed later on (generate a promise)
+	    //Create filter checkboxes for the overlays
+	    var overlayMaps = {
+	      "Bus Stops": stops,
+	      "Curb Ramps": curbs,
+	      "User Reported Data": userData,
+	      "Elevators": elevators,
+	      "Elevation Change": elevationlayer
+	      //      "Sidewalk Closure Permits": permits
+	    };
 
-	  var updateLayers = function updateLayers() {
-	    (0, _layersBusdata2['default'])(stops, map);
-	    (0, _layersSidewalks2['default'])(elevationlayer, map, data_api);
-	    (0, _layersCurbramps2['default'])(curbs, map, data_api);
-	    //    requestPermitsUpdate(permits, map, data_api);
-	  };
+	    // Read in data to increase speed later on (generate a promise)
 
-	  map.on('load', function (e) {
-	    updateLayers();
-	    map.setView([47.609700, -122.324638], FEATUREZOOM);
-	  });
+	    var updateLayers = function updateLayers() {
+	      (0, _layersBusdata2['default'])(stops, map);
+	      (0, _layersSidewalks2['default'])(elevationlayer, map, api);
+	      (0, _layersCurbramps2['default'])(curbs, map, api);
+	      //      requestPermitsUpdate(permits, map, api);
+	    };
 
-	  map.on('moveend', function (e) {
-	    if (map.getZoom() >= FEATUREZOOM) {
+	    map.on('load', function (e) {
 	      updateLayers();
-	    }
+	      map.setView([47.609700, -122.324638], FEATUREZOOM);
+	    });
+
+	    map.on('moveend', function (e) {
+	      if (map.getZoom() >= FEATUREZOOM) {
+	        updateLayers();
+	      }
+	    });
+
+	    map.on('zoomend', function () {
+	      if (map.getZoom() < FEATUREZOOM) {
+	        map.removeLayer(stops);
+	        map.removeLayer(elevationlayer);
+	        map.removeLayer(curbs);
+	        //        map.removeLayer(permits);
+	        elevationTiles.addTo(map);
+	      } else {
+	        stops.addTo(map);
+	        elevationlayer.addTo(map);
+	        curbs.addTo(map);
+	        //        permits.addTo(map);
+	        map.removeLayer(elevationTiles);
+	      }
+	    });
+
+	    map.on('contextmenu', function (e) {
+	      var popup = confirm("Do you want to report a new obstacle?");
+	      if (popup === true) {
+	        window.location.href = 'report?lat=' + e.latlng.lat + '&lon=' + e.latlng.lng;
+	      }
+	    });
+
+	    map.setView([47.652810, -122.308690], FEATUREZOOM);
+
+	    // Add geocoder
+	    map.addControl(L.mapbox.geocoderControl('mapbox.places'));
+	    // Add zoom buttons
+	    new L.Control.Zoom().addTo(map);
+
+	    L.control.layers(null, overlayMaps).addTo(map);
 	  });
-
-	  map.on('zoomend', function () {
-	    if (map.getZoom() < FEATUREZOOM) {
-	      map.removeLayer(stops);
-	      map.removeLayer(elevationlayer);
-	      map.removeLayer(curbs);
-	      //      map.removeLayer(permits);
-	      elevationTiles.addTo(map);
-	    } else {
-	      stops.addTo(map);
-	      elevationlayer.addTo(map);
-	      curbs.addTo(map);
-	      //      permits.addTo(map);
-	      map.removeLayer(elevationTiles);
-	    }
-	  });
-
-	  map.on('contextmenu', function (e) {
-	    var popup = confirm("Do you want to report a new obstacle?");
-	    if (popup === true) {
-	      window.location.href = 'report?lat=' + e.latlng.lat + '&lon=' + e.latlng.lng;
-	    }
-	  });
-
-	  map.setView([47.652810, -122.308690], FEATUREZOOM);
-
-	  // Add geocoder
-	  map.addControl(L.mapbox.geocoderControl('mapbox.places'));
-	  // Add zoom buttons
-	  new L.Control.Zoom().addTo(map);
-
-	  L.control.layers(null, overlayMaps).addTo(map);
 	}
+
 	exports['default'] = App;
 	module.exports = exports['default'];
 
