@@ -84,7 +84,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function App(tile_url, mapbox_token, api_url) {
 	  'use strict';
 
-	  var rawdata_api = api_url.replace(/\/?$/, '/') + 'data';
+	  var data_api = api_url.replace(/\/?$/, '/') + 'v1';
 	  var FEATUREZOOM = 17;
 	  L.mapbox.accessToken = mapbox_token;
 	  var map = L.mapbox.map('map', 'mapbox.streets', {
@@ -117,9 +117,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var updateLayers = function updateLayers() {
 	    (0, _layersBusdata2['default'])(stops, map);
-	    (0, _layersSidewalks2['default'])(elevationlayer, map, rawdata_api);
-	    (0, _layersCurbramps2['default'])(curbs, map, rawdata_api);
-	    //    requestPermitsUpdate(permits, map, rawdata_api);
+	    (0, _layersSidewalks2['default'])(elevationlayer, map, data_api);
+	    (0, _layersCurbramps2['default'])(curbs, map, data_api);
+	    //    requestPermitsUpdate(permits, map, data_api);
 	  };
 
 	  map.on('load', function (e) {
@@ -10077,7 +10077,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Request data
 	  _jquery2['default'].ajax({
 	    type: 'GET',
-	    url: api_url + '/v1/sidewalks.geojson',
+	    url: api_url + '/sidewalks.geojson',
 	    data: {
 	      bbox: bounds
 	    },
@@ -10235,7 +10235,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Request data
 	  _jquery2['default'].ajax({
 	    type: 'GET',
-	    url: api_url + '/v1/curbramps.geojson',
+	    url: api_url + '/curbramps.geojson',
 	    data: {
 	      bbox: bounds
 	    },

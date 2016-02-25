@@ -1,8 +1,9 @@
-var passport = require('passport'),
+var bcrypt = require('bcrypt-nodejs'),
     express = require('express'),
-    bcrypt = require('bcrypt-nodejs'),
+    passport = require('passport'),
+    path = require('path'),
     request = require('request'),
-    path = require('path');
+    url = require('url');
 
 var User = require('../models/user');
 
@@ -95,11 +96,17 @@ router.get('/profile', function(req, res) {
 
 /* GET map page. */
 router.get('/map', function(req, res) {
-  res.render('map', {
-    mapbox_tiles: JSON.stringify(process.env.MAPBOX_TILES),
-    mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
-    api_url: JSON.stringify(process.env.API_URL),
-    user: req.user
+  // Get mapbox credentials from API
+  request(url.resolve(process.env.API_URL, '/v1/mapinfo'), function(e, r, b) {
+    if (!e) {
+      mapinfo = JSON.parse(b);
+      res.render('map', {
+        mapbox_tiles: JSON.stringify(mapinfo.tiles),
+        mapbox_token: JSON.stringify(mapinfo.token),
+        api_url: JSON.stringify(process.env.API_URL),
+        user: req.user
+      });
+    }
   });
 });
 

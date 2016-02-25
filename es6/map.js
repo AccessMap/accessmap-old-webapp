@@ -12,7 +12,7 @@ import requestCurbsUpdate from './layers/curbramps';
 function App(tile_url, mapbox_token, api_url) {
   'use strict';
 
-  let rawdata_api = api_url.replace(/\/?$/, '/') + 'data';
+  let data_api = api_url.replace(/\/?$/, '/') + 'v1';
   let FEATUREZOOM = 17;
   L.mapbox.accessToken = mapbox_token;
   let map = L.mapbox.map('map', 'mapbox.streets', {
@@ -45,9 +45,9 @@ function App(tile_url, mapbox_token, api_url) {
 
   let updateLayers = function() {
     requestStopsUpdate(stops, map);
-    requestSidewalksUpdate(elevationlayer, map, rawdata_api);
-    requestCurbsUpdate(curbs, map, rawdata_api);
-//    requestPermitsUpdate(permits, map, rawdata_api);
+    requestSidewalksUpdate(elevationlayer, map, data_api);
+    requestCurbsUpdate(curbs, map, data_api);
+//    requestPermitsUpdate(permits, map, data_api);
   };
 
   map.on('load', function(e) {
