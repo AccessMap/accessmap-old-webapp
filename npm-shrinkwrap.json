@@ -733,6 +733,60 @@
       "from": "json-loader@*",
       "resolved": "https://registry.npmjs.org/json-loader/-/json-loader-0.5.4.tgz"
     },
+    "leaflet-polylinedecorator": {
+      "version": "1.0.1",
+      "from": "leaflet-polylinedecorator@*",
+      "resolved": "https://registry.npmjs.org/leaflet-polylinedecorator/-/leaflet-polylinedecorator-1.0.1.tgz"
+    },
+    "leaflet.locatecontrol": {
+      "version": "0.48.0",
+      "from": "leaflet.locatecontrol@*",
+      "resolved": "https://registry.npmjs.org/leaflet.locatecontrol/-/leaflet.locatecontrol-0.48.0.tgz",
+      "dependencies": {
+        "font-awesome": {
+          "version": "4.5.0",
+          "from": "font-awesome@>=4.4.0 <5.0.0",
+          "resolved": "https://registry.npmjs.org/font-awesome/-/font-awesome-4.5.0.tgz"
+        },
+        "leaflet": {
+          "version": "0.7.7",
+          "from": "leaflet@>=0.7.7 <0.8.0",
+          "resolved": "https://registry.npmjs.org/leaflet/-/leaflet-0.7.7.tgz"
+        }
+      }
+    },
+    "mapbox.js": {
+      "version": "2.3.0",
+      "from": "mapbox.js@*",
+      "resolved": "https://registry.npmjs.org/mapbox.js/-/mapbox.js-2.3.0.tgz",
+      "dependencies": {
+        "corslite": {
+          "version": "0.0.6",
+          "from": "corslite@0.0.6",
+          "resolved": "https://registry.npmjs.org/corslite/-/corslite-0.0.6.tgz"
+        },
+        "isarray": {
+          "version": "0.0.1",
+          "from": "isarray@0.0.1",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
+        },
+        "leaflet": {
+          "version": "0.7.7",
+          "from": "leaflet@0.7.7",
+          "resolved": "https://registry.npmjs.org/leaflet/-/leaflet-0.7.7.tgz"
+        },
+        "mustache": {
+          "version": "2.2.1",
+          "from": "mustache@2.2.1",
+          "resolved": "https://registry.npmjs.org/mustache/-/mustache-2.2.1.tgz"
+        },
+        "sanitize-caja": {
+          "version": "0.1.3",
+          "from": "sanitize-caja@0.1.3",
+          "resolved": "https://registry.npmjs.org/sanitize-caja/-/sanitize-caja-0.1.3.tgz"
+        }
+      }
+    },
     "morgan": {
       "version": "1.6.1",
       "from": "morgan@>=1.6.1 <1.7.0",
