@@ -1,34 +1,34 @@
-var Sequelize = require('sequelize');
+'use strict';
 
-var mydb = new Sequelize(process.env.DATABASE_URL);
 
-var user_attributes = {
-  username: {
-    type: Sequelize.STRING,
-    allowNull: false,
-    unique: true,
-    validate: {
-      is: /^[a-z0-9\_\-]+$/i,
+module.exports = function(sequelize, DataTypes) {
+  var user_attributes = {
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        is: /^[a-z0-9\_\-]+$/i,
+      }
+    },
+    email: {
+      type: DataTypes.STRING,
+      validate: {
+        isEmail: true
+      }
+    },
+    password: {
+      type: DataTypes.STRING,
+    },
+    salt: {
+      type: DataTypes.STRING
     }
-  },
-  email: {
-    type: Sequelize.STRING,
-    validate: {
-      isEmail: true
-    }
-  },
-  password: {
-    type: Sequelize.STRING,
-  },
-  salt: {
-    type: Sequelize.STRING
-  }
+  };
+
+  var user_options = {
+    freezeTableName: true
+  };
+
+  var User = sequelize.define('user', user_attributes, user_options);
+  return User;
 };
-
-var user_options = {
-  freezeTableName: true
-};
-
-var User = mydb.define('user', user_attributes, user_options);
-
-module.exports = User;

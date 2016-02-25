@@ -11,19 +11,25 @@ var session = require('express-session'),
     bcrypt = require('bcrypt-nodejs'),
     LocalStrategy = require('passport-local').Strategy;
 
-var User = require('./models/user'),
-    routes = require('./routes/index');
+var models = require('./models');
+var routes = require('./routes/index');
 
 var app = express();
+var env = process.env.NODE_ENV || 'development';
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 app.use(favicon(path.join(__dirname, 'public/favicon.ico')));
+if (env == 'production') {
+  var secret = 'productionSecret';
+} else if (env == 'development') {
+  var secret = 'developmentSecret';
+}
 app.use(session({
   store: new (require('connect-pg-simple')(session))(),
-  secret: 'reallybadsecret',
+  secret: secret,
   resave: false,
   saveUninitialized: false
 }));
@@ -40,13 +46,26 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Set up testing user if not using production database
+if (env === 'development') {
+  models.user.sync();
+  // models.user.findOne()
+  var salt = bcrypt.genSaltSync(10);
+  models.user.create({
+    username: 'test',
+    email: 'test@test.com',
+    salt: salt,
+    password: bcrypt.hashSync('test', salt)
+  });
+}
+
 // Passport (login)
 app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    User.findOne({
+    models.user.findOne({
       where: {
         'username': username
       }
@@ -72,7 +91,7 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(id, done) {
-  User.findOne({
+  models.user.findOne({
     where: {
       'id': id
     }

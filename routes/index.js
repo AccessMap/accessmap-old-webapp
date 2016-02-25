@@ -4,7 +4,7 @@ var bcrypt = require('bcrypt-nodejs'),
     path = require('path'),
     request = require('request');
 
-var User = require('../models/user');
+var models = require('../models');
 
 var router = express.Router();
 
@@ -56,7 +56,7 @@ router.post('/register', function(req, res) {
       password: hashedPassword
     };
 
-    User.create(newUser).then(function() {
+    models.User.create(newUser).then(function() {
       res.redirect('/login');
     }).catch(function(error) {
       console.log(error);
