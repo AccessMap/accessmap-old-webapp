@@ -6,6 +6,8 @@ import requestSidewalksUpdate from './layers/sidewalks';
 import requestStopsUpdate from './layers/busdata';
 import requestCurbsUpdate from './layers/curbramps';
 import $ from 'jquery';
+import 'leaflet.locatecontrol';
+import L from 'mapbox.js';
 // Permits disabled until data.seattle.gov data source is restored
 // import { requestPermitsUpdate } from './layers/permits';
 
