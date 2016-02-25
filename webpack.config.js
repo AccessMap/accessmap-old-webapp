@@ -17,7 +17,11 @@ module.exports = {
         loader: 'babel-loader' },
       // json-loader required for mapbox.js' referral to its own package.json
       { test: /\.json$/,
-        loader: 'json'}
+        loader: 'json' },
+      { test: /\.css$/,
+        loader: 'style-loader!css-loader' },
+      { test: /\.png$/,
+        loader: 'url-loader?limit=100000' }
     ]
   }
 };

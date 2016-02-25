@@ -7,7 +7,10 @@ import requestStopsUpdate from './layers/busdata';
 import requestCurbsUpdate from './layers/curbramps';
 import $ from 'jquery';
 import 'leaflet.locatecontrol';
+import '!style!css!leaflet.locatecontrol/dist/L.Control.Locate.min.css';
 import L from 'mapbox.js';
+import 'mapbox.js/theme/images/icons-ffffff@2x.png';
+import '!style!css!mapbox.js/theme/style.css';
 // Permits disabled until data.seattle.gov data source is restored
 // import { requestPermitsUpdate } from './layers/permits';
 

@@ -2,6 +2,8 @@ import $ from 'jquery';
 import path from 'path';
 // Order matters for L vs. the polylinedecorator modules
 import L from 'mapbox.js';
+import 'mapbox.js/theme/images/icons-ffffff@2x.png';
+import '!style!css!mapbox.js/theme/style.css';
 import 'leaflet-polylinedecorator';
 
 
