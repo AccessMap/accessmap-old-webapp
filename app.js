@@ -48,15 +48,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Set up testing user if not using production database
 if (env === 'development') {
-  models.user.sync();
-  // models.user.findOne()
-  var salt = bcrypt.genSaltSync(10);
-  models.user.create({
-    username: 'test',
-    email: 'test@test.com',
-    salt: salt,
-    password: bcrypt.hashSync('test', salt)
-  });
+  models.user
+    .sync({force: true})
+    .then(function(err) {
+      var salt = bcrypt.genSaltSync(10);
+      models.user.create({
+        username: 'test',
+        email: 'test@test.com',
+        salt: salt,
+        password: bcrypt.hashSync('test', salt)
+      });
+      return 1;
+    }, function(err) {
+      console.log('Error syncing database');
+    });
 }
 
 // Passport (login)
