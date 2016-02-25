@@ -1,3 +1,18 @@
+# Vim temp files
 *.swp
+
+# Node installed modules
 node_modules
+
+# Logs
+*.log
+
+# Build files
+*.hot-update.js
+*.hot-update.json
+
+# Secret environment variables
 set_envs.sh
+
+# sqlite test databases
+*.sqlite

@@ -1,10 +1,6 @@
 extends layout
 
 append head
-  link(rel='stylesheet', href='https://api.tiles.mapbox.com/mapbox.js/v2.1.8/mapbox.css')
-  link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css')
-  link(rel='stylesheet', href='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.24.0/L.Control.Locate.css')
-  link(rel='stylesheet', href='/stylesheets/leaflet-search.css')
   style.
     body {
       padding: 0;
@@ -16,11 +12,8 @@ append head
     }
 
 block content
-  div#map
+  #map(style="height: 100%;")
 
-  script(src='https://api.tiles.mapbox.com/mapbox.js/v2.1.8/mapbox.js')
-  script(src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.24.0/L.Control.Locate.js')
-
-  script(src='javascripts/bundle.js')
+  script(src='javascripts/map-bundle.js')
   script.
-    App(!{mapbox_tiles}, !{mapbox_token}, !{api_url});
+      App(!{api_url});

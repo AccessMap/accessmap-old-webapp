@@ -1,7 +1,10 @@
-export function requestSidewalksUpdate(layerGroup, map, api_url) {
+import $ from 'jquery';
+
+
+function requestSidewalksUpdate(layerGroup, map, api_url) {
   // Gradations
-  var high = 0.0833;
-  var mid = 0.05;
+  let high = 0.0833;
+  let mid = 0.05;
 
   function drawElevations(data) {
     layerGroup.clearLayers();
@@ -13,12 +16,12 @@ export function requestSidewalksUpdate(layerGroup, map, api_url) {
                 'weight': 5,
                 'opacity': 0.6};
       } else if (f.properties.grade > mid) {
-        steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
+        let steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
         return {'color': '#FFFF00',
                 'weight': 5,
                 'opacity': 0.6};
       } else {
-        steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
+        let steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
         return {'color': '#00FF00',
                 'weight': 5,
                 'opacity': 0.6};
@@ -26,18 +29,18 @@ export function requestSidewalksUpdate(layerGroup, map, api_url) {
     }
 
     for (let i = 0; i < data.features.length; i++) {
-      var feature = data.features[i];
-      var coords = feature.geometry.coordinates;
-      var coord1 = [coords[0][1], coords[0][0]];
-      var coord2 = [coords[1][1], coords[1][0]];
-      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
+      let feature = data.features[i];
+      let coords = feature.geometry.coordinates;
+      let coord1 = [coords[0][1], coords[0][0]];
+      let coord2 = [coords[1][1], coords[1][0]];
+      let steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
       if (bounds.contains(coord1) || bounds.contains(coord2)) {
         let line = L.geoJson(feature, {
           'style': setStyle
         });
 
         //Display info when user clicks on the line
-        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
+        let popup = L.popup().setContent("<b>Elevation Change is " + steepness);
         line.bindPopup(popup);
 
         layerGroup.addLayer(line);
@@ -49,7 +52,7 @@ let bounds = map.getBounds().toBBoxString();
 // Request data
 $.ajax({
   type: 'GET',
-  url: api_url + '/v1/sidewalks.geojson',
+  url: api_url + '/sidewalks.geojson',
   data: {
     bbox: bounds
   },
@@ -60,3 +63,5 @@ $.ajax({
   }
 });
 }
+
+export default requestSidewalksUpdate;

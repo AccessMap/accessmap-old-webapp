@@ -1,23 +1,44 @@
 body {
-	font-family: 'Roboto', sans-serif;
+  padding-top: 0px;
+  font-family: sans-serif;
+  height: 100%;
+  width: 100%;
 }
 
-.jumbotron {
+.fill {
+  padding-top: 50px;
+  padding-bottom: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+  height: 100%;
+  width: 100%;
+}
+
+.container .jumbotron {
   background: url("/images/hill-splash.jpg");
   background-size: cover;
   background-position: right center;
   background-repeat: no-repeat;
-  padding-top: 80px;
+  border-radius: 0px;
+  padding-top: 0;
   padding-bottom: 40px;
   color: white;
 }
 
 .jumbotron p {
-	font-size: 1.6em;
+  font-size: 1.6em;
 }
 
 .jumbotron h1 {
-	font-weight: bold;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.container i {
+  font-size: 150%;
+}
+
+.container .row {
+  padding-bottom: 40px;
 }
 
 table img {
@@ -28,6 +49,52 @@ td {
   padding: 10px;
 }
 
-table, td, th {
-    border: 1px solid black;
+h2 {
+  font-family: 'Montserrat', sans-serif;
+}
+.navbar {
+  background-color: #84B942;
+  background-image: none;
+  font-color: #FFFFFF;
+  border: none;
+}
+
+.navbar-brand {
+  padding: 0px;
+}
+
+.navbar-brand > img {
+  height: 100%;
+  padding: 5px;
+  width: auto;
+}
+
+.navbar .fa {
+  font-size: 130%;
+}
+
+.navbar-inverse .navbar-nav>li>a{
+  color: white;
+  font-size: 120%;
+  font-family: 'Montserrat', sans-serif;
+  text-shadow: none;
+}
+
+.navbar-inverse .navbar-nav>li>a:hover{
+  color: #1A4274;
+}
+
+.navbar-inverse .navbar-nav>li>span>a{
+  color: white;
+  font-size: 120%;
+  text-shadow: none;
+  padding: 5px 5px;
+  line-height: 50px;
+}
+
+.navbar-inverse .navbar-header>a{
+  color: white;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 180%;
+  text-shadow: none;
 }
