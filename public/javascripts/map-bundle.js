@@ -66,15 +66,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _layersSidewalks = __webpack_require__(7);
+	var _layersSidewalks = __webpack_require__(39);
 
 	var _layersSidewalks2 = _interopRequireDefault(_layersSidewalks);
 
-	var _layersBusdata = __webpack_require__(8);
+	var _layersBusdata = __webpack_require__(40);
 
 	var _layersBusdata2 = _interopRequireDefault(_layersBusdata);
 
-	var _layersCurbramps = __webpack_require__(9);
+	var _layersCurbramps = __webpack_require__(41);
 
 	var _layersCurbramps2 = _interopRequireDefault(_layersCurbramps);
 
@@ -82,9 +82,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
-	__webpack_require__(41);
+	__webpack_require__(42);
 
-	var _mapboxJs = __webpack_require__(10);
+	var _mapboxJs = __webpack_require__(8);
 
 	var _mapboxJs2 = _interopRequireDefault(_mapboxJs);
 
@@ -10028,266 +10028,28 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */,
 /* 5 */,
 /* 6 */,
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _jquery = __webpack_require__(1);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	function requestSidewalksUpdate(layerGroup, map, api_url) {
-	  // Gradations
-	  var high = 0.0833;
-	  var mid = 0.05;
-
-	  function drawElevations(data) {
-	    layerGroup.clearLayers();
-	    var bounds = map.getBounds();
-
-	    function setStyle(f) {
-	      if (f.properties.grade >= high) {
-	        return { 'color': '#FF0000',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      } else if (f.properties.grade > mid) {
-	        var steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
-	        return { 'color': '#FFFF00',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      } else {
-	        var steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
-	        return { 'color': '#00FF00',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      }
-	    }
-
-	    for (var i = 0; i < data.features.length; i++) {
-	      var feature = data.features[i];
-	      var coords = feature.geometry.coordinates;
-	      var coord1 = [coords[0][1], coords[0][0]];
-	      var coord2 = [coords[1][1], coords[1][0]];
-	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
-	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
-	        var line = L.geoJson(feature, {
-	          'style': setStyle
-	        });
-
-	        //Display info when user clicks on the line
-	        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
-	        line.bindPopup(popup);
-
-	        layerGroup.addLayer(line);
-	      }
-	    }
-	  }
-
-	  var bounds = map.getBounds().toBBoxString();
-	  // Request data
-	  _jquery2['default'].ajax({
-	    type: 'GET',
-	    url: api_url + '/sidewalks.geojson',
-	    data: {
-	      bbox: bounds
-	    },
-	    dataType: 'json',
-	    success: function success(data) {
-	      drawElevations(data);
-	      layerGroup.bringToBack();
-	    }
-	  });
-	}
-
-	exports['default'] = requestSidewalksUpdate;
-	module.exports = exports['default'];
-
-/***/ },
+/* 7 */,
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// TODO: Use OO addTo method
-	// Request stops in an area
-	// Process the request data
-	// Add the markers to the map
 	'use strict';
 
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
+	var leaflet = __webpack_require__(9);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _jquery = __webpack_require__(1);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	function requestStopsUpdate(layerGroup, map) {
-	  // Generates a layerGroup to add to / remove from map
-	  var OBA_URL = 'http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json';
-	  var RADIUS = 800;
-	  var latlng = map.getCenter();
-	  var centerLat = latlng.lat;
-	  var centerLon = latlng.lng;
-
-	  var bounds = map.getBounds();
-	  var latlonspan = [Math.abs(bounds.getNorth() - bounds.getSouth()), Math.abs(bounds.getWest() - bounds.getEast())];
-
-	  var busIcon = L.icon({
-	    iconUrl: '../images/bus.png',
-	    iconSize: [30, 30],
-	    iconAnchor: [10, 0]
-	  });
-
-	  function requestStops(callback) {
-	    _jquery2['default'].ajax({
-	      url: OBA_URL,
-	      dataType: 'jsonp',
-	      data: {
-	        key: '8e4402d8-6f8d-49fe-8e7c-d3d38098b4ef',
-	        lat: centerLat,
-	        lon: centerLon,
-	        latSpan: latlonspan[0],
-	        lonSpan: latlonspan[1],
-	        maxCount: 300
-	      },
-	      success: callback
-	    });
-	  }
-
-	  function addMarkers(request_data) {
-	    var data = request_data.data.list;
-	    // Destroy the layers in stopLayerGroup
-	    layerGroup.clearLayers();
-	    // Create the new ones
-	    for (var i = 0; i < data.length; i++) {
-	      var row = data[i];
-	      // Turn it into geoJSON
-	      var geoJSON = {
-	        'type': 'Feature',
-	        'geometry': {
-	          'type': 'Point',
-	          'coordinates': [row.lon, row.lat]
-	        },
-	        'properties': {
-	          'name': row.name,
-	          'direction': row.direction,
-	          'id': row.id,
-	          'routeIds': row.routeIds
-	        }
-	      };
-	      var marker = L.geoJson(geoJSON, {
-	        pointToLayer: function pointToLayer(feature, latlng) {
-	          return L.marker(latlng, { icon: busIcon });
-	        }
-	      });
-
-	      //Display info when user clicks on the bus stop
-	      var popup = L.popup().setContent("<b>Bus Stop at " + row.name + "</b>");
-	      marker.bindPopup(popup);
-
-	      layerGroup.addLayer(marker);
-	    }
-	  }
-
-	  requestStops(addMarkers);
-	}
-
-	exports['default'] = requestStopsUpdate;
-	module.exports = exports['default'];
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _jquery = __webpack_require__(1);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	function requestCurbsUpdate(layerGroup, map, api_url) {
-	  function drawCurbs(data) {
-	    layerGroup.clearLayers();
-	    var bounds = map.getBounds();
-
-	    function make_circle(feature, latlon) {
-	      var coords = feature.geometry.coordinates;
-	      return L.circleMarker(latlon, {
-	        'radius': 3,
-	        'color': '#0000FF'
-	      });
-	    }
-
-	    for (var i = 0; i < data.features.length; i++) {
-	      var feature = data.features[i];
-	      var coord = feature.geometry.coordinates;
-	      var latlng = [coord[1], coord[0]];
-	      if (bounds.contains(latlng)) {
-	        var point = L.geoJson(feature, { pointToLayer: make_circle });
-
-	        //Display info when user clicks on the curb marker
-	        var popup = L.popup().setContent("<b>Curb Ramp</b>");
-	        point.bindPopup(popup);
-
-	        layerGroup.addLayer(point);
-	      }
-	    }
-	  }
-
-	  var bounds = map.getBounds().toBBoxString();
-	  // Request data
-	  _jquery2['default'].ajax({
-	    type: 'GET',
-	    url: api_url + '/curbramps.geojson',
-	    data: {
-	      bbox: bounds
-	    },
-	    dataType: 'json',
-	    success: function success(data) {
-	      drawCurbs(data);
-	    }
-	  });
-	}
-
-	exports['default'] = requestCurbsUpdate;
-	module.exports = exports['default'];
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var leaflet = __webpack_require__(11);
-
-	__webpack_require__(13);
+	__webpack_require__(11);
 
 	module.exports = leaflet;
 
 
 /***/ },
-/* 11 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = window.L = __webpack_require__(12);
+	module.exports = window.L = __webpack_require__(10);
 
 
 /***/ },
-/* 12 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -19460,27 +19222,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(window, document));
 
 /***/ },
-/* 13 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var geocoderControl = __webpack_require__(14),
-	    gridControl = __webpack_require__(24),
-	    featureLayer = __webpack_require__(28),
-	    legendControl = __webpack_require__(31),
-	    shareControl = __webpack_require__(32),
-	    tileLayer = __webpack_require__(34),
-	    infoControl = __webpack_require__(35),
-	    map = __webpack_require__(36),
-	    gridLayer = __webpack_require__(37),
-	    styleLayer = __webpack_require__(40);
+	var geocoderControl = __webpack_require__(12),
+	    gridControl = __webpack_require__(22),
+	    featureLayer = __webpack_require__(26),
+	    legendControl = __webpack_require__(29),
+	    shareControl = __webpack_require__(30),
+	    tileLayer = __webpack_require__(32),
+	    infoControl = __webpack_require__(33),
+	    map = __webpack_require__(34),
+	    gridLayer = __webpack_require__(35),
+	    styleLayer = __webpack_require__(38);
 
 	L.mapbox = module.exports = {
-	    VERSION: __webpack_require__(20).version,
-	    geocoder: __webpack_require__(15),
-	    marker: __webpack_require__(29),
-	    simplestyle: __webpack_require__(30),
+	    VERSION: __webpack_require__(18).version,
+	    geocoder: __webpack_require__(13),
+	    marker: __webpack_require__(27),
+	    simplestyle: __webpack_require__(28),
 	    tileLayer: tileLayer.tileLayer,
 	    TileLayer: tileLayer.TileLayer,
 	    styleLayer: styleLayer.styleLayer,
@@ -19501,10 +19263,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    FeatureLayer: featureLayer.FeatureLayer,
 	    map: map.map,
 	    Map: map.Map,
-	    config: __webpack_require__(19),
-	    sanitize: __webpack_require__(26),
-	    template: __webpack_require__(25).to_html,
-	    feedback: __webpack_require__(21)
+	    config: __webpack_require__(17),
+	    sanitize: __webpack_require__(24),
+	    template: __webpack_require__(23).to_html,
+	    feedback: __webpack_require__(19)
 	};
 
 
@@ -19516,17 +19278,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ((document.location.protocol === 'https:' ||
 	    document.location.protocol === 'http:') ? '' : 'https:') +
 	    '//api.tiles.mapbox.com/mapbox.js/' + 'v' +
-	    __webpack_require__(20).version + '/images';
+	    __webpack_require__(18).version + '/images';
 
 
 /***/ },
-/* 14 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var geocoder = __webpack_require__(15),
-	    util = __webpack_require__(17);
+	var geocoder = __webpack_require__(13),
+	    util = __webpack_require__(15);
 
 	var GeocoderControl = L.Control.extend({
 	    includes: L.Mixin.Events,
@@ -19726,16 +19488,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArray = __webpack_require__(16),
-	    util = __webpack_require__(17),
-	    format_url = __webpack_require__(18),
-	    feedback = __webpack_require__(21),
-	    request = __webpack_require__(22);
+	var isArray = __webpack_require__(14),
+	    util = __webpack_require__(15),
+	    format_url = __webpack_require__(16),
+	    feedback = __webpack_require__(19),
+	    request = __webpack_require__(20);
 
 	// Low-level geocoding interface - wraps specific API calls and their
 	// return values.
@@ -19860,7 +19622,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 14 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -19869,7 +19631,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
+/* 15 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19920,13 +19682,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var config = __webpack_require__(19),
-	    version = __webpack_require__(20).version;
+	var config = __webpack_require__(17),
+	    version = __webpack_require__(18).version;
 
 	module.exports = function(path, accessToken) {
 	    accessToken = accessToken || L.mapbox.accessToken;
@@ -19980,7 +19742,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 17 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19994,7 +19756,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 18 */
 /***/ function(module, exports) {
 
 	module.exports = {
@@ -20261,7 +20023,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 21 */
+/* 19 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -20279,14 +20041,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var corslite = __webpack_require__(23),
-	    strict = __webpack_require__(17).strict,
-	    config = __webpack_require__(19);
+	var corslite = __webpack_require__(21),
+	    strict = __webpack_require__(15).strict,
+	    config = __webpack_require__(17);
 
 	var protocol = /^(https?:)?(?=\/\/(.|api)\.tiles\.mapbox\.com\/)/;
 
@@ -20317,7 +20079,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	function corslite(url, callback, cors) {
@@ -20416,20 +20178,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var util = __webpack_require__(17),
-	    Mustache = __webpack_require__(25);
+	var util = __webpack_require__(15),
+	    Mustache = __webpack_require__(23);
 
 	var GridControl = L.Control.extend({
 
 	    options: {
 	        pinnable: true,
 	        follow: false,
-	        sanitizer: __webpack_require__(26),
+	        sanitizer: __webpack_require__(24),
 	        touchTeaser: true,
 	        location: true
 	    },
@@ -20620,7 +20382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 25 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -21255,10 +21017,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 26 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var html_sanitize = __webpack_require__(27);
+	var html_sanitize = __webpack_require__(25);
 
 	module.exports = function(_) {
 	    if (!_) return '';
@@ -21279,7 +21041,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -23732,16 +23494,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 28 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var util = __webpack_require__(17),
-	    format_url = __webpack_require__(18),
-	    request = __webpack_require__(22),
-	    marker = __webpack_require__(29),
-	    simplestyle = __webpack_require__(30);
+	var util = __webpack_require__(15),
+	    format_url = __webpack_require__(16),
+	    request = __webpack_require__(20),
+	    marker = __webpack_require__(27),
+	    simplestyle = __webpack_require__(28);
 
 	// # featureLayer
 	//
@@ -23750,7 +23512,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var FeatureLayer = L.FeatureGroup.extend({
 	    options: {
 	        filter: function() { return true; },
-	        sanitizer: __webpack_require__(26),
+	        sanitizer: __webpack_require__(24),
 	        style: simplestyle.style,
 	        popupOptions: { closeButton: false }
 	    },
@@ -23865,14 +23627,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 29 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var format_url = __webpack_require__(18),
-	    util = __webpack_require__(17),
-	    sanitize = __webpack_require__(26);
+	var format_url = __webpack_require__(16),
+	    util = __webpack_require__(15),
+	    sanitize = __webpack_require__(24);
 
 	// mapbox-related markers functionality
 	// provide an icon from mapbox's simple-style spec and hosted markers
@@ -23936,7 +23698,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 30 */
+/* 28 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -23987,7 +23749,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 31 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -23996,7 +23758,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    options: {
 	        position: 'bottomright',
-	        sanitizer: __webpack_require__(26)
+	        sanitizer: __webpack_require__(24)
 	    },
 
 	    initialize: function(options) {
@@ -24060,15 +23822,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 32 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var format_url = __webpack_require__(18);
+	var format_url = __webpack_require__(16);
 
 	var ShareControl = L.Control.extend({
-	    includes: [__webpack_require__(33)],
+	    includes: [__webpack_require__(31)],
 
 	    options: {
 	        position: 'topleft',
@@ -24187,14 +23949,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 33 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var request = __webpack_require__(22),
-	    format_url = __webpack_require__(18),
-	    util = __webpack_require__(17);
+	var request = __webpack_require__(20),
+	    format_url = __webpack_require__(16),
+	    util = __webpack_require__(15);
 
 	module.exports = {
 	    _loadTileJSON: function(_) {
@@ -24217,19 +23979,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 34 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var util = __webpack_require__(17);
+	var util = __webpack_require__(15);
 	var formatPattern = /\.((?:png|jpg)\d*)(?=$|\?)/;
 
 	var TileLayer = L.TileLayer.extend({
-	    includes: [__webpack_require__(33)],
+	    includes: [__webpack_require__(31)],
 
 	    options: {
-	        sanitizer: __webpack_require__(26)
+	        sanitizer: __webpack_require__(24)
 	    },
 
 	    // http://mapbox.com/developers/api/#image_quality
@@ -24321,7 +24083,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -24329,7 +24091,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var InfoControl = L.Control.extend({
 	    options: {
 	        position: 'bottomright',
-	        sanitizer: __webpack_require__(26)
+	        sanitizer: __webpack_require__(24)
 	    },
 
 	    initialize: function(options) {
@@ -24442,20 +24204,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var tileLayer = __webpack_require__(34).tileLayer,
-	    featureLayer = __webpack_require__(28).featureLayer,
-	    gridLayer = __webpack_require__(37).gridLayer,
-	    gridControl = __webpack_require__(24).gridControl,
-	    infoControl = __webpack_require__(35).infoControl,
-	    shareControl = __webpack_require__(32).shareControl,
-	    legendControl = __webpack_require__(31).legendControl,
-	    mapboxLogoControl = __webpack_require__(39).mapboxLogoControl,
-	    feedback = __webpack_require__(21);
+	var tileLayer = __webpack_require__(32).tileLayer,
+	    featureLayer = __webpack_require__(26).featureLayer,
+	    gridLayer = __webpack_require__(35).gridLayer,
+	    gridControl = __webpack_require__(22).gridControl,
+	    infoControl = __webpack_require__(33).infoControl,
+	    shareControl = __webpack_require__(30).shareControl,
+	    legendControl = __webpack_require__(29).legendControl,
+	    mapboxLogoControl = __webpack_require__(37).mapboxLogoControl,
+	    feedback = __webpack_require__(19);
 
 	function withAccessToken(options, accessToken) {
 	    if (!accessToken || options.accessToken)
@@ -24464,7 +24226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var LMap = L.Map.extend({
-	    includes: [__webpack_require__(33)],
+	    includes: [__webpack_require__(31)],
 
 	    options: {
 	        tileLayer: {},
@@ -24474,7 +24236,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        gridControl: {},
 	        infoControl: false,
 	        shareControl: false,
-	        sanitizer: __webpack_require__(26)
+	        sanitizer: __webpack_require__(24)
 	    },
 
 	    _tilejson: {},
@@ -24682,18 +24444,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 37 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var util = __webpack_require__(17),
-	    request = __webpack_require__(22),
-	    grid = __webpack_require__(38);
+	var util = __webpack_require__(15),
+	    request = __webpack_require__(20),
+	    grid = __webpack_require__(36);
 
 	// forked from danzel/L.UTFGrid
 	var GridLayer = L.Class.extend({
-	    includes: [L.Mixin.Events, __webpack_require__(33)],
+	    includes: [L.Mixin.Events, __webpack_require__(31)],
 
 	    options: {
 	        template: function() { return ''; }
@@ -24911,7 +24673,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 38 */
+/* 36 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -24933,7 +24695,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 39 */
+/* 37 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -24971,19 +24733,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 40 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var util = __webpack_require__(17);
-	var format_url = __webpack_require__(18);
-	var request = __webpack_require__(22);
+	var util = __webpack_require__(15);
+	var format_url = __webpack_require__(16);
+	var request = __webpack_require__(20);
 
 	var StyleLayer = L.TileLayer.extend({
 
 	    options: {
-	        sanitizer: __webpack_require__(26)
+	        sanitizer: __webpack_require__(24)
 	    },
 
 	    initialize: function(_, options) {
@@ -25058,7 +24820,246 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _jquery = __webpack_require__(1);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	function requestSidewalksUpdate(layerGroup, map, api_url) {
+	  // Gradations
+	  var high = 0.0833;
+	  var mid = 0.05;
+
+	  function drawElevations(data) {
+	    layerGroup.clearLayers();
+	    var bounds = map.getBounds();
+
+	    function setStyle(f) {
+	      if (f.properties.grade >= high) {
+	        return { 'color': '#FF0000',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      } else if (f.properties.grade > mid) {
+	        var steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
+	        return { 'color': '#FFFF00',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      } else {
+	        var steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
+	        return { 'color': '#00FF00',
+	          'weight': 5,
+	          'opacity': 0.6 };
+	      }
+	    }
+
+	    for (var i = 0; i < data.features.length; i++) {
+	      var feature = data.features[i];
+	      var coords = feature.geometry.coordinates;
+	      var coord1 = [coords[0][1], coords[0][0]];
+	      var coord2 = [coords[1][1], coords[1][0]];
+	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
+	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
+	        var line = L.geoJson(feature, {
+	          'style': setStyle
+	        });
+
+	        //Display info when user clicks on the line
+	        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
+	        line.bindPopup(popup);
+
+	        layerGroup.addLayer(line);
+	      }
+	    }
+	  }
+
+	  var bounds = map.getBounds().toBBoxString();
+	  // Request data
+	  _jquery2['default'].ajax({
+	    type: 'GET',
+	    url: api_url + '/sidewalks.geojson',
+	    data: {
+	      bbox: bounds
+	    },
+	    dataType: 'json',
+	    success: function success(data) {
+	      drawElevations(data);
+	      layerGroup.bringToBack();
+	    }
+	  });
+	}
+
+	exports['default'] = requestSidewalksUpdate;
+	module.exports = exports['default'];
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// TODO: Use OO addTo method
+	// Request stops in an area
+	// Process the request data
+	// Add the markers to the map
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _jquery = __webpack_require__(1);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	function requestStopsUpdate(layerGroup, map) {
+	  // Generates a layerGroup to add to / remove from map
+	  var OBA_URL = 'http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json';
+	  var RADIUS = 800;
+	  var latlng = map.getCenter();
+	  var centerLat = latlng.lat;
+	  var centerLon = latlng.lng;
+
+	  var bounds = map.getBounds();
+	  var latlonspan = [Math.abs(bounds.getNorth() - bounds.getSouth()), Math.abs(bounds.getWest() - bounds.getEast())];
+
+	  var busIcon = L.icon({
+	    iconUrl: '../images/bus.png',
+	    iconSize: [30, 30],
+	    iconAnchor: [10, 0]
+	  });
+
+	  function requestStops(callback) {
+	    _jquery2['default'].ajax({
+	      url: OBA_URL,
+	      dataType: 'jsonp',
+	      data: {
+	        key: '8e4402d8-6f8d-49fe-8e7c-d3d38098b4ef',
+	        lat: centerLat,
+	        lon: centerLon,
+	        latSpan: latlonspan[0],
+	        lonSpan: latlonspan[1],
+	        maxCount: 300
+	      },
+	      success: callback
+	    });
+	  }
+
+	  function addMarkers(request_data) {
+	    var data = request_data.data.list;
+	    // Destroy the layers in stopLayerGroup
+	    layerGroup.clearLayers();
+	    // Create the new ones
+	    for (var i = 0; i < data.length; i++) {
+	      var row = data[i];
+	      // Turn it into geoJSON
+	      var geoJSON = {
+	        'type': 'Feature',
+	        'geometry': {
+	          'type': 'Point',
+	          'coordinates': [row.lon, row.lat]
+	        },
+	        'properties': {
+	          'name': row.name,
+	          'direction': row.direction,
+	          'id': row.id,
+	          'routeIds': row.routeIds
+	        }
+	      };
+	      var marker = L.geoJson(geoJSON, {
+	        pointToLayer: function pointToLayer(feature, latlng) {
+	          return L.marker(latlng, { icon: busIcon });
+	        }
+	      });
+
+	      //Display info when user clicks on the bus stop
+	      var popup = L.popup().setContent("<b>Bus Stop at " + row.name + "</b>");
+	      marker.bindPopup(popup);
+
+	      layerGroup.addLayer(marker);
+	    }
+	  }
+
+	  requestStops(addMarkers);
+	}
+
+	exports['default'] = requestStopsUpdate;
+	module.exports = exports['default'];
+
+/***/ },
 /* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _jquery = __webpack_require__(1);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	function requestCurbsUpdate(layerGroup, map, api_url) {
+	  function drawCurbs(data) {
+	    layerGroup.clearLayers();
+	    var bounds = map.getBounds();
+
+	    function make_circle(feature, latlon) {
+	      var coords = feature.geometry.coordinates;
+	      return L.circleMarker(latlon, {
+	        'radius': 3,
+	        'color': '#0000FF'
+	      });
+	    }
+
+	    for (var i = 0; i < data.features.length; i++) {
+	      var feature = data.features[i];
+	      var coord = feature.geometry.coordinates;
+	      var latlng = [coord[1], coord[0]];
+	      if (bounds.contains(latlng)) {
+	        var point = L.geoJson(feature, { pointToLayer: make_circle });
+
+	        //Display info when user clicks on the curb marker
+	        var popup = L.popup().setContent("<b>Curb Ramp</b>");
+	        point.bindPopup(popup);
+
+	        layerGroup.addLayer(point);
+	      }
+	    }
+	  }
+
+	  var bounds = map.getBounds().toBBoxString();
+	  // Request data
+	  _jquery2['default'].ajax({
+	    type: 'GET',
+	    url: api_url + '/curbramps.geojson',
+	    data: {
+	      bbox: bounds
+	    },
+	    dataType: 'json',
+	    success: function success(data) {
+	      drawCurbs(data);
+	    }
+	  });
+	}
+
+	exports['default'] = requestCurbsUpdate;
+	module.exports = exports['default'];
+
+/***/ },
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -25073,7 +25074,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // define an AMD module that relies on 'leaflet'
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(42)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(43)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 	    // define a Common JS module that relies on 'leaflet'
 	    } else if (typeof exports === 'object') {
@@ -25568,7 +25569,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*

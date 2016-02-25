@@ -33,6 +33,7 @@
     "jade": "~1.11.0",
     "jquery": "^2.2.0",
     "json-loader": "^0.5.4",
+    "leaflet-polylinedecorator": "^1.0.1",
     "leaflet.locatecontrol": "^0.48.0",
     "mapbox.js": "^2.3.0",
     "morgan": "~1.6.1",

@@ -1,5 +1,8 @@
 import $ from 'jquery';
 import path from 'path';
+// Order matters for L vs. the polylinedecorator modules
+import L from 'mapbox.js';
+import 'leaflet-polylinedecorator';
 
 
 function App(learn_url, api_url, user) {
