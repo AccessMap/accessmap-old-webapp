@@ -24,7 +24,8 @@ app.use(favicon(path.join(__dirname, 'public/favicon.ico')));
 app.use(session({
   store: new (require('connect-pg-simple')(session))(),
   secret: 'reallybadsecret',
-  resave: false
+  resave: false,
+  saveUninitialized: false
 }));
 app.use(flash());
 app.use(function(req, res, next) {
