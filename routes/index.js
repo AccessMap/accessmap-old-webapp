@@ -115,10 +115,15 @@ router.get('/improve', function(req, res) {
 });
 
 router.get('/learnsidewalks', isAuthenticated, function(req, res, next) {
-  res.render('learnsidewalks', {
-    mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
-    learn_url: JSON.stringify(process.env.LEARN_URL),
-    user: req.user.username
+  request(url.resolve(process.env.API_URL, '/v1/mapinfo'), function(e, r, b) {
+    if (!e) {
+      mapinfo = JSON.parse(b);
+      res.render('learnsidewalks', {
+        mapbox_token: JSON.stringify(mapinfo.token),
+        learn_url: JSON.stringify(process.env.LEARN_URL),
+        user: req.user.username
+      });
+    }
   });
 });
 
