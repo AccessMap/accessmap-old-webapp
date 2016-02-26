@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "webpack && node server.js"
   },
   "repository": {
     "type": "git",
@@ -31,11 +31,6 @@
     "express-session": "https://registry.npmjs.org/express-session/-/express-session-1.13.0.tgz",
     "history": "^1.12.6",
     "jade": "~1.11.0",
-    "jquery": "^2.2.0",
-    "json-loader": "^0.5.4",
-    "leaflet-polylinedecorator": "^1.0.1",
-    "leaflet.locatecontrol": "^0.48.0",
-    "mapbox.js": "^2.3.0",
     "morgan": "~1.6.1",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
@@ -43,14 +38,23 @@
     "pg": "^4.4.4",
     "request": "^2.69.0",
     "sequelize": "^3.19.0",
-    "serve-favicon": "~2.3.0",
-    "url-loader": "^0.5.7"
+    "serve-favicon": "~2.3.0"
   },
   "devDependencies": {
     "babel-core": "^5.8.32",
     "babel-loader": "^5.3.2",
     "css-loader": "^0.23.1",
+    "file-loader": "^0.8.5",
+    "jquery": "^2.2.0",
+    "json-loader": "^0.5.4",
+    "leaflet-polylinedecorator": "^1.0.1",
+    "leaflet.locatecontrol": "^0.48.0",
+    "mapbox.js": "^2.3.0",
+    "react": "^0.14.7",
+    "react-geocoder": "^2.5.0",
+    "sqlite3": "^3.1.1",
     "style-loader": "^0.13.0",
+    "url-loader": "^0.5.7",
     "webpack": "^1.12.2"
   }
 }

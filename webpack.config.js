@@ -6,7 +6,7 @@ module.exports = {
   },
   output: {
     path: __dirname,
-    filename: 'public/javascripts/[name]-bundle.js',
+    filename: 'public/build/[name]-bundle.js',
     library: 'App',
     libraryTarget: 'umd'
   },
