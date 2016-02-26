@@ -8,7 +8,6 @@ node_modules
 *.log
 
 # Build files
-public/build
 *.hot-update.js
 *.hot-update.json
 
