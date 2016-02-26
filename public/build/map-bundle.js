@@ -74,9 +74,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _layersBusdata2 = _interopRequireDefault(_layersBusdata);
 
-	var _layersCurbramps = __webpack_require__(47);
+	var _layersCrossings = __webpack_require__(52);
 
-	var _layersCurbramps2 = _interopRequireDefault(_layersCurbramps);
+	var _layersCrossings2 = _interopRequireDefault(_layersCrossings);
 
 	var _jquery = __webpack_require__(1);
 
@@ -99,7 +99,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function App(api_url) {
 	  'use strict';
-	  var api = api_url.replace(/\/?$/, '/') + 'v1';
+	  var api = api_url.replace(/\/?$/, '/') + 'v2';
 	  var mapinfo = _jquery2['default'].ajax({
 	    url: api + '/mapinfo',
 	    dataType: 'json'
@@ -119,7 +119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var stops = _mapboxJs2['default'].featureGroup({ minZoom: 8 });
 	    var elevationlayer = _mapboxJs2['default'].featureGroup({ minZoom: 8 });
-	    var curbs = _mapboxJs2['default'].featureGroup({ minZoom: 8 });
+	    var crossings = _mapboxJs2['default'].featureGroup({ minZoom: 8 });
 	    var userData = _mapboxJs2['default'].featureGroup({ minZoom: 8 });
 	    var elevators = _mapboxJs2['default'].featureGroup({ minZoom: 8 });
 	    //    let permits = L.featureGroup({minZoom: 8});
@@ -127,7 +127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    //Create filter checkboxes for the overlays
 	    var overlayMaps = {
 	      "Bus Stops": stops,
-	      "Curb Ramps": curbs,
+	      "Crossings": crossings,
 	      "User Reported Data": userData,
 	      "Elevators": elevators,
 	      "Elevation Change": elevationlayer
@@ -139,7 +139,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var updateLayers = function updateLayers() {
 	      (0, _layersBusdata2['default'])(stops, map);
 	      (0, _layersSidewalks2['default'])(elevationlayer, map, api);
-	      (0, _layersCurbramps2['default'])(curbs, map, api);
+	      (0, _layersCrossings2['default'])(crossings, map, api);
 	      //      requestPermitsUpdate(permits, map, api);
 	    };
 
@@ -158,13 +158,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (map.getZoom() < FEATUREZOOM) {
 	        map.removeLayer(stops);
 	        map.removeLayer(elevationlayer);
-	        map.removeLayer(curbs);
+	        map.removeLayer(crossings);
 	        //        map.removeLayer(permits);
 	        elevationTiles.addTo(map);
 	      } else {
 	        stops.addTo(map);
 	        elevationlayer.addTo(map);
-	        curbs.addTo(map);
+	        crossings.addTo(map);
 	        //        permits.addTo(map);
 	        map.removeLayer(elevationTiles);
 	      }
@@ -25364,69 +25364,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = exports['default'];
 
 /***/ },
-/* 47 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _jquery = __webpack_require__(1);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	function requestCurbsUpdate(layerGroup, map, api_url) {
-	  function drawCurbs(data) {
-	    layerGroup.clearLayers();
-	    var bounds = map.getBounds();
-
-	    function make_circle(feature, latlon) {
-	      var coords = feature.geometry.coordinates;
-	      return L.circleMarker(latlon, {
-	        'radius': 3,
-	        'color': '#0000FF'
-	      });
-	    }
-
-	    for (var i = 0; i < data.features.length; i++) {
-	      var feature = data.features[i];
-	      var coord = feature.geometry.coordinates;
-	      var latlng = [coord[1], coord[0]];
-	      if (bounds.contains(latlng)) {
-	        var point = L.geoJson(feature, { pointToLayer: make_circle });
-
-	        //Display info when user clicks on the curb marker
-	        var popup = L.popup().setContent("<b>Curb Ramp</b>");
-	        point.bindPopup(popup);
-
-	        layerGroup.addLayer(point);
-	      }
-	    }
-	  }
-
-	  var bounds = map.getBounds().toBBoxString();
-	  // Request data
-	  _jquery2['default'].ajax({
-	    type: 'GET',
-	    url: api_url + '/curbramps.geojson',
-	    data: {
-	      bbox: bounds
-	    },
-	    dataType: 'json',
-	    success: function success(data) {
-	      drawCurbs(data);
-	    }
-	  });
-	}
-
-	exports['default'] = requestCurbsUpdate;
-	module.exports = exports['default'];
-
-/***/ },
+/* 47 */,
 /* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -35148,6 +35086,88 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// exports
 
+
+/***/ },
+/* 52 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+	var _jquery = __webpack_require__(1);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	function requestCrossingsUpdate(layerGroup, map, api_url) {
+	  // Gradations
+	  var high = 0.0833;
+	  var mid = 0.05;
+
+	  function drawElevations(data) {
+	    layerGroup.clearLayers();
+	    var bounds = map.getBounds();
+
+	    function setStyle(f) {
+	      // if (f.properties.grade >= high) {
+	      //   return {'color': '#FF0000',
+	      //           'weight': 5,
+	      //           'opacity': 0.6};
+	      // } else if (f.properties.grade > mid) {
+	      //   let steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
+	      //   return {'color': '#FFFF00',
+	      //           'weight': 5,
+	      //           'opacity': 0.6};
+	      // } else {
+	      //   let steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
+	      //   return {'color': '#00FF00',
+	      //           'weight': 5,
+	      //           'opacity': 0.6};
+	      // }
+	    }
+
+	    for (var i = 0; i < data.features.length; i++) {
+	      var feature = data.features[i];
+	      var coords = feature.geometry.coordinates;
+	      var coord1 = [coords[0][1], coords[0][0]];
+	      var coord2 = [coords[1][1], coords[1][0]];
+	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
+	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
+	        var line = L.geoJson(feature, {
+	          'style': setStyle
+	        });
+
+	        //Display info when user clicks on the line
+	        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
+	        line.bindPopup(popup);
+
+	        layerGroup.addLayer(line);
+	      }
+	    }
+	  }
+
+	  var bounds = map.getBounds().toBBoxString();
+	  // Request data
+	  _jquery2["default"].ajax({
+	    type: 'GET',
+	    url: api_url + '/crossings.geojson',
+	    data: {
+	      bbox: bounds
+	    },
+	    dataType: 'json',
+	    success: function success(data) {
+	      drawElevations(data);
+	      layerGroup.bringToBack();
+	    }
+	  });
+	}
+
+	exports["default"] = requestCrossingsUpdate;
+	module.exports = exports["default"];
 
 /***/ }
 /******/ ])

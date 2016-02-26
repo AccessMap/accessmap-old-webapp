@@ -4,7 +4,7 @@
 
 import requestSidewalksUpdate from './layers/sidewalks';
 import requestStopsUpdate from './layers/busdata';
-import requestCurbsUpdate from './layers/curbramps';
+import requestCrossingsUpdate from './layers/crossings';
 import $ from 'jquery';
 import 'leaflet.locatecontrol';
 import '!style!css!leaflet.locatecontrol/dist/L.Control.Locate.min.css';
@@ -17,7 +17,7 @@ import '!style!css!mapbox.js/theme/style.css';
 
 function App(api_url) {
   'use strict';
-  let api = api_url.replace(/\/?$/, '/') + 'v1';
+  let api = api_url.replace(/\/?$/, '/') + 'v2';
   let mapinfo = $.ajax({
       url: api + '/mapinfo',
       dataType: 'json'
@@ -37,7 +37,7 @@ function App(api_url) {
 
     let stops = L.featureGroup({minZoom: 8});
     let elevationlayer = L.featureGroup({minZoom: 8});
-    let curbs = L.featureGroup({minZoom: 8});
+    let crossings = L.featureGroup({minZoom: 8});
     let userData = L.featureGroup({minZoom: 8});
     let elevators = L.featureGroup({minZoom: 8});
 //    let permits = L.featureGroup({minZoom: 8});
@@ -45,7 +45,7 @@ function App(api_url) {
     //Create filter checkboxes for the overlays
     let overlayMaps = {
       "Bus Stops": stops,
-      "Curb Ramps": curbs,
+      "Crossings": crossings,
       "User Reported Data":userData,
       "Elevators":elevators,
       "Elevation Change": elevationlayer
@@ -57,7 +57,7 @@ function App(api_url) {
     let updateLayers = function() {
       requestStopsUpdate(stops, map);
       requestSidewalksUpdate(elevationlayer, map, api);
-      requestCurbsUpdate(curbs, map, api);
+      requestCrossingsUpdate(crossings, map, api);
 //      requestPermitsUpdate(permits, map, api);
     };
 
@@ -76,13 +76,13 @@ function App(api_url) {
       if (map.getZoom() < FEATUREZOOM) {
         map.removeLayer(stops);
         map.removeLayer(elevationlayer);
-        map.removeLayer(curbs);
+        map.removeLayer(crossings);
 //        map.removeLayer(permits);
         elevationTiles.addTo(map);
       } else {
         stops.addTo(map);
         elevationlayer.addTo(map);
-        curbs.addTo(map);
+        crossings.addTo(map);
 //        permits.addTo(map);
         map.removeLayer(elevationTiles);
       }
