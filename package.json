@@ -38,7 +38,8 @@
     "pg": "^4.4.4",
     "request": "^2.69.0",
     "sequelize": "^3.19.0",
-    "serve-favicon": "~2.3.0"
+    "serve-favicon": "~2.3.0",
+    "url": "^0.11.0"
   },
   "devDependencies": {
     "babel-core": "^5.8.32",
