@@ -74,7 +74,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _layersBusdata2 = _interopRequireDefault(_layersBusdata);
 
-	var _layersCrossings = __webpack_require__(47);
+	var _layersCrossings = __webpack_require__(52);
 
 	var _layersCrossings2 = _interopRequireDefault(_layersCrossings);
 
@@ -25218,10 +25218,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          'weight': 5,
 	          'opacity': 0.6 };
 	      } else if (f.properties.grade > mid) {
+	        var steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
 	        return { 'color': '#FFFF00',
 	          'weight': 5,
 	          'opacity': 0.6 };
 	      } else {
+	        var steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
 	        return { 'color': '#00FF00',
 	          'weight': 5,
 	          'opacity': 0.6 };
@@ -25230,18 +25232,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    for (var i = 0; i < data.features.length; i++) {
 	      var feature = data.features[i];
-	      var line = L.geoJson(feature, {
-	        'style': setStyle
-	      });
+	      var coords = feature.geometry.coordinates;
+	      var coord1 = [coords[0][1], coords[0][0]];
+	      var coord2 = [coords[1][1], coords[1][0]];
+	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
+	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
+	        var line = L.geoJson(feature, {
+	          'style': setStyle
+	        });
 
-	      //Display info when user clicks on the line
-	      var grade = feature.properties.grade;
-	      var fid = feature.properties.id;
-	      var content = '<b>Sidewalk ID: ' + fid + '</b><br>' + '<b>Grade:</b> ' + (100 * grade).toFixed(2) + '%';
-	      var popup = L.popup().setContent(content);
-	      line.bindPopup(popup);
+	        //Display info when user clicks on the line
+	        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
+	        line.bindPopup(popup);
 
-	      layerGroup.addLayer(line);
+	        layerGroup.addLayer(line);
+	      }
 	    }
 	  }
 
@@ -25359,88 +25364,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = exports['default'];
 
 /***/ },
-/* 47 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-	var _jquery = __webpack_require__(1);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	function requestCrossingsUpdate(layerGroup, map, api_url) {
-	  // Gradations
-	  var high = 0.0833;
-	  var mid = 0.05;
-
-	  function drawElevations(data) {
-	    layerGroup.clearLayers();
-	    var bounds = map.getBounds();
-
-	    function setStyle(f) {
-	      // if (f.properties.grade >= high) {
-	      //   return {'color': '#FF0000',
-	      //           'weight': 5,
-	      //           'opacity': 0.6};
-	      // } else if (f.properties.grade > mid) {
-	      //   let steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
-	      //   return {'color': '#FFFF00',
-	      //           'weight': 5,
-	      //           'opacity': 0.6};
-	      // } else {
-	      //   let steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
-	      //   return {'color': '#00FF00',
-	      //           'weight': 5,
-	      //           'opacity': 0.6};
-	      // }
-	    }
-
-	    for (var i = 0; i < data.features.length; i++) {
-	      var feature = data.features[i];
-	      var coords = feature.geometry.coordinates;
-	      var coord1 = [coords[0][1], coords[0][0]];
-	      var coord2 = [coords[1][1], coords[1][0]];
-	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
-	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
-	        var line = L.geoJson(feature, {
-	          'style': setStyle
-	        });
-
-	        //Display info when user clicks on the line
-	        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
-	        line.bindPopup(popup);
-
-	        layerGroup.addLayer(line);
-	      }
-	    }
-	  }
-
-	  var bounds = map.getBounds().toBBoxString();
-	  // Request data
-	  _jquery2["default"].ajax({
-	    type: 'GET',
-	    url: api_url + '/crossings.geojson',
-	    data: {
-	      bbox: bounds
-	    },
-	    dataType: 'json',
-	    success: function success(data) {
-	      drawElevations(data);
-	      layerGroup.bringToBack();
-	    }
-	  });
-	}
-
-	exports["default"] = requestCrossingsUpdate;
-	module.exports = exports["default"];
-
-/***/ },
+/* 47 */,
 /* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -35162,6 +35086,88 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// exports
 
+
+/***/ },
+/* 52 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+	var _jquery = __webpack_require__(1);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	function requestCrossingsUpdate(layerGroup, map, api_url) {
+	  // Gradations
+	  var high = 0.0833;
+	  var mid = 0.05;
+
+	  function drawElevations(data) {
+	    layerGroup.clearLayers();
+	    var bounds = map.getBounds();
+
+	    function setStyle(f) {
+	      // if (f.properties.grade >= high) {
+	      //   return {'color': '#FF0000',
+	      //           'weight': 5,
+	      //           'opacity': 0.6};
+	      // } else if (f.properties.grade > mid) {
+	      //   let steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
+	      //   return {'color': '#FFFF00',
+	      //           'weight': 5,
+	      //           'opacity': 0.6};
+	      // } else {
+	      //   let steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
+	      //   return {'color': '#00FF00',
+	      //           'weight': 5,
+	      //           'opacity': 0.6};
+	      // }
+	    }
+
+	    for (var i = 0; i < data.features.length; i++) {
+	      var feature = data.features[i];
+	      var coords = feature.geometry.coordinates;
+	      var coord1 = [coords[0][1], coords[0][0]];
+	      var coord2 = [coords[1][1], coords[1][0]];
+	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
+	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
+	        var line = L.geoJson(feature, {
+	          'style': setStyle
+	        });
+
+	        //Display info when user clicks on the line
+	        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
+	        line.bindPopup(popup);
+
+	        layerGroup.addLayer(line);
+	      }
+	    }
+	  }
+
+	  var bounds = map.getBounds().toBBoxString();
+	  // Request data
+	  _jquery2["default"].ajax({
+	    type: 'GET',
+	    url: api_url + '/crossings.geojson',
+	    data: {
+	      bbox: bounds
+	    },
+	    dataType: 'json',
+	    success: function success(data) {
+	      drawElevations(data);
+	      layerGroup.bringToBack();
+	    }
+	  });
+	}
+
+	exports["default"] = requestCrossingsUpdate;
+	module.exports = exports["default"];
 
 /***/ }
 /******/ ])

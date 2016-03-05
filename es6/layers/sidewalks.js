@@ -16,12 +16,10 @@ function requestSidewalksUpdate(layerGroup, map, api_url) {
                 'weight': 5,
                 'opacity': 0.6};
       } else if (f.properties.grade > mid) {
-        let steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
         return {'color': '#FFFF00',
                 'weight': 5,
                 'opacity': 0.6};
       } else {
-        let steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
         return {'color': '#00FF00',
                 'weight': 5,
                 'opacity': 0.6};
@@ -30,21 +28,18 @@ function requestSidewalksUpdate(layerGroup, map, api_url) {
 
     for (let i = 0; i < data.features.length; i++) {
       let feature = data.features[i];
-      let coords = feature.geometry.coordinates;
-      let coord1 = [coords[0][1], coords[0][0]];
-      let coord2 = [coords[1][1], coords[1][0]];
-      let steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
-      if (bounds.contains(coord1) || bounds.contains(coord2)) {
-        let line = L.geoJson(feature, {
-          'style': setStyle
-        });
+      let line = L.geoJson(feature, {
+        'style': setStyle
+      });
 
-        //Display info when user clicks on the line
-        let popup = L.popup().setContent("<b>Elevation Change is " + steepness);
-        line.bindPopup(popup);
+      //Display info when user clicks on the line
+      let grade = feature.properties.grade;
+      let fid = feature.properties.id;
+      let content = '<b>Sidewalk ID: ' + fid + '</b><br>' + '<b>Grade:</b> ' + (100 * grade).toFixed(2) + '%'
+      let popup = L.popup().setContent(content);
+      line.bindPopup(popup);
 
-        layerGroup.addLayer(line);
-      }
+      layerGroup.addLayer(line);
     }
   }
 
