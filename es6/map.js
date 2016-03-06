@@ -35,7 +35,11 @@ function App(api_url) {
     sidewalkTiles.addTo(map);
 
     // Initialize vector layers (e.g. GeoJSON)
-    let crossings = new L.GeoJSONBbox(api + '/crossings.geojson');
+    let crossings = new L.GeoJSONBbox(api + '/crossings.geojson', {
+      filter: function(feature, layer) {
+        return feature.properties.curbramps;
+      }
+    });
     let sidewalks = new L.GeoJSONBbox(api + '/sidewalks.geojson', {
       style: function(feature, layer) {
         if (feature.properties.grade >= 0.06) {

@@ -111,14 +111,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    sidewalkTiles.addTo(map);
 
 	    // Initialize vector layers (e.g. GeoJSON)
-	    var crossings = new _mapboxJs2['default'].GeoJSONBbox(api + '/crossings.geojson');
+	    var crossings = new _mapboxJs2['default'].GeoJSONBbox(api + '/crossings.geojson', {
+	      filter: function filter(feature, layer) {
+	        return feature.properties.curbramps;
+	      }
+	    });
 	    var sidewalks = new _mapboxJs2['default'].GeoJSONBbox(api + '/sidewalks.geojson', {
 	      style: function style(feature, layer) {
-	        if (feature.properties.grade >= 0.0833) {
+	        if (feature.properties.grade >= 0.06) {
 	          return { 'color': '#FF0000',
 	            'weight': 5,
 	            'opacity': 0.6 };
-	        } else if (feature.properties.grade > 0.05) {
+	        } else if (feature.properties.grade > 0.04) {
 	          return { 'color': '#FFFF00',
 	            'weight': 5,
 	            'opacity': 0.6 };
@@ -34932,9 +34936,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this._map) {
 	      (function () {
 	        var bounds = map.getBounds();
-	        // if (this.options.pad) {
-	        //   bounds = bounds.pad(this.options.pad);
-	        // }
 	        var bbox = bounds.toBBoxString();
 	        var that = _this;
 	        var request = _jquery2['default'].ajax({
