@@ -38,11 +38,11 @@ function App(api_url) {
     let crossings = new L.GeoJSONBbox(api + '/crossings.geojson');
     let sidewalks = new L.GeoJSONBbox(api + '/sidewalks.geojson', {
       style: function(feature, layer) {
-        if (feature.properties.grade >= 0.0833) {
+        if (feature.properties.grade >= 0.06) {
           return {'color': '#FF0000',
                   'weight': 5,
                   'opacity': 0.6};
-        } else if (feature.properties.grade > 0.05) {
+        } else if (feature.properties.grade > 0.04) {
           return {'color': '#FFFF00',
                   'weight': 5,
                   'opacity': 0.6};
