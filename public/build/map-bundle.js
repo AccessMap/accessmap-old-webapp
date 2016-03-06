@@ -66,25 +66,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _layersSidewalks = __webpack_require__(45);
-
-	var _layersSidewalks2 = _interopRequireDefault(_layersSidewalks);
-
-	var _layersBusdata = __webpack_require__(46);
-
-	var _layersBusdata2 = _interopRequireDefault(_layersBusdata);
-
-	var _layersCrossings = __webpack_require__(47);
-
-	var _layersCrossings2 = _interopRequireDefault(_layersCrossings);
-
 	var _jquery = __webpack_require__(1);
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
-	__webpack_require__(48);
+	__webpack_require__(46);
 
-	__webpack_require__(50);
+	__webpack_require__(48);
 
 	var _mapboxJs = __webpack_require__(7);
 
@@ -93,6 +81,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	__webpack_require__(38);
 
 	__webpack_require__(39);
+
+	__webpack_require__(50);
+
+	__webpack_require__(52);
 
 	// Permits disabled until data.seattle.gov data source is restored
 	// import { requestPermitsUpdate } from './layers/permits';
@@ -107,84 +99,87 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  mapinfo.done(function (mapdata) {
 	    var FEATUREZOOM = 17;
+	    // Initialize map and tile layers
 	    _mapboxJs2['default'].mapbox.accessToken = mapdata.token;
 	    var map = _mapboxJs2['default'].mapbox.map('map', 'mapbox.streets', {
 	      zoomControl: false,
 	      attribution: 'Map data &copy',
 	      maxZoom: 18
 	    });
+	    map.setView([47.652810, -122.308690], FEATUREZOOM);
+	    var sidewalkTiles = _mapboxJs2['default'].mapbox.tileLayer(mapdata.tiles);
+	    sidewalkTiles.addTo(map);
 
-	    var elevationTiles = _mapboxJs2['default'].mapbox.tileLayer(mapdata.tiles);
-	    elevationTiles.addTo(map);
-
-	    var stops = _mapboxJs2['default'].featureGroup({ minZoom: 8 });
-	    var elevationlayer = _mapboxJs2['default'].featureGroup({ minZoom: 8 });
-	    var crossings = _mapboxJs2['default'].featureGroup({ minZoom: 8 });
-	    var userData = _mapboxJs2['default'].featureGroup({ minZoom: 8 });
-	    var elevators = _mapboxJs2['default'].featureGroup({ minZoom: 8 });
-	    //    let permits = L.featureGroup({minZoom: 8});
-
-	    //Create filter checkboxes for the overlays
-	    var overlayMaps = {
-	      "Bus Stops": stops,
-	      "Crossings": crossings,
-	      "User Reported Data": userData,
-	      "Elevators": elevators,
-	      "Elevation Change": elevationlayer
-	      //      "Sidewalk Closure Permits": permits
-	    };
-
-	    // Read in data to increase speed later on (generate a promise)
-
-	    var updateLayers = function updateLayers() {
-	      (0, _layersBusdata2['default'])(stops, map);
-	      (0, _layersSidewalks2['default'])(elevationlayer, map, api);
-	      (0, _layersCrossings2['default'])(crossings, map, api);
-	      //      requestPermitsUpdate(permits, map, api);
-	    };
-
-	    map.on('load', function (e) {
-	      updateLayers();
-	      map.setView([47.609700, -122.324638], FEATUREZOOM);
-	    });
-
-	    map.on('moveend', function (e) {
-	      if (map.getZoom() >= FEATUREZOOM) {
-	        updateLayers();
+	    // Initialize vector layers (e.g. GeoJSON)
+	    var crossings = new _mapboxJs2['default'].GeoJSONBbox(api + '/crossings.geojson');
+	    var sidewalks = new _mapboxJs2['default'].GeoJSONBbox(api + '/sidewalks.geojson', {
+	      style: function style(feature, layer) {
+	        if (feature.properties.grade >= 0.0833) {
+	          return { 'color': '#FF0000',
+	            'weight': 5,
+	            'opacity': 0.6 };
+	        } else if (feature.properties.grade > 0.05) {
+	          return { 'color': '#FFFF00',
+	            'weight': 5,
+	            'opacity': 0.6 };
+	        } else {
+	          return { 'color': '#00FF00',
+	            'weight': 5,
+	            'opacity': 0.6 };
+	        }
+	      },
+	      onEachFeature: function onEachFeature(feature, layer) {
+	        var grade = feature.properties.grade;
+	        var fid = feature.properties.id;
+	        var content = '<b>Sidewalk ID: ' + fid + '</b><br>' + '<b>Grade:</b> ' + (100 * grade).toFixed(2) + '%';
+	        layer.bindPopup(content);
 	      }
 	    });
+	    var stops = new _mapboxJs2['default'].GeoJSONOBA('http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json', {
+	      onEachFeature: function onEachFeature(feature, layer) {
+	        var fid = feature.properties.id;
+	        var content = '<b>Bus stop ' + feature.properties.id + '</b><br>' + feature.properties.name;
+	        layer.bindPopup(content);
+	      },
+	      pointToLayer: function pointToLayer(feature, latlng) {
+	        return _mapboxJs2['default'].marker(latlng, {
+	          icon: _mapboxJs2['default'].icon({
+	            iconUrl: '../images/bus.png',
+	            iconSize: [24, 24]
+	          })
+	        });
+	      }
+	    });
+	    map.addLayer(crossings);
+	    map.addLayer(sidewalks);
+	    map.addLayer(stops);
+
+	    var featureGroups = {
+	      "Crossings": crossings,
+	      "Sidewalks": sidewalks,
+	      "Bus Stops": stops
+	    };
 
 	    map.on('zoomend', function () {
 	      if (map.getZoom() < FEATUREZOOM) {
-	        map.removeLayer(stops);
-	        map.removeLayer(elevationlayer);
 	        map.removeLayer(crossings);
-	        //        map.removeLayer(permits);
-	        elevationTiles.addTo(map);
+	        map.removeLayer(stops);
+	        map.removeLayer(sidewalks);
+	        sidewalkTiles.addTo(map);
 	      } else {
-	        stops.addTo(map);
-	        elevationlayer.addTo(map);
 	        crossings.addTo(map);
-	        //        permits.addTo(map);
-	        map.removeLayer(elevationTiles);
+	        stops.addTo(map);
+	        sidewalks.addTo(map);
+	        map.removeLayer(sidewalkTiles);
 	      }
 	    });
-
-	    map.on('contextmenu', function (e) {
-	      var popup = confirm("Do you want to report a new obstacle?");
-	      if (popup === true) {
-	        window.location.href = 'report?lat=' + e.latlng.lat + '&lon=' + e.latlng.lng;
-	      }
-	    });
-
-	    map.setView([47.652810, -122.308690], FEATUREZOOM);
 
 	    // Add geocoder
 	    map.addControl(_mapboxJs2['default'].mapbox.geocoderControl('mapbox.places'));
 	    // Add zoom buttons
 	    new _mapboxJs2['default'].Control.Zoom().addTo(map);
 
-	    _mapboxJs2['default'].control.layers(null, overlayMaps).addTo(map);
+	    _mapboxJs2['default'].control.layers(null, featureGroups).addTo(map);
 	  });
 	}
 
@@ -19226,6 +19221,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	}(window, document));
 
+
 /***/ },
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
@@ -25188,260 +25184,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 44 */,
-/* 45 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _jquery = __webpack_require__(1);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	function requestSidewalksUpdate(layerGroup, map, api_url) {
-	  // Gradations
-	  var high = 0.0833;
-	  var mid = 0.05;
-
-	  function drawElevations(data) {
-	    layerGroup.clearLayers();
-	    var bounds = map.getBounds();
-
-	    function setStyle(f) {
-	      if (f.properties.grade >= high) {
-	        return { 'color': '#FF0000',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      } else if (f.properties.grade > mid) {
-	        return { 'color': '#FFFF00',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      } else {
-	        return { 'color': '#00FF00',
-	          'weight': 5,
-	          'opacity': 0.6 };
-	      }
-	    }
-
-	    for (var i = 0; i < data.features.length; i++) {
-	      var feature = data.features[i];
-	      var line = L.geoJson(feature, {
-	        'style': setStyle
-	      });
-
-	      //Display info when user clicks on the line
-	      var grade = feature.properties.grade;
-	      var fid = feature.properties.id;
-	      var content = '<b>Sidewalk ID: ' + fid + '</b><br>' + '<b>Grade:</b> ' + (100 * grade).toFixed(2) + '%';
-	      var popup = L.popup().setContent(content);
-	      line.bindPopup(popup);
-
-	      layerGroup.addLayer(line);
-	    }
-	  }
-
-	  var bounds = map.getBounds().toBBoxString();
-	  // Request data
-	  _jquery2['default'].ajax({
-	    type: 'GET',
-	    url: api_url + '/sidewalks.geojson',
-	    data: {
-	      bbox: bounds
-	    },
-	    dataType: 'json',
-	    success: function success(data) {
-	      drawElevations(data);
-	      layerGroup.bringToBack();
-	    }
-	  });
-	}
-
-	exports['default'] = requestSidewalksUpdate;
-	module.exports = exports['default'];
-
-/***/ },
+/* 45 */,
 /* 46 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// TODO: Use OO addTo method
-	// Request stops in an area
-	// Process the request data
-	// Add the markers to the map
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _jquery = __webpack_require__(1);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	function requestStopsUpdate(layerGroup, map) {
-	  // Generates a layerGroup to add to / remove from map
-	  var OBA_URL = 'http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json';
-	  var RADIUS = 800;
-	  var latlng = map.getCenter();
-	  var centerLat = latlng.lat;
-	  var centerLon = latlng.lng;
-
-	  var bounds = map.getBounds();
-	  var latlonspan = [Math.abs(bounds.getNorth() - bounds.getSouth()), Math.abs(bounds.getWest() - bounds.getEast())];
-
-	  var busIcon = L.icon({
-	    iconUrl: '../images/bus.png',
-	    iconSize: [30, 30],
-	    iconAnchor: [10, 0]
-	  });
-
-	  function requestStops(callback) {
-	    _jquery2['default'].ajax({
-	      url: OBA_URL,
-	      dataType: 'jsonp',
-	      data: {
-	        key: '8e4402d8-6f8d-49fe-8e7c-d3d38098b4ef',
-	        lat: centerLat,
-	        lon: centerLon,
-	        latSpan: latlonspan[0],
-	        lonSpan: latlonspan[1],
-	        maxCount: 300
-	      },
-	      success: callback
-	    });
-	  }
-
-	  function addMarkers(request_data) {
-	    var data = request_data.data.list;
-	    // Destroy the layers in stopLayerGroup
-	    layerGroup.clearLayers();
-	    // Create the new ones
-	    for (var i = 0; i < data.length; i++) {
-	      var row = data[i];
-	      // Turn it into geoJSON
-	      var geoJSON = {
-	        'type': 'Feature',
-	        'geometry': {
-	          'type': 'Point',
-	          'coordinates': [row.lon, row.lat]
-	        },
-	        'properties': {
-	          'name': row.name,
-	          'direction': row.direction,
-	          'id': row.id,
-	          'routeIds': row.routeIds
-	        }
-	      };
-	      var marker = L.geoJson(geoJSON, {
-	        pointToLayer: function pointToLayer(feature, latlng) {
-	          return L.marker(latlng, { icon: busIcon });
-	        }
-	      });
-
-	      //Display info when user clicks on the bus stop
-	      var popup = L.popup().setContent("<b>Bus Stop at " + row.name + "</b>");
-	      marker.bindPopup(popup);
-
-	      layerGroup.addLayer(marker);
-	    }
-	  }
-
-	  requestStops(addMarkers);
-	}
-
-	exports['default'] = requestStopsUpdate;
-	module.exports = exports['default'];
-
-/***/ },
-/* 47 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-	var _jquery = __webpack_require__(1);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	function requestCrossingsUpdate(layerGroup, map, api_url) {
-	  // Gradations
-	  var high = 0.0833;
-	  var mid = 0.05;
-
-	  function drawElevations(data) {
-	    layerGroup.clearLayers();
-	    var bounds = map.getBounds();
-
-	    function setStyle(f) {
-	      // if (f.properties.grade >= high) {
-	      //   return {'color': '#FF0000',
-	      //           'weight': 5,
-	      //           'opacity': 0.6};
-	      // } else if (f.properties.grade > mid) {
-	      //   let steepness = "Moderate</b><br>(between " + (mid * 100).toFixed(2) + "% and " + (high * 100).toFixed(2) + "% grade)";
-	      //   return {'color': '#FFFF00',
-	      //           'weight': 5,
-	      //           'opacity': 0.6};
-	      // } else {
-	      //   let steepness = "Negligible</b><br>(less than " + (mid * 100).toFixed(2) + "% grade)";
-	      //   return {'color': '#00FF00',
-	      //           'weight': 5,
-	      //           'opacity': 0.6};
-	      // }
-	    }
-
-	    for (var i = 0; i < data.features.length; i++) {
-	      var feature = data.features[i];
-	      var coords = feature.geometry.coordinates;
-	      var coord1 = [coords[0][1], coords[0][0]];
-	      var coord2 = [coords[1][1], coords[1][0]];
-	      var steepness = "Significant</b><br>(greater than " + (high * 100).toFixed(2) + "% grade)";
-	      if (bounds.contains(coord1) || bounds.contains(coord2)) {
-	        var line = L.geoJson(feature, {
-	          'style': setStyle
-	        });
-
-	        //Display info when user clicks on the line
-	        var popup = L.popup().setContent("<b>Elevation Change is " + steepness);
-	        line.bindPopup(popup);
-
-	        layerGroup.addLayer(line);
-	      }
-	    }
-	  }
-
-	  var bounds = map.getBounds().toBBoxString();
-	  // Request data
-	  _jquery2["default"].ajax({
-	    type: 'GET',
-	    url: api_url + '/crossings.geojson',
-	    data: {
-	      bbox: bounds
-	    },
-	    dataType: 'json',
-	    success: function success(data) {
-	      drawElevations(data);
-	      layerGroup.bringToBack();
-	    }
-	  });
-	}
-
-	exports["default"] = requestCrossingsUpdate;
-	module.exports = exports["default"];
-
-/***/ },
-/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -25456,7 +25200,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // define an AMD module that relies on 'leaflet'
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(49)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(47)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 	    // define a Common JS module that relies on 'leaflet'
 	    } else if (typeof exports === 'object') {
@@ -25951,7 +25695,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 49 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -35124,13 +34868,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(window, document));
 
 /***/ },
-/* 50 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(51);
+	var content = __webpack_require__(49);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
 	var update = __webpack_require__(43)(content, {});
@@ -35150,7 +34894,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 51 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(41)();
@@ -35162,6 +34906,157 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// exports
 
+
+/***/ },
+/* 50 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _jquery = __webpack_require__(1);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	__webpack_require__(51);
+
+	L.GeoJSONBbox = L.GeoJSONAjax.extend({
+	  getData: function getData(map) {
+	    var _this = this;
+
+	    if (this._map) {
+	      (function () {
+	        var bounds = map.getBounds();
+	        // if (this.options.pad) {
+	        //   bounds = bounds.pad(this.options.pad);
+	        // }
+	        var bbox = bounds.toBBoxString();
+	        var that = _this;
+	        var request = _jquery2['default'].ajax({
+	          url: that.url,
+	          data: {
+	            bbox: bbox
+	          },
+	          dataType: 'json'
+	        });
+	        request.done(function (data) {
+	          that.clearLayers();
+	          that.addData(data);
+	        });
+	      })();
+	    }
+	  }
+	});
+
+	exports['default'] = L.GeoJSONBbox;
+	module.exports = exports['default'];
+
+/***/ },
+/* 51 */
+/***/ function(module, exports) {
+
+	// This class should not be used directly - it is missing the getData
+	// function.
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+	L.GeoJSONAjax = L.GeoJSON.extend({
+	  initialize: function initialize(url, options) {
+	    this.url = url;
+	    L.GeoJSON.prototype.initialize.call(this, null, options);
+	  },
+	  onAdd: function onAdd(map) {
+	    this._map = map;
+	    L.GeoJSON.prototype.onAdd.call(this, map);
+	    this.getData(this._map);
+	    var that = this;
+	    map.on('moveend', function (e) {
+	      that.getData(that._map);
+	    });
+	  }
+	});
+
+	exports['default'] = L.GeoJSONAjax;
+	module.exports = exports['default'];
+
+/***/ },
+/* 52 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _jquery = __webpack_require__(1);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	__webpack_require__(51);
+
+	L.GeoJSONOBA = L.GeoJSONAjax.extend({
+	  getData: function getData(map) {
+	    var _this = this;
+
+	    if (this._map) {
+	      (function () {
+	        var that = _this;
+	        var bounds = map.getBounds();
+	        var center = bounds.getCenter();
+	        var request = _jquery2['default'].ajax({
+	          url: that.url,
+	          data: {
+	            key: '8e4402d8-6f8d-49fe-8e7c-d3d38098b4ef',
+	            lat: center.lat,
+	            lon: center.lng,
+	            latSpan: Math.abs(bounds.getNorth() - bounds.getSouth()),
+	            lonSpan: Math.abs(bounds.getEast() - bounds.getWest()),
+	            maxCount: 300
+	          },
+	          dataType: 'jsonp'
+	        });
+	        request.done(function (data) {
+	          var featureCollection = {
+	            type: 'FeatureCollection',
+	            features: []
+	          };
+
+	          data.data.list.forEach(function (result) {
+	            var feature = {
+	              'type': 'Feature',
+	              'geometry': {
+	                'type': 'Point',
+	                'coordinates': [result.lon, result.lat]
+	              },
+	              'properties': {
+	                'name': result.name,
+	                'direction': result.direction,
+	                'id': result.id,
+	                'routeIds': result.routeIds
+	              }
+	            };
+	            featureCollection.features.push(feature);
+	          });
+	          that.clearLayers();
+	          that.addData(featureCollection);
+	        });
+	      })();
+	    }
+	  }
+	});
+
+	exports['default'] = L.GeoJSONOBA;
+	module.exports = exports['default'];
 
 /***/ }
 /******/ ])
