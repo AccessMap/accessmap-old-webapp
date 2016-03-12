@@ -31,7 +31,10 @@
     "express": "~4.13.1",
     "express-session": "https://registry.npmjs.org/express-session/-/express-session-1.13.0.tgz",
     "history": "^1.12.6",
+    "imports-loader": "^0.6.5",
     "jade": "~1.11.0",
+    "mapbox-gl": "^0.15.0",
+    "mapbox-gl-geocoder": "^1.0.0",
     "morgan": "~1.6.1",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
@@ -40,7 +43,9 @@
     "request": "^2.69.0",
     "sequelize": "^3.19.0",
     "serve-favicon": "~2.3.0",
-    "url": "^0.11.0"
+    "url": "^0.11.0",
+    "webworkify": "^1.1.0",
+    "webworkify-webpack": "^1.0.4"
   },
   "devDependencies": {
     "babel-core": "^5.8.32",
