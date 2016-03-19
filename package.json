@@ -33,7 +33,7 @@
     "history": "^1.12.6",
     "imports-loader": "^0.6.5",
     "jade": "~1.11.0",
-    "mapbox-gl": "^0.15.0",
+    "mapbox-gl": "^0.14.3",
     "mapbox-gl-geocoder": "^1.0.0",
     "morgan": "~1.6.1",
     "passport": "^0.3.2",
@@ -43,9 +43,10 @@
     "request": "^2.69.0",
     "sequelize": "^3.19.0",
     "serve-favicon": "~2.3.0",
+    "transform-loader": "^0.2.3",
     "url": "^0.11.0",
     "webworkify": "^1.1.0",
-    "webworkify-webpack": "^1.0.4"
+    "webworkify-webpack": "^1.0.6"
   },
   "devDependencies": {
     "babel-core": "^5.8.32",
