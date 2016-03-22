@@ -2,7 +2,7 @@
 // variable, leading to all kinds of problems for modular development.
 // As a result, none of the modules on npm work due to clobbering L.
 
-// import $ from 'jquery';
+import $ from 'jquery';
 // import 'leaflet.locatecontrol';
 // import '!style!css!leaflet.locatecontrol/dist/L.Control.Locate.min.css';
 // import L from 'mapbox.js';
@@ -32,7 +32,7 @@ function App(api_url) {
       container: 'map',
       style: 'mapbox://styles/mapbox/streets-v8',
       center: [-122.308690, 47.652810],
-      zoom: 17
+      zoom: 14
     });
 
     map.addControl(new Geocoder());

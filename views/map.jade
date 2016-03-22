@@ -1,19 +1,18 @@
-extends layout
+html
+    head
+      style.
+        body {
+          padding: 0;
+          margin: 0;
+        }
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+        }
 
-append head
-  style.
-    body {
-      padding: 0;
-      margin: 0;
-    }
-    html, body, #map {
-        height: 100%;
-        width: 100%;
-    }
+    body
+      #map(style="height: 100%;")
 
-block content
-  #map(style="height: 100%;")
-
-  script(src='build/map-bundle.js')
-  script.
-      App(!{api_url});
+      script(src='build/map-bundle.js')
+      script.
+          App(!{api_url});
