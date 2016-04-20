@@ -1,3 +1,4 @@
+export NODE_ENV=development
 export MAPBOX_TILES=
 export MAPBOX_TOKEN=
 export API_URL=
