@@ -11,6 +11,6 @@ For the map to work correctly, these environment variables need to be set:
 | --- | --- |
 | MAPBOX_TILES | A Mapbox tile layer id, e.g. of the form 'name.id' |
 | MAPBOX_TOKEN | The Mapbox token for map tiles of sidewalks color-coded by steepness |
-| SIDEWALKS_URL | The JSON endpoint (URL) that sends GeoJSON for sidewalks, curb ramps, etc - the AccessMap API |
+| API_URL | The JSON endpoint (URL) that sends GeoJSON for sidewalks, curb ramps, etc - the AccessMap API |
 
 There is a set_envs.sh_example included. To run the server in a dev environment, copy it to set_envs.sh, enter your information, and run `source set_envs.sh`. Then run `node server.js`.

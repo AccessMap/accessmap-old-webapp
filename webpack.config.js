@@ -1,51 +1,55 @@
-var webpack = require('webpack');
 var path = require('path');
+var webpack = require('webpack');
 
 module.exports = {
-  entry: {
-    map: './es6/map.js',
-    learnsidewalks: './es6/learnsidewalks.js'
-  },
-  output: {
-    path: __dirname,
-    filename: 'public/build/[name]-bundle.js',
-    library: 'App',
-    libraryTarget: 'umd'
-  },
-  resolve: {
-    extensions: ['', '.js', '.jxs'],
-    alias: {
-      webworkify: 'webworkify-webpack'
+    entry: './es6/map.js',
+    output: {
+        path: './',
+        filename: './public/build/map-bundle.js',
+        library: 'App'
+    },
+    resolve: {
+        extensions: ['', '.js'],
+        alias: {
+            webworkify: 'webworkify-webpack',
+            // 'mapbox-gl': path.resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
+        }
+    },
+    node: {
+      console: true,
+      net: 'empty',
+      tls: 'empty'
+    },
+    module: {
+        loaders: [{
+            test: /\.json$/,
+            loader: 'json-loader'
+        }, {
+            test: path.join(__dirname, 'es6'),
+            exclude: /node_modules/,
+            loader: 'babel',
+            query: {
+              presets: ['es2015']
+            }
+        }, {
+            test: /\.js$/,
+            include: path.resolve('node_modules/mapbox-gl-shaders/index.js'),
+            loader: 'transform/cacheable?brfs'
+        }, {
+            test: /\.css$/,
+            loader: 'style-loader!css-loader'
+        }, {
+            test: require.resolve('mapbox-gl-geocoder'),
+            loader: 'imports?mapboxgl=mapbox-gl'
+        }],
+        postLoaders: [{
+            includes: [
+              /node_modules\/mapbox-gl-shaders/,
+              /node_modules\/request/
+            ],
+            loader: 'transform',
+            query: 'brfs'
+        }],
+        noParse: /node_modules\/json-schema\/lib\/validate\.js/
     }
-  },
-  node: {
-    console: true,
-    fs: 'empty'
-  },
-  module: {
-    loaders: [
-      { test: /\.js$/,
-        include: path.resolve(__dirname, 'node_modules/mapbox-gl/js/render/painter/use_program.js'),
-        loader: 'transform/cacheable?brfs'
-      },
-      {
-        test: /\.js$/,
-        include: path.resolve(__dirname, 'node_modules/webworkify/index.js'),
-        loader: 'worker'
-      },
-      { test: path.join(__dirname, 'es6'),
-        exclude: /node_modules/,
-        loader: 'babel-loader' },
-      { test: require.resolve('mapbox-gl-geocoder'),
-        loader: 'imports?mapboxgl=>require("mapbox-gl")'
-      },
-      // json-loader required for mapbox.js' referral to its own package.json
-      { test: /\.json$/,
-        loader: 'json-loader' },
-      { test: /\.css$/,
-        loader: 'style-loader!css-loader' },
-      { test: /\.png$/,
-        loader: 'url-loader?limit=100000' }
-    ]
-  }
-};
+}

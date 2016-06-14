@@ -97,6 +97,7 @@ router.get('/profile', function(req, res) {
 router.get('/map', function(req, res) {
   res.render('map', {
     api_url: JSON.stringify(process.env.API_URL),
+    mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
     user: req.user
   });
 });
