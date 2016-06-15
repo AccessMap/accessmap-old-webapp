@@ -66,14 +66,74 @@ var App =
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function App(api_url, mapbox_token) {
+	  // AccessMap uses a versioned API - which one are we using?
+	  var api_version = 'v2';
+	  var api = api_url.replace(/\/?$/, '/') + api_version;
+
+	  // GeoJSON vs. vector tile background zoom level switch
+	  var zoomChange = 15;
+
+	  // Map initialization
 	  _mapboxGl2.default.accessToken = mapbox_token;
+
 	  var map = new _mapboxGl2.default.Map({
 	    container: 'map',
 	    style: 'mapbox://styles/mapbox/streets-v8',
 	    center: [-122.308690, 47.652810],
-	    zoom: 14
+	    zoom: zoomChange
 	  });
 
+	  map.on('load', function () {
+	    var bounds = map.getBounds().toArray();
+	    var bbox = bounds[0].concat(bounds[1]).join(',');
+
+	    map.addSource('sidewalks', {
+	      type: 'geojson',
+	      data: api + '/sidewalks.geojson' + '?bbox=' + bbox
+	    });
+	    map.addLayer({
+	      id: 'sidewalks',
+	      type: 'line',
+	      source: 'sidewalks'
+	    });
+
+	    map.addSource('crossings', {
+	      type: 'geojson',
+	      data: api + '/crossings.geojson' + '?bbox=' + bbox
+	    });
+	    map.addLayer({
+	      id: 'crossings',
+	      type: 'line',
+	      source: 'crossings'
+	    });
+	  });
+
+	  // Map behavior - panning, clicking, etc
+	  map.on('moveend', function () {
+	    if (map.getZoom() >= zoomChange) {
+	      var bounds = map.getBounds().toArray();
+	      var bbox = bounds[0].concat(bounds[1]).join(',');
+	      map.getSource('sidewalks').setData(api + '/sidewalks.geojson' + '?bbox=' + bbox);
+	      map.getSource('crossings').setData(api + '/crossings.geojson' + '?bbox=' + bbox);
+	    }
+	  });
+
+	  // Swap GeoJSON overlay for pre-colored vector tiles when zoomed in
+	  map.on('zoom', function (data) {
+	    if (map.getZoom() >= zoomChange) {
+	      // Hide the overlays, show the vector tiles
+	      // TODO: add the vector tiles
+	      map.setLayoutProperty('sidewalks', 'visibility', 'visible');
+	      map.setLayoutProperty('crossings', 'visibility', 'visible');
+	    } else {
+	      // Hide the vector tiles, show the overlays
+	      // TODO: remove the vector tiles
+	      map.setLayoutProperty('sidewalks', 'visibility', 'none');
+	      map.setLayoutProperty('crossings', 'visibility', 'none');
+	    }
+	  });
+
+	  // Map controls
 	  map.addControl(new _mapboxGlGeocoder2.default());
 	  map.addControl(new _mapboxGl2.default.Navigation({ position: 'top-left' }));
 	} // Leaflet (upon which mapbox.js is based) forces a global window.L
