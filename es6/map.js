@@ -2,7 +2,6 @@
 // variable, leading to all kinds of problems for modular development.
 // As a result, none of the modules on npm work due to clobbering L.
 
-import $ from 'jquery';
 import mapboxgl from 'mapbox-gl';
 import '!style!css!mapbox-gl/dist/mapbox-gl.css';
 import Geocoder from 'mapbox-gl-geocoder';
@@ -30,16 +29,45 @@ function App(api_url, mapbox_token) {
     let bounds = map.getBounds().toArray();
     let bbox = bounds[0].concat(bounds[1]).join(',');
 
+    // Sidewalks
+    // Note: mapbox-gl-js does not yet have data-driven styling - when it
+    // does, this should be updated
     map.addSource('sidewalks', {
       type: 'geojson',
       data: api + '/sidewalks.geojson' + '?bbox=' + bbox
     })
     map.addLayer({
-      id: 'sidewalks',
+      id: 'sidewalks-high',
       type: 'line',
-      source: 'sidewalks'
+      source: 'sidewalks',
+      paint: {
+        'line-color': '#ff0000'
+      },
+      filter: ['>', 'grade', 0.08333],
+      minzoom: zoomChange
+    });
+    map.addLayer({
+      id: 'sidewalks-mid',
+      type: 'line',
+      source: 'sidewalks',
+      paint: {
+        'line-color': '#ffff00'
+      },
+      filter: ['all', ['>=', 'grade', 0.05], ['<=', 'grade', 0.08333]],
+      minzoom: zoomChange
+    });
+    map.addLayer({
+      id: 'sidewalks-low',
+      type: 'line',
+      source: 'sidewalks',
+      paint: {
+        'line-color': '#00ff00'
+      },
+      filter: ['<', 'grade', 0.05],
+      minzoom: zoomChange
     });
 
+    // Crossings
     map.addSource('crossings', {
       type: 'geojson',
       data: api + '/crossings.geojson' + '?bbox=' + bbox
@@ -47,7 +75,9 @@ function App(api_url, mapbox_token) {
     map.addLayer({
       id: 'crossings',
       type: 'line',
-      source: 'crossings'
+      source: 'crossings',
+      filter: ['==', 'curbramps', true],
+      minzoom: zoomChange
     });
 
   });
@@ -60,21 +90,6 @@ function App(api_url, mapbox_token) {
       let bbox = bounds[0].concat(bounds[1]).join(',');
       map.getSource('sidewalks').setData(api + '/sidewalks.geojson' + '?bbox=' + bbox);
       map.getSource('crossings').setData(api + '/crossings.geojson' + '?bbox=' + bbox);
-    }
-  });
-
-  // Swap GeoJSON overlay for pre-colored vector tiles when zoomed in
-  map.on('zoom', function(data) {
-    if (map.getZoom() >= zoomChange) {
-      // Hide the overlays, show the vector tiles
-      // TODO: add the vector tiles
-      map.setLayoutProperty('sidewalks', 'visibility', 'visible');
-      map.setLayoutProperty('crossings', 'visibility', 'visible');
-    } else {
-      // Hide the vector tiles, show the overlays
-      // TODO: remove the vector tiles
-      map.setLayoutProperty('sidewalks', 'visibility', 'none');
-      map.setLayoutProperty('crossings', 'visibility', 'none');
     }
   });
 
