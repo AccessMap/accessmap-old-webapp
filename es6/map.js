@@ -32,40 +32,40 @@ function App(api_url, mapbox_token) {
     // Sidewalks
     // Note: mapbox-gl-js does not yet have data-driven styling - when it
     // does, this should be updated
-    map.addSource('sidewalks', {
-      type: 'geojson',
-      data: api + '/sidewalks.geojson' + '?bbox=' + bbox
-    })
-    map.addLayer({
-      id: 'sidewalks-high',
-      type: 'line',
-      source: 'sidewalks',
-      paint: {
-        'line-color': '#ff0000'
-      },
-      filter: ['>', 'grade', 0.08333],
-      minzoom: zoomChange
-    });
-    map.addLayer({
-      id: 'sidewalks-mid',
-      type: 'line',
-      source: 'sidewalks',
-      paint: {
-        'line-color': '#ffff00'
-      },
-      filter: ['all', ['>=', 'grade', 0.05], ['<=', 'grade', 0.08333]],
-      minzoom: zoomChange
-    });
-    map.addLayer({
-      id: 'sidewalks-low',
-      type: 'line',
-      source: 'sidewalks',
-      paint: {
-        'line-color': '#00ff00'
-      },
-      filter: ['<', 'grade', 0.05],
-      minzoom: zoomChange
-    });
+    // map.addSource('sidewalks', {
+    //   type: 'geojson',
+    //   data: api + '/sidewalks.geojson' + '?bbox=' + bbox
+    // })
+    // map.addLayer({
+    //   id: 'sidewalks-high',
+    //   type: 'line',
+    //   source: 'sidewalks',
+    //   paint: {
+    //     'line-color': '#ff0000'
+    //   },
+    //   filter: ['>', 'grade', 0.08333],
+    //   minzoom: zoomChange
+    // });
+    // map.addLayer({
+    //   id: 'sidewalks-mid',
+    //   type: 'line',
+    //   source: 'sidewalks',
+    //   paint: {
+    //     'line-color': '#ffff00'
+    //   },
+    //   filter: ['all', ['>=', 'grade', 0.05], ['<=', 'grade', 0.08333]],
+    //   minzoom: zoomChange
+    // });
+    // map.addLayer({
+    //   id: 'sidewalks-low',
+    //   type: 'line',
+    //   source: 'sidewalks',
+    //   paint: {
+    //     'line-color': '#00ff00'
+    //   },
+    //   filter: ['<', 'grade', 0.05],
+    //   minzoom: zoomChange
+    // });
 
     // Crossings
     map.addSource('crossings', {
@@ -80,6 +80,42 @@ function App(api_url, mapbox_token) {
       minzoom: zoomChange
     });
 
+    // Test vector tiles
+    map.addSource('sidewalks-vt', {
+      type: 'vector',
+      tiles: ['http://dssg-db.cloudapp.net:3001/test_layer/{z}/{x}/{y}.mvt'],
+      attribution: '&copy; AccessMap'
+    });
+    map.addLayer({
+      id: 'sidewalks-vt-high',
+      type: 'line',
+      source: 'sidewalks-vt',
+      'source-layer': 'vectile',
+      paint: {
+        'line-color': '#ff0000'
+      },
+      filter: ['>', 'grade', 0.08333],
+    });
+    map.addLayer({
+      id: 'sidewalks-vt-mid',
+      type: 'line',
+      source: 'sidewalks-vt',
+      'source-layer': 'vectile',
+      paint: {
+        'line-color': '#ffff00'
+      },
+      filter: ['all', ['>=', 'grade', 0.05], ['<=', 'grade', 0.08333]],
+    });
+    map.addLayer({
+      id: 'sidewalks-vt-low',
+      type: 'line',
+      source: 'sidewalks-vt',
+      'source-layer': 'vectile',
+      paint: {
+        'line-color': '#00ff00'
+      },
+      filter: ['<', 'grade', 0.05],
+    });
   });
 
 
@@ -88,9 +124,19 @@ function App(api_url, mapbox_token) {
     if (map.getZoom() >= zoomChange) {
       let bounds = map.getBounds().toArray();
       let bbox = bounds[0].concat(bounds[1]).join(',');
-      map.getSource('sidewalks').setData(api + '/sidewalks.geojson' + '?bbox=' + bbox);
+      // map.getSource('sidewalks').setData(api + '/sidewalks.geojson' + '?bbox=' + bbox);
       map.getSource('crossings').setData(api + '/crossings.geojson' + '?bbox=' + bbox);
     }
+  });
+
+  // Increase sidewalks + crossings width when zooming in
+  map.on('zoom', function() {
+    let zoom = map.getZoom();
+    let thickness = zoom > 15 ? Math.pow(zoom / 15, 8) : 1
+    map.setPaintProperty('sidewalks-vt-low', 'line-width', thickness);
+    map.setPaintProperty('sidewalks-vt-mid', 'line-width', thickness);
+    map.setPaintProperty('sidewalks-vt-high', 'line-width', thickness);
+    map.setPaintProperty('crossings', 'line-width', thickness);
   });
 
   // Map controls
