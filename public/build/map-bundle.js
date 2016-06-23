@@ -211,8 +211,15 @@ var App =
 	  // Increase sidewalks + crossings width when zooming in
 	  map.on('zoom', function () {
 	    var zoom = map.getZoom();
-	    var thickness = zoom > 15 ? Math.pow(zoom / 15, 10) : 1;
+	    var thickness = 1;
+	    var dropShadowOpacity = 0.4;
+	    if (zoom > zoomChange) {
+	      thickness = Math.pow(zoom / 15, 10);
+	    } else {
+	      dropShadowOpacity = 0.4 * Math.pow(zoom / zoomChange, 4);
+	    }
 	    map.setPaintProperty('sidewalks-vt', 'line-width', thickness);
+	    map.setPaintProperty('sidewalks-vt', 'line-opacity', dropShadowOpacity);
 	    map.setPaintProperty('sidewalks-vt-low', 'line-width', thickness);
 	    map.setPaintProperty('sidewalks-vt-mid', 'line-width', thickness);
 	    map.setPaintProperty('sidewalks-vt-high', 'line-width', thickness);
