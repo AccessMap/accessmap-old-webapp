@@ -72,7 +72,6 @@ var App =
 
 	  // GeoJSON vs. vector tile background zoom level switch
 	  var zoomChange = 15;
-	  var oldZoom = zoomChange;
 
 	  // Map initialization
 	  _mapboxGl2.default.accessToken = mapbox_token;
@@ -146,12 +145,28 @@ var App =
 	      attribution: '&copy; AccessMap'
 	    });
 	    map.addLayer({
+	      id: 'sidewalks-vt',
+	      type: 'line',
+	      source: 'sidewalks-vt',
+	      'source-layer': 'vectile',
+	      paint: {
+	        'line-opacity': 0.4,
+	        'line-translate': [1, 1]
+	      },
+	      layout: {
+	        'line-cap': 'round'
+	      }
+	    });
+	    map.addLayer({
 	      id: 'sidewalks-vt-high',
 	      type: 'line',
 	      source: 'sidewalks-vt',
 	      'source-layer': 'vectile',
 	      paint: {
 	        'line-color': '#ff0000'
+	      },
+	      layout: {
+	        'line-cap': 'round'
 	      },
 	      filter: ['>', 'grade', 0.08333]
 	    });
@@ -163,6 +178,9 @@ var App =
 	      paint: {
 	        'line-color': '#ffff00'
 	      },
+	      layout: {
+	        'line-cap': 'round'
+	      },
 	      filter: ['all', ['>=', 'grade', 0.05], ['<=', 'grade', 0.08333]]
 	    });
 	    map.addLayer({
@@ -172,6 +190,9 @@ var App =
 	      'source-layer': 'vectile',
 	      paint: {
 	        'line-color': '#00ff00'
+	      },
+	      layout: {
+	        'line-cap': 'round'
 	      },
 	      filter: ['<', 'grade', 0.05]
 	    });
@@ -190,15 +211,8 @@ var App =
 	  // Increase sidewalks + crossings width when zooming in
 	  map.on('zoom', function () {
 	    var zoom = map.getZoom();
-	    // if (zoom > zoomChange && oldZoom < zoomChange) {
-	    //   // Just zoomed in past the threshold - bump up the size
-	    //   map.setPaintProperty('sidewalks-vt-low', 'line-width', 5);
-	    // } else if (zoom < zoomChange && oldZoom > zoomChange) {
-	    //   // Just zoomed out past the threshold - bump down the size
-	    //   map.setPaintProperty('sidewalks-vt-low', 'line-width', 1);
-	    // }
-	    // oldZoom = zoom;
-	    var thickness = zoom > 15 ? Math.pow(zoom / 15, 8) : 1;
+	    var thickness = zoom > 15 ? Math.pow(zoom / 15, 10) : 1;
+	    map.setPaintProperty('sidewalks-vt', 'line-width', thickness);
 	    map.setPaintProperty('sidewalks-vt-low', 'line-width', thickness);
 	    map.setPaintProperty('sidewalks-vt-mid', 'line-width', thickness);
 	    map.setPaintProperty('sidewalks-vt-high', 'line-width', thickness);

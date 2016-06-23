@@ -87,12 +87,28 @@ function App(api_url, mapbox_token) {
       attribution: '&copy; AccessMap'
     });
     map.addLayer({
+      id: 'sidewalks-vt',
+      type: 'line',
+      source: 'sidewalks-vt',
+      'source-layer': 'vectile',
+      paint: {
+        'line-opacity': 0.4,
+        'line-translate': [1, 1]
+      },
+      layout: {
+        'line-cap': 'round'
+      },
+    });
+    map.addLayer({
       id: 'sidewalks-vt-high',
       type: 'line',
       source: 'sidewalks-vt',
       'source-layer': 'vectile',
       paint: {
         'line-color': '#ff0000'
+      },
+      layout: {
+        'line-cap': 'round'
       },
       filter: ['>', 'grade', 0.08333],
     });
@@ -104,6 +120,9 @@ function App(api_url, mapbox_token) {
       paint: {
         'line-color': '#ffff00'
       },
+      layout: {
+        'line-cap': 'round'
+      },
       filter: ['all', ['>=', 'grade', 0.05], ['<=', 'grade', 0.08333]],
     });
     map.addLayer({
@@ -113,6 +132,9 @@ function App(api_url, mapbox_token) {
       'source-layer': 'vectile',
       paint: {
         'line-color': '#00ff00'
+      },
+      layout: {
+        'line-cap': 'round'
       },
       filter: ['<', 'grade', 0.05],
     });
@@ -132,7 +154,8 @@ function App(api_url, mapbox_token) {
   // Increase sidewalks + crossings width when zooming in
   map.on('zoom', function() {
     let zoom = map.getZoom();
-    let thickness = zoom > 15 ? Math.pow(zoom / 15, 8) : 1
+    let thickness = zoom > 15 ? Math.pow(zoom / 15, 10) : 1
+    map.setPaintProperty('sidewalks-vt', 'line-width', thickness);
     map.setPaintProperty('sidewalks-vt-low', 'line-width', thickness);
     map.setPaintProperty('sidewalks-vt-mid', 'line-width', thickness);
     map.setPaintProperty('sidewalks-vt-high', 'line-width', thickness);
