@@ -7,7 +7,7 @@ var db = {}
 
 if (env === 'production') {
   var sequelize = new Sequelize(process.env.DATABASE_URL);
-} else if(env === 'development') {
+} else if (env === 'development') {
   // Create a local sqlite database for development + testing
   var sequelize = new Sequelize('local', 'test', 'test', {
     dialect: 'sqlite',
