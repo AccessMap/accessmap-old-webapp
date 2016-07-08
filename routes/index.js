@@ -8,9 +8,6 @@ var models = require('../models');
 
 var router = express.Router();
 
-// For proxy to API server
-var proxy = require('express-http-proxy');
-
 ///////////
 // Index //
 ///////////
@@ -124,20 +121,6 @@ router.get('/getdata', isAuthenticated, function(req, res, next) {
     }
   });
 });
-
-/////////
-// API //
-/////////
-
-router.get(['/api', '/api/*'], proxy(process.env.API_URL, {
-  forwardPath: function(req, res) {
-    // Get the requested URL
-    var reqUrl = require('url').parse(req.url).path;
-    // Remove the first part (/api/) as the destination doesn't have it
-    var url = '/' + reqUrl.split('/').slice(2).join('/');
-    return url
-  }
-}));
 
 
 module.exports = router;

@@ -12,7 +12,8 @@ var session = require('express-session'),
     LocalStrategy = require('passport-local').Strategy;
 
 var models = require('./models');
-var routes = require('./routes/index');
+var index = require('./routes/index');
+var api = require('./routes/api');
 
 var app = express();
 var env = process.env.NODE_ENV || 'development';
@@ -118,7 +119,8 @@ passport.deserializeUser(function(id, done) {
 });
 
 // Routes
-app.use('/', routes);
+app.use('/', index);
+app.use('/api', api);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
