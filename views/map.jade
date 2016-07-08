@@ -1,18 +1,14 @@
-html
-    head
-      style.
-        body {
-          padding: 0;
-          margin: 0;
-        }
-        html, body, #map {
-            height: 100%;
-            width: 100%;
-        }
+extends layout
+append head
+  style.
+    html, body, #map {
+        height: 100%;
+        width: 100%;
+    }
 
-    body
-      #map(style="height: 100%;")
+append content
+  #map
 
-      script(src='build/map-bundle.js')
-      script.
-        App(!{api_url}, !{mapbox_token});
+  script(src='build/map-bundle.js')
+  script.
+    App(!{api_url}, !{mapbox_token});

@@ -6,6 +6,8 @@ import mapboxgl from 'mapbox-gl';
 import '!style!css!mapbox-gl/dist/mapbox-gl.css';
 import Geocoder from 'mapbox-gl-geocoder';
 import '!style!css!mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import * as chroma from 'chroma-js';
+
 
 function App(api_url, mapbox_token) {
   // AccessMap uses a versioned API - which one are we using?
@@ -13,7 +15,24 @@ function App(api_url, mapbox_token) {
   const api = api_url.replace(/\/?$/, '/') + api_version;
 
   // GeoJSON vs. vector tile background zoom level switch
-  const zoomChange = 15;
+  // const zoomChange = 15;
+  const zoomChange = 14;
+
+  // -- Styling --
+  // Sidewalk color scale
+  // Original color scheme
+  let colorScale = chroma.scale(['lime', 'yellow', 'red']);
+  // Simple dark -> color scheme
+  // let colorScale = chroma.scale(['grey', 'red']);
+  // The yellow is more visible for this one
+  // let colorScale = chroma.bezier(['lime', 'yellow', 'red']);
+
+  // Line widths
+  const lineWidth = 2;
+  const shadowScale = 1.3;
+
+  // Outline/shadow opacity
+  const outlineOpacity = 0.8;
 
   // Map initialization
   mapboxgl.accessToken = mapbox_token;
@@ -22,7 +41,7 @@ function App(api_url, mapbox_token) {
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v8',
     center: [-122.308690, 47.652810],
-    zoom: zoomChange
+    zoom: 15
   });
 
   map.on('load', function() {
@@ -87,13 +106,15 @@ function App(api_url, mapbox_token) {
       attribution: '&copy; AccessMap'
     });
     map.addLayer({
-      id: 'sidewalks-vt',
+      id: 'sidewalks-vt-shadow',
       type: 'line',
       source: 'sidewalks-vt',
       'source-layer': 'vectile',
       paint: {
-        'line-opacity': 0.4,
-        'line-translate': [1, 1]
+        'line-color': '#333333',
+        'line-opacity': outlineOpacity,
+        'line-width': shadowScale * lineWidth
+        // 'line-translate': [1, 1]
       },
       layout: {
         'line-cap': 'round'
@@ -105,7 +126,8 @@ function App(api_url, mapbox_token) {
       source: 'sidewalks-vt',
       'source-layer': 'vectile',
       paint: {
-        'line-color': '#ff0000'
+        'line-color': colorScale(1.0).hex(),
+        'line-width': lineWidth
       },
       layout: {
         'line-cap': 'round'
@@ -118,7 +140,8 @@ function App(api_url, mapbox_token) {
       source: 'sidewalks-vt',
       'source-layer': 'vectile',
       paint: {
-        'line-color': '#ffff00'
+        'line-color': colorScale(0.5).hex(),
+        'line-width': lineWidth
       },
       layout: {
         'line-cap': 'round'
@@ -131,7 +154,13 @@ function App(api_url, mapbox_token) {
       source: 'sidewalks-vt',
       'source-layer': 'vectile',
       paint: {
-        'line-color': '#00ff00'
+        'line-color': colorScale(0).hex(),
+        'line-width': 1.5,
+        // Adds direction arrows to line, but then ignores line-color
+        // Also, until data-driven styling works for lines, can't
+        // make direction go according to elevation change, just coordinate
+        // order
+        // 'line-pattern': 'oneway-spaced-white-large'
       },
       layout: {
         'line-cap': 'round'
@@ -154,19 +183,22 @@ function App(api_url, mapbox_token) {
   // Increase sidewalks + crossings width when zooming in
   map.on('zoom', function() {
     let zoom = map.getZoom();
-    let thickness = 1;
-    let dropShadowOpacity = 0.4;
+    let width = lineWidth;
+    let dropShadowOpacity = outlineOpacity;
+    let lineOpacity = 1.0
     if (zoom > zoomChange) {
-      thickness = Math.pow(zoom / 15, 10);
+      width = lineWidth * Math.pow(zoom / zoomChange, 6);
     } else {
-      dropShadowOpacity = 0.4 * Math.pow(zoom / zoomChange, 4);
+      dropShadowOpacity = outlineOpacity * Math.pow(zoom / zoomChange, 4);
     }
-    map.setPaintProperty('sidewalks-vt', 'line-width', thickness);
-    map.setPaintProperty('sidewalks-vt', 'line-opacity', dropShadowOpacity);
-    map.setPaintProperty('sidewalks-vt-low', 'line-width', thickness);
-    map.setPaintProperty('sidewalks-vt-mid', 'line-width', thickness);
-    map.setPaintProperty('sidewalks-vt-high', 'line-width', thickness);
-    map.setPaintProperty('crossings', 'line-width', thickness);
+    // map.setPaintProperty('sidewalks-vt-shadow', 'line-width', width);
+    map.setPaintProperty('sidewalks-vt-shadow', 'line-width', shadowScale * width);
+    map.setPaintProperty('sidewalks-vt-shadow', 'line-opacity', dropShadowOpacity);
+    let swLines = ['sidewalks-vt-low', 'sidewalks-vt-mid', 'sidewalks-vt-high'];
+    for (let swLine of swLines) {
+      map.setPaintProperty(swLine, 'line-width', width);
+    }
+    map.setPaintProperty('crossings', 'line-width', width);
   });
 
   // Map controls
