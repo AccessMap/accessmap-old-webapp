@@ -7,9 +7,9 @@ import '!style!css!mapbox.js/theme/style.css';
 import 'leaflet-polylinedecorator';
 
 
-function App(learn_url, api_url, user) {
+function App(learn_url, user) {
   'use strict';
-  let api = api_url.replace(/\/?$/, '/') + 'v1';
+  const api = '/api/v1';
   let mapinfo = $.ajax({
       url: api + '/mapinfo',
       dataType: 'json'

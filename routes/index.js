@@ -8,6 +8,9 @@ var models = require('../models');
 
 var router = express.Router();
 
+// For proxy to API server
+var proxy = require('express-http-proxy');
+
 ///////////
 // Index //
 ///////////
@@ -96,7 +99,6 @@ router.get('/profile', function(req, res) {
 /* GET map page. */
 router.get('/map', function(req, res) {
   res.render('map', {
-    api_url: JSON.stringify(process.env.API_URL),
     mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
     user: req.user
   });
@@ -109,7 +111,6 @@ router.get('/improve', function(req, res) {
 router.get('/learnsidewalks', isAuthenticated, function(req, res, next) {
   res.render('learnsidewalks', {
     learn_url: JSON.stringify(process.env.LEARN_URL),
-    api_url: JSON.stringify(process.env.API_URL),
     user: req.user.username
   });
 });
@@ -123,5 +124,20 @@ router.get('/getdata', isAuthenticated, function(req, res, next) {
     }
   });
 });
+
+/////////
+// API //
+/////////
+
+router.get(['/api', '/api/*'], proxy(process.env.API_URL, {
+  forwardPath: function(req, res) {
+    // Get the requested URL
+    var reqUrl = require('url').parse(req.url).path;
+    // Remove the first part (/api/) as the destination doesn't have it
+    var url = '/' + reqUrl.split('/').slice(2).join('/');
+    return url
+  }
+}));
+
 
 module.exports = router;

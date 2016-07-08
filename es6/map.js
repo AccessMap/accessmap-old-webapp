@@ -9,10 +9,9 @@ import '!style!css!mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as chroma from 'chroma-js';
 
 
-function App(api_url, mapbox_token) {
+function App(mapbox_token) {
   // AccessMap uses a versioned API - which one are we using?
-  const api_version = 'v2';
-  const api = api_url.replace(/\/?$/, '/') + api_version;
+  const api = '/api/v2';
 
   // GeoJSON vs. vector tile background zoom level switch
   // const zoomChange = 15;

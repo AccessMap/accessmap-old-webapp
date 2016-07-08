@@ -67,10 +67,9 @@ var App =
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	function App(api_url, mapbox_token) {
+	function App(mapbox_token) {
 	  // AccessMap uses a versioned API - which one are we using?
-	  var api_version = 'v2';
-	  var api = api_url.replace(/\/?$/, '/') + api_version;
+	  var api = '/api/v2';
 
 	  // GeoJSON vs. vector tile background zoom level switch
 	  // const zoomChange = 15;
