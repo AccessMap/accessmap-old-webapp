@@ -55,6 +55,9 @@ function App(mapbox_token) {
       type: 'line',
       source: 'crossings',
       filter: ['==', 'curbramps', true],
+      paint: {
+        'line-width': lineWidth
+      },
       minzoom: zoomChange
     });
 
@@ -102,7 +105,7 @@ function App(mapbox_token) {
       'source-layer': 'vectile',
       paint: {
         'line-color': colorScale(0).hex(),
-        'line-width': 1.5,
+        'line-width': lineWidth,
       },
       layout: {
         'line-cap': 'round'

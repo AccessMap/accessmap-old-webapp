@@ -118,6 +118,9 @@ var App =
 	      type: 'line',
 	      source: 'crossings',
 	      filter: ['==', 'curbramps', true],
+	      paint: {
+	        'line-width': lineWidth
+	      },
 	      minzoom: zoomChange
 	    });
 
@@ -165,7 +168,7 @@ var App =
 	      'source-layer': 'vectile',
 	      paint: {
 	        'line-color': colorScale(0).hex(),
-	        'line-width': 1.5
+	        'line-width': lineWidth
 	      },
 	      layout: {
 	        'line-cap': 'round'
