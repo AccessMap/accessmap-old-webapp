@@ -20,11 +20,16 @@ function App(mapbox_token) {
   // -- Styling --
   // Sidewalk color scale
   // Original color scheme
-  let colorScale = chroma.scale(['lime', 'yellow', 'red']);
+  // let colorScale = chroma.scale(['lime', 'yellow', 'red']);
   // Simple dark -> color scheme
   // let colorScale = chroma.scale(['grey', 'red']);
   // The yellow is more visible for this one
   // let colorScale = chroma.bezier(['lime', 'yellow', 'red']);
+  // Color blind safe - red-blue scale(s)
+  // let colorScale = chroma.bezier(['SkyBlue', 'Plum', 'red']);
+  // let colorScale = chroma.scale(['#3E60BD', '#9743C6', '#FD4C51'])
+  let colorScale = chroma.scale(['#3E60BD', '#FD4C51'])
+                    .correctLightness();
 
   // Line widths
   const lineWidth = 2;
@@ -104,21 +109,21 @@ function App(mapbox_token) {
       tiles: ['http://dssg-db.cloudapp.net:3001/test_layer/{z}/{x}/{y}.mvt'],
       attribution: '&copy; AccessMap'
     });
-    map.addLayer({
-      id: 'sidewalks-vt-shadow',
-      type: 'line',
-      source: 'sidewalks-vt',
-      'source-layer': 'vectile',
-      paint: {
-        'line-color': '#333333',
-        'line-opacity': outlineOpacity,
-        'line-width': shadowScale * lineWidth
-        // 'line-translate': [1, 1]
-      },
-      layout: {
-        'line-cap': 'round'
-      },
-    });
+    // map.addLayer({
+    //   id: 'sidewalks-vt-shadow',
+    //   type: 'line',
+    //   source: 'sidewalks-vt',
+    //   'source-layer': 'vectile',
+    //   paint: {
+    //     'line-color': '#333333',
+    //     'line-opacity': outlineOpacity,
+    //     'line-width': shadowScale * lineWidth
+    //     // 'line-translate': [1, 1]
+    //   },
+    //   layout: {
+    //     'line-cap': 'round'
+    //   },
+    // });
     map.addLayer({
       id: 'sidewalks-vt-high',
       type: 'line',
@@ -191,8 +196,8 @@ function App(mapbox_token) {
       dropShadowOpacity = outlineOpacity * Math.pow(zoom / zoomChange, 4);
     }
     // map.setPaintProperty('sidewalks-vt-shadow', 'line-width', width);
-    map.setPaintProperty('sidewalks-vt-shadow', 'line-width', shadowScale * width);
-    map.setPaintProperty('sidewalks-vt-shadow', 'line-opacity', dropShadowOpacity);
+    // map.setPaintProperty('sidewalks-vt-shadow', 'line-width', shadowScale * width);
+    // map.setPaintProperty('sidewalks-vt-shadow', 'line-opacity', dropShadowOpacity);
     let swLines = ['sidewalks-vt-low', 'sidewalks-vt-mid', 'sidewalks-vt-high'];
     for (let swLine of swLines) {
       map.setPaintProperty(swLine, 'line-width', width);
