@@ -8,6 +8,7 @@ import Geocoder from 'mapbox-gl-geocoder';
 import '!style!css!mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as chroma from 'chroma-js';
 import $ from 'jquery';
+import debounce from 'debounce';
 
 
 function App(mapbox_token) {
@@ -222,7 +223,7 @@ function App(mapbox_token) {
     let dragPoint = null;
     let canvas = map.getCanvasContainer();
     // Routing mouse move behavior
-    map.on('mousemove', function(e) {
+    function onMouseMove(e) {
       let features = map.queryRenderedFeatures(e.point, {
         layers: ['waypoints']
       });
@@ -254,7 +255,8 @@ function App(mapbox_token) {
         isCursorOverPoint = false;
         map.dragPan.enable();
       }
-    });
+    }
+    map.on('mousemove', debounce(onMouseMove, 200));
     map.on('mousedown', function(e) {
       if (!isCursorOverPoint) return;
 

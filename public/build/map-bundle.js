@@ -67,13 +67,13 @@ var App =
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
+	var _debounce = __webpack_require__(216);
+
+	var _debounce2 = _interopRequireDefault(_debounce);
+
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	// Leaflet (upon which mapbox.js is based) forces a global window.L
-	// variable, leading to all kinds of problems for modular development.
-	// As a result, none of the modules on npm work due to clobbering L.
 
 	function App(mapbox_token) {
 	  // AccessMap uses a versioned API - which one are we using?
@@ -282,7 +282,7 @@ var App =
 	    var dragPoint = null;
 	    var canvas = map.getCanvasContainer();
 	    // Routing mouse move behavior
-	    map.on('mousemove', function (e) {
+	    function onMouseMove(e) {
 	      var features = map.queryRenderedFeatures(e.point, {
 	        layers: ['waypoints']
 	      });
@@ -310,7 +310,8 @@ var App =
 	        isCursorOverPoint = false;
 	        map.dragPan.enable();
 	      }
-	    });
+	    }
+	    map.on('mousemove', (0, _debounce2.default)(onMouseMove, 200));
 	    map.on('mousedown', function (e) {
 	      if (!isCursorOverPoint) return;
 
@@ -422,7 +423,9 @@ var App =
 	  // Map controls
 	  map.addControl(new _mapboxGlGeocoder2.default());
 	  map.addControl(new _mapboxGl2.default.Navigation({ position: 'top-left' }));
-	}
+	} // Leaflet (upon which mapbox.js is based) forces a global window.L
+	// variable, leading to all kinds of problems for modular development.
+	// As a result, none of the modules on npm work due to clobbering L.
 
 	module.exports = App;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
@@ -52718,6 +52721,76 @@ var App =
 
 	return jQuery;
 	}));
+
+
+/***/ },
+/* 216 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/**
+	 * Module dependencies.
+	 */
+
+	var now = __webpack_require__(217);
+
+	/**
+	 * Returns a function, that, as long as it continues to be invoked, will not
+	 * be triggered. The function will be called after it stops being called for
+	 * N milliseconds. If `immediate` is passed, trigger the function on the
+	 * leading edge, instead of the trailing.
+	 *
+	 * @source underscore.js
+	 * @see http://unscriptable.com/2009/03/20/debouncing-javascript-methods/
+	 * @param {Function} function to wrap
+	 * @param {Number} timeout in ms (`100`)
+	 * @param {Boolean} whether to execute at the beginning (`false`)
+	 * @api public
+	 */
+
+	module.exports = function debounce(func, wait, immediate){
+	  var timeout, args, context, timestamp, result;
+	  if (null == wait) wait = 100;
+
+	  function later() {
+	    var last = now() - timestamp;
+
+	    if (last < wait && last > 0) {
+	      timeout = setTimeout(later, wait - last);
+	    } else {
+	      timeout = null;
+	      if (!immediate) {
+	        result = func.apply(context, args);
+	        if (!timeout) context = args = null;
+	      }
+	    }
+	  };
+
+	  return function debounced() {
+	    context = this;
+	    args = arguments;
+	    timestamp = now();
+	    var callNow = immediate && !timeout;
+	    if (!timeout) timeout = setTimeout(later, wait);
+	    if (callNow) {
+	      result = func.apply(context, args);
+	      context = args = null;
+	    }
+
+	    return result;
+	  };
+	};
+
+
+/***/ },
+/* 217 */
+/***/ function(module, exports) {
+
+	module.exports = Date.now || now
+
+	function now() {
+	    return new Date().getTime()
+	}
 
 
 /***/ }
