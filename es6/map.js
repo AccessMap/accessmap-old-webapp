@@ -7,6 +7,7 @@ import '!style!css!mapbox-gl/dist/mapbox-gl.css';
 import Geocoder from 'mapbox-gl-geocoder';
 import '!style!css!mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as chroma from 'chroma-js';
+import $ from 'jquery';
 
 
 function App(mapbox_token) {
@@ -19,15 +20,6 @@ function App(mapbox_token) {
 
   // -- Styling --
   // Sidewalk color scale
-  // Original color scheme
-  // let colorScale = chroma.scale(['lime', 'yellow', 'red']);
-  // Simple dark -> color scheme
-  // let colorScale = chroma.scale(['grey', 'red']);
-  // The yellow is more visible for this one
-  // let colorScale = chroma.bezier(['lime', 'yellow', 'red']);
-  // Color blind safe - red-blue scale(s)
-  // let colorScale = chroma.bezier(['SkyBlue', 'Plum', 'red']);
-  // let colorScale = chroma.scale(['#3E60BD', '#9743C6', '#FD4C51'])
   let colorScale = chroma.scale(['#3E60BD', '#FD4C51'])
                     .correctLightness();
 
@@ -52,44 +44,6 @@ function App(mapbox_token) {
     let bounds = map.getBounds().toArray();
     let bbox = bounds[0].concat(bounds[1]).join(',');
 
-    // Sidewalks
-    // Note: mapbox-gl-js does not yet have data-driven styling - when it
-    // does, this should be updated
-    // map.addSource('sidewalks', {
-    //   type: 'geojson',
-    //   data: api + '/sidewalks.geojson' + '?bbox=' + bbox
-    // })
-    // map.addLayer({
-    //   id: 'sidewalks-high',
-    //   type: 'line',
-    //   source: 'sidewalks',
-    //   paint: {
-    //     'line-color': '#ff0000'
-    //   },
-    //   filter: ['>', 'grade', 0.08333],
-    //   minzoom: zoomChange
-    // });
-    // map.addLayer({
-    //   id: 'sidewalks-mid',
-    //   type: 'line',
-    //   source: 'sidewalks',
-    //   paint: {
-    //     'line-color': '#ffff00'
-    //   },
-    //   filter: ['all', ['>=', 'grade', 0.05], ['<=', 'grade', 0.08333]],
-    //   minzoom: zoomChange
-    // });
-    // map.addLayer({
-    //   id: 'sidewalks-low',
-    //   type: 'line',
-    //   source: 'sidewalks',
-    //   paint: {
-    //     'line-color': '#00ff00'
-    //   },
-    //   filter: ['<', 'grade', 0.05],
-    //   minzoom: zoomChange
-    // });
-
     // Crossings
     map.addSource('crossings', {
       type: 'geojson',
@@ -103,27 +57,15 @@ function App(mapbox_token) {
       minzoom: zoomChange
     });
 
+    // Sidewalks
+    // Note: mapbox-gl-js does not yet have data-driven styling - when it
+    // does, this should be updated
     // Test vector tiles
     map.addSource('sidewalks-vt', {
       type: 'vector',
       tiles: ['http://dssg-db.cloudapp.net:3001/test_layer/{z}/{x}/{y}.mvt'],
       attribution: '&copy; AccessMap'
     });
-    // map.addLayer({
-    //   id: 'sidewalks-vt-shadow',
-    //   type: 'line',
-    //   source: 'sidewalks-vt',
-    //   'source-layer': 'vectile',
-    //   paint: {
-    //     'line-color': '#333333',
-    //     'line-opacity': outlineOpacity,
-    //     'line-width': shadowScale * lineWidth
-    //     // 'line-translate': [1, 1]
-    //   },
-    //   layout: {
-    //     'line-cap': 'round'
-    //   },
-    // });
     map.addLayer({
       id: 'sidewalks-vt-high',
       type: 'line',
@@ -160,26 +102,225 @@ function App(mapbox_token) {
       paint: {
         'line-color': colorScale(0).hex(),
         'line-width': 1.5,
-        // Adds direction arrows to line, but then ignores line-color
-        // Also, until data-driven styling works for lines, can't
-        // make direction go according to elevation change, just coordinate
-        // order
-        // 'line-pattern': 'oneway-spaced-white-large'
       },
       layout: {
         'line-cap': 'round'
       },
       filter: ['<', 'grade', 0.05],
     });
-  });
 
+    // Routing
+    // TODO: Write a proper routing control that implements a UX-friendly
+    // routing workflow
+    let waypoints = {
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-122.310586, 47.655467]
+        },
+        properties: {
+          waypoint: 'origin'
+        }
+      }, {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-122.318028, 47.658788]
+        },
+        properties: {
+         waypoint: 'destination'
+        }
+      }]
+    }
+
+    // Add id to each waypoint because tracking them by location is a pain
+    // Also add a 'text fill' property to label origin/destination
+    for (let i = 0; i < waypoints.features.length; i++) {
+      waypoints.features[i].properties['routeId'] = i;
+      switch (waypoints.features[i].properties.waypoint) {
+        case 'origin':
+          waypoints.features[i].properties['textLabel'] = 'A';
+          break;
+        case 'destination':
+          waypoints.features[i].properties['textLabel'] = 'B';
+          break;
+        default:
+          waypoints.features[i].properties['textLabel'] = '';
+      }
+    }
+    map.addSource('route', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: []
+      }
+    });
+    map.addLayer({
+      id: 'route-outline',
+      type: 'line',
+      source: 'route',
+      paint: {
+        'line-width': 12,
+        'line-color': '#ffffff'
+      }
+    });
+    map.addLayer({
+      id: 'route',
+      type: 'line',
+      source: 'route',
+      paint: {
+        'line-width': 5,
+        'line-color': '#0000ff'
+      }
+    });
+
+    map.addSource('waypoints', {
+      type: 'geojson',
+      data: waypoints
+    });
+
+    map.addLayer({
+      id: 'waypoints-outline',
+      type: 'circle',
+      source: 'waypoints',
+      paint: {
+        'circle-radius': 12,
+        'circle-color': '#000'
+      }
+    });
+    map.addLayer({
+      id: 'waypoints',
+      type: 'circle',
+      source: 'waypoints',
+      paint: {
+        'circle-radius': 10,
+        'circle-color': {
+          property: 'waypoint',
+          type: 'categorical',
+          stops: [
+            ['origin', '#00ff00'],
+            ['intermediate', '#888888'],
+            ['destination', '#ffff00']
+          ]
+        }
+      }
+    });
+    map.addLayer({
+      id: 'waypoints-text',
+      type: 'symbol',
+      source: 'waypoints',
+      layout: {
+        'text-field': '{textLabel}',
+        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold']
+      }
+    });
+
+    let isCursorOverPoint = false;
+    let isDragging = false;
+    let dragPoint = null;
+    let canvas = map.getCanvasContainer();
+    // Routing mouse move behavior
+    map.on('mousemove', function(e) {
+      let features = map.queryRenderedFeatures(e.point, {
+        layers: ['waypoints']
+      });
+      if (features.length) {
+        // Figure out which waypoint we're over and track it globally
+        let featureId = features[0].properties.routeId;
+        for (let i = 0; i < waypoints.features.length; i++) {
+          let globalId = waypoints.features[i].properties.routeId;
+          if (featureId === globalId) {
+            dragPoint = i;
+          }
+        }
+        // map.setPaintProperty('waypoints', 'circle-color', '#aaaaaa');
+        canvas.style.cursor = 'move';
+        isCursorOverPoint = true;
+        map.dragPan.disable();
+      } else {
+        map.setPaintProperty('waypoints', 'circle-color', {
+          property: 'waypoint',
+          type: 'categorical',
+          stops: [
+            ['origin', '#00ff00'],
+            ['intermediate', '#888888'],
+            ['destination', '#ffff00']
+          ]
+        });
+
+        canvas.style.cursor = '';
+        isCursorOverPoint = false;
+        map.dragPan.enable();
+      }
+    });
+    map.on('mousedown', function(e) {
+      if (!isCursorOverPoint) return;
+
+      isDragging = true;
+
+      canvas.style.cursor = 'grab';
+
+      map.on('mousemove', function(e) {
+        if (!isDragging) return;
+
+        let coords = e.lngLat;
+
+        canvas.style.cursor = 'grabbing';
+
+        waypoints.features[dragPoint].geometry.coordinates = [coords.lng, coords.lat];
+        map.getSource('waypoints').setData(waypoints);
+      });
+      map.on('mouseup', function(e) {
+        if (!isDragging) return;
+
+        // Get the origin and destination coordinates
+        let features = waypoints.features
+        let origin = features[0].geometry.coordinates;
+        let destination = features[features.length - 1].geometry.coordinates;
+        updateRoute(origin, destination);
+
+        canvas.style.cursor = '';
+        isDragging = false;
+      });
+    });
+    // Load an initial route
+    function updateRoute(origin, destination) {
+      // origin and destination need to be in lat-lon
+      origin = origin.concat().reverse();
+      destination = destination.concat().reverse();
+      let coords = origin.concat(destination);
+      // FIXME: send coords as data?
+      let req = $.get(api + '/route.json?waypoints=' + '[' + coords + ']');
+      req.done(function(data) {
+          // Draw the route from origin to destination
+          if(data.code === 'Ok') {
+            let geometry = data.routes[0].geometry
+            let fc = {
+              type: 'FeatureCollection',
+              features: [{
+                type: 'Feature',
+                geometry: geometry,
+                properties: {}
+              }]
+            }
+            map.getSource('route').setData(fc);
+          } else {
+            console.log('Could not get route');
+          }
+      });
+    }
+    updateRoute(waypoints.features[0].geometry.coordinates,
+                waypoints.features[1].geometry.coordinates);
+
+  });
 
   // Map behavior - panning, clicking, etc
   map.on('moveend', function() {
     if (map.getZoom() >= zoomChange) {
       let bounds = map.getBounds().toArray();
       let bbox = bounds[0].concat(bounds[1]).join(',');
-      // map.getSource('sidewalks').setData(api + '/sidewalks.geojson' + '?bbox=' + bbox);
       map.getSource('crossings').setData(api + '/crossings.geojson' + '?bbox=' + bbox);
     }
   });
@@ -195,9 +336,6 @@ function App(mapbox_token) {
     } else {
       dropShadowOpacity = outlineOpacity * Math.pow(zoom / zoomChange, 4);
     }
-    // map.setPaintProperty('sidewalks-vt-shadow', 'line-width', width);
-    // map.setPaintProperty('sidewalks-vt-shadow', 'line-width', shadowScale * width);
-    // map.setPaintProperty('sidewalks-vt-shadow', 'line-opacity', dropShadowOpacity);
     let swLines = ['sidewalks-vt-low', 'sidewalks-vt-mid', 'sidewalks-vt-high'];
     for (let swLine of swLines) {
       map.setPaintProperty(swLine, 'line-width', width);
