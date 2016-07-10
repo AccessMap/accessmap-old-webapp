@@ -2,10 +2,13 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
-    entry: './es6/map.js',
+    entry: {
+      map: './es6/map.js',
+      isochrones: './es6/isochrones.js'
+    },
     output: {
         path: './',
-        filename: './public/build/map-bundle.js',
+        filename: './public/build/[name]-bundle.js',
         library: 'App'
     },
     resolve: {

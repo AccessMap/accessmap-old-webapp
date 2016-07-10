@@ -101,6 +101,13 @@ router.get('/map', function(req, res) {
   });
 });
 
+router.get('/isochrones', function(req, res) {
+  res.render('isochrones', {
+    mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
+    user: req.user
+  });
+});
+
 router.get('/improve', function(req, res) {
   res.render('improve', { user: req.user });
 });

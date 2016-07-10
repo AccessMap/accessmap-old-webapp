@@ -61,6 +61,8 @@
     "sqlite3": "^3.1.4",
     "style-loader": "^0.13.1",
     "transform-loader": "^0.2.3",
+    "turf-buffer": "^3.0.12",
+    "turf-isolines": "^3.0.12",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.1",
     "webworkify-webpack": "1.0.6"
