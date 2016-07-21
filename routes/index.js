@@ -31,8 +31,14 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
+/* GET comingsoon. */
+router.get('/comingsoon', function(req, res) {
+  res.render('comingsoon');
+});
+
 /* GET register. */
 router.get('/register', function(req, res) {
+  res.redirect('/comingsoon');
   res.render('register');
 });
 
@@ -67,6 +73,8 @@ router.post('/register', function(req, res) {
 
 /* GET login page. */
 router.get('/login', function(req, res) {
+  // TODO: Remove the redirect to re-enable login page
+  res.redirect('/comingsoon');
   res.render('login', { user: req.user });
 });
 
@@ -79,6 +87,7 @@ router.post('/login', passport.authenticate('local', {
 
 /* GET logout page. */
 router.get('/logout', function(req, res) {
+  res.redirect('/comingsoon');
   req.logout();
   req.flash('success', 'You have successfully logged out.');
   res.redirect('/');
@@ -86,6 +95,7 @@ router.get('/logout', function(req, res) {
 
 /* GET profile page. */
 router.get('/profile', function(req, res) {
+  res.redirect('/comingsoon');
   res.render('profile', { user: req.user });
 });
 

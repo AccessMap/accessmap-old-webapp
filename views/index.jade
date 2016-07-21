@@ -4,6 +4,7 @@ block content
   .container(style='width: 100%; padding: 0px 0px;')
     .jumbotron.text-center
       .container
+        img(src='images/hill-splash.jpg')
         .row
           h1 Welcome to AccessMap!
           p We want to enable accessible, safe sidewalk trip planning for people with limited mobility. Our application is still in beta, but we would love for you to try it out. Click below to go to the map, register so you can get involved with AccessMap, or click 'Donate' to make a tax-deductible contribution to the AccessMap project through the Taskar Center for Accessible Technology.
@@ -12,7 +13,7 @@ block content
           .col-sm-3.col-sm-offset-1.text-center
             a.btn.btn-primary.btn-lg(href='./map')
               i.fa.fa-map
-              p Try It Now &raquo
+              p View the map &raquo
           .col-sm-3.col-sm-offset-1.text-center
             a.btn.btn-primary.btn-lg(href="#getinvolved")
               i.fa.fa-flag
@@ -41,10 +42,10 @@ block content
                   th: b Displayed on map
               tr
                 td: b Elevation
-                td Green, Yellow, and Red sidewalk segments
+                td Green, Yellow, and Red lines (sidewalks).
               tr
                 td: b Curb Ramps
-                td: img(src='/images/blue_circle.png')
+                td Black lines.
               tr
                 td: b Construction
                 td

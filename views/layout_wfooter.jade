@@ -1,5 +1,15 @@
 extends layout
 
 block footer
-    footer(style='margin-bottom:20px;')
-      span &copy; AccessMap 2016
+    footer()
+      .footer
+        span &copy; AccessMap 2016
+        span
+          a(href='http://github.com/accessmap')
+            i.fa.fa-github
+        span
+          a(href='http://twitter.com/AccessMapSea')
+            i.fa.fa-twitter
+        span
+          a(href='mailto:info@accessmapseattle.com')
+            i.fa.fa-envelope
