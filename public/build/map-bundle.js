@@ -85,7 +85,8 @@ var App =
 
 	  // -- Styling --
 	  // Sidewalk color scale
-	  var colorScale = chroma.scale(['#3E60BD', '#FD4C51']).correctLightness();
+	  //
+	  var colorScale = chroma.scale(['lime', 'yellow', 'red']);
 
 	  // Line widths
 	  var lineWidth = 2;
@@ -108,36 +109,28 @@ var App =
 	    var bounds = map.getBounds().toArray();
 	    var bbox = bounds[0].concat(bounds[1]).join(',');
 
-	    // Crossings
-	    map.addSource('crossings', {
-	      type: 'geojson',
-	      data: api + '/crossings.geojson' + '?bbox=' + bbox
-	    });
-	    map.addLayer({
-	      id: 'crossings',
-	      type: 'line',
-	      source: 'crossings',
-	      filter: ['==', 'curbramps', true],
-	      paint: {
-	        'line-width': lineWidth
-	      },
-	      minzoom: zoomChange
-	    });
-
 	    // Sidewalks
-	    // Note: mapbox-gl-js does not yet have data-driven styling - when it
-	    // does, this should be updated
-	    // Test vector tiles
-	    map.addSource('sidewalks-vt', {
+	    // TODO: when data-driven styling works for lines, reduce to one sidewalk
+	    // layer
+
+	    // This is a hack to ensure that tile requests are made to the main site's
+	    // /tiles subdirectory. Using just '/tiles/(...).mvt' results in
+	    // cross-origin errors
+	    if (!window.location.origin) {
+	      window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+	    }
+	    var tilesUrl = window.location.origin + '/tiles/seattle/{z}/{x}/{y}.mvt';
+
+	    map.addSource('seattle', {
 	      type: 'vector',
-	      tiles: ['http://dssg-db.cloudapp.net:3001/test_layer/{z}/{x}/{y}.mvt'],
+	      tiles: [tilesUrl],
 	      attribution: '&copy; AccessMap'
 	    });
 	    map.addLayer({
-	      id: 'sidewalks-vt-high',
+	      id: 'sidewalks-high',
 	      type: 'line',
-	      source: 'sidewalks-vt',
-	      'source-layer': 'vectile',
+	      source: 'seattle',
+	      'source-layer': 'sidewalks',
 	      paint: {
 	        'line-color': colorScale(1.0).hex(),
 	        'line-width': lineWidth
@@ -148,10 +141,10 @@ var App =
 	      filter: ['>', 'grade', 0.08333]
 	    });
 	    map.addLayer({
-	      id: 'sidewalks-vt-mid',
+	      id: 'sidewalks-mid',
 	      type: 'line',
-	      source: 'sidewalks-vt',
-	      'source-layer': 'vectile',
+	      source: 'seattle',
+	      'source-layer': 'sidewalks',
 	      paint: {
 	        'line-color': colorScale(0.5).hex(),
 	        'line-width': lineWidth
@@ -162,10 +155,10 @@ var App =
 	      filter: ['all', ['>=', 'grade', 0.05], ['<=', 'grade', 0.08333]]
 	    });
 	    map.addLayer({
-	      id: 'sidewalks-vt-low',
+	      id: 'sidewalks-low',
 	      type: 'line',
-	      source: 'sidewalks-vt',
-	      'source-layer': 'vectile',
+	      source: 'seattle',
+	      'source-layer': 'sidewalks',
 	      paint: {
 	        'line-color': colorScale(0).hex(),
 	        'line-width': lineWidth
@@ -175,17 +168,24 @@ var App =
 	      },
 	      filter: ['<', 'grade', 0.05]
 	    });
+
+	    // Crossings
+	    map.addLayer({
+	      id: 'crossings',
+	      type: 'line',
+	      source: 'seattle',
+	      'source-layer': 'crossings',
+	      filter: ['==', 'curbramps', true],
+	      paint: {
+	        'line-width': lineWidth
+	      },
+	      minzoom: zoomChange
+	    });
 	  });
 
+	  //
 	  // Map behavior - panning, clicking, etc
-	  map.on('moveend', function () {
-	    if (map.getZoom() >= zoomChange) {
-	      var bounds = map.getBounds().toArray();
-	      var bbox = bounds[0].concat(bounds[1]).join(',');
-	      map.getSource('crossings').setData(api + '/crossings.geojson' + '?bbox=' + bbox);
-	    }
-	  });
-
+	  //
 	  // Increase sidewalks + crossings width when zooming in
 	  map.on('zoom', function () {
 	    var zoom = map.getZoom();
@@ -197,7 +197,7 @@ var App =
 	    } else {
 	      dropShadowOpacity = outlineOpacity * Math.pow(zoom / zoomChange, 4);
 	    }
-	    var swLines = ['sidewalks-vt-low', 'sidewalks-vt-mid', 'sidewalks-vt-high'];
+	    var swLines = ['sidewalks-low', 'sidewalks-mid', 'sidewalks-high'];
 	    var _iteratorNormalCompletion = true;
 	    var _didIteratorError = false;
 	    var _iteratorError = undefined;

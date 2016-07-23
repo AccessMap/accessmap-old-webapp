@@ -14,6 +14,7 @@ var session = require('express-session'),
 var models = require('./models');
 var index = require('./routes/index');
 var api = require('./routes/api');
+var tiles = require('./routes/tiles');
 
 var app = express();
 var env = process.env.NODE_ENV || 'development';
@@ -121,6 +122,7 @@ passport.deserializeUser(function(id, done) {
 // Routes
 app.use('/', index);
 app.use('/api', api);
+app.use('/tiles', tiles);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
