@@ -37,7 +37,7 @@ function App(mapbox_token) {
   let map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v8',
-    center: [-122.308690, 47.652810],
+    center: [-122.334859, 47.607568],
     zoom: 15
   });
 
@@ -64,6 +64,12 @@ function App(mapbox_token) {
       tiles: [tilesUrl],
       attribution: '&copy; AccessMap'
     });
+    map.addSource('osrm', {
+      type: 'vector',
+      tiles: ['http://localhost:5000/tile/v1/foot/tile({x},{y},{z}).mvt'],
+      attribution: '&copy; AccessMap'
+    });
+
     map.addLayer({
       id: 'sidewalks-high',
       type: 'line',
@@ -74,7 +80,8 @@ function App(mapbox_token) {
         'line-width': lineWidth
       },
       layout: {
-        'line-cap': 'round'
+        'line-cap': 'round',
+        'line-opacity': 0.0
       },
       filter: ['>', 'grade', 0.08333],
     });
@@ -85,7 +92,8 @@ function App(mapbox_token) {
       'source-layer': 'sidewalks',
       paint: {
         'line-color': colorScale(0.5).hex(),
-        'line-width': lineWidth
+        'line-width': lineWidth,
+        'line-opacity': 0.0
       },
       layout: {
         'line-cap': 'round'
@@ -100,12 +108,57 @@ function App(mapbox_token) {
       paint: {
         'line-color': colorScale(0).hex(),
         'line-width': lineWidth,
+        'line-opacity': 0.0
       },
       layout: {
         'line-cap': 'round'
       },
       filter: ['<', 'grade', 0.05],
     });
+
+    map.addLayer({
+      id: 'sidewalks-osrm-0',
+      type: 'line',
+      source: 'osrm',
+      'source-layer': 'speeds',
+      paint: {
+        'line-color': colorScale(1.0).hex(),
+        'line-width': lineWidth
+      },
+      layout: {
+        'line-cap': 'round'
+      },
+      filter: ['<', 'speed', 0.0001],
+    });
+    map.addLayer({
+      id: 'sidewalks-osrm-0.1',
+      type: 'line',
+      source: 'osrm',
+      'source-layer': 'speeds',
+      paint: {
+        'line-color': colorScale(0.5).hex(),
+        'line-width': lineWidth
+      },
+      layout: {
+        'line-cap': 'round'
+      },
+      filter: ['all', ['>=', 'speed', 0.0001], ['<=', 'speed', 0.1]],
+    });
+    map.addLayer({
+      id: 'sidewalks-osrm-greater',
+      type: 'line',
+      source: 'osrm',
+      'source-layer': 'speeds',
+      paint: {
+        'line-color': colorScale(0.0).hex(),
+        'line-width': lineWidth
+      },
+      layout: {
+        'line-cap': 'round'
+      },
+      filter: ['>', 'speed', 0.1],
+    });
+
 
     // Crossings
     map.addLayer({
@@ -116,6 +169,9 @@ function App(mapbox_token) {
       filter: ['==', 'curbramps', true],
       paint: {
         'line-width': lineWidth
+      },
+      layout: {
+        'line-opacity': 0.0
       },
       minzoom: zoomChange
     });
