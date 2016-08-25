@@ -942,7 +942,6 @@ var App =
 /***/ function(module, exports) {
 
 	// shim for using process in browser
-
 	var process = module.exports = {};
 
 	// cached from whatever global is present so that test runners that stub it
@@ -954,21 +953,63 @@ var App =
 	var cachedClearTimeout;
 
 	(function () {
-	  try {
-	    cachedSetTimeout = setTimeout;
-	  } catch (e) {
-	    cachedSetTimeout = function () {
-	      throw new Error('setTimeout is not defined');
+	    try {
+	        cachedSetTimeout = setTimeout;
+	    } catch (e) {
+	        cachedSetTimeout = function () {
+	            throw new Error('setTimeout is not defined');
+	        }
 	    }
-	  }
-	  try {
-	    cachedClearTimeout = clearTimeout;
-	  } catch (e) {
-	    cachedClearTimeout = function () {
-	      throw new Error('clearTimeout is not defined');
+	    try {
+	        cachedClearTimeout = clearTimeout;
+	    } catch (e) {
+	        cachedClearTimeout = function () {
+	            throw new Error('clearTimeout is not defined');
+	        }
 	    }
-	  }
 	} ())
+	function runTimeout(fun) {
+	    if (cachedSetTimeout === setTimeout) {
+	        //normal enviroments in sane situations
+	        return setTimeout(fun, 0);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedSetTimeout(fun, 0);
+	    } catch(e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+	            return cachedSetTimeout.call(null, fun, 0);
+	        } catch(e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+	            return cachedSetTimeout.call(this, fun, 0);
+	        }
+	    }
+
+
+	}
+	function runClearTimeout(marker) {
+	    if (cachedClearTimeout === clearTimeout) {
+	        //normal enviroments in sane situations
+	        return clearTimeout(marker);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedClearTimeout(marker);
+	    } catch (e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+	            return cachedClearTimeout.call(null, marker);
+	        } catch (e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+	            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+	            return cachedClearTimeout.call(this, marker);
+	        }
+	    }
+
+
+
+	}
 	var queue = [];
 	var draining = false;
 	var currentQueue;
@@ -993,7 +1034,7 @@ var App =
 	    if (draining) {
 	        return;
 	    }
-	    var timeout = cachedSetTimeout(cleanUpNextTick);
+	    var timeout = runTimeout(cleanUpNextTick);
 	    draining = true;
 
 	    var len = queue.length;
@@ -1010,7 +1051,7 @@ var App =
 	    }
 	    currentQueue = null;
 	    draining = false;
-	    cachedClearTimeout(timeout);
+	    runClearTimeout(timeout);
 	}
 
 	process.nextTick = function (fun) {
@@ -1022,7 +1063,7 @@ var App =
 	    }
 	    queue.push(new Item(fun, args));
 	    if (queue.length === 1 && !draining) {
-	        cachedSetTimeout(drainQueue, 0);
+	        runTimeout(drainQueue);
 	    }
 	};
 
@@ -1953,7 +1994,8 @@ var App =
 			"tmp": "tmp/mapbox-gl-0.20.1.tgz_1466541121151_0.10657452396117151"
 		},
 		"directories": {},
-		"_resolved": "https://registry.npmjs.org/mapbox-gl/-/mapbox-gl-0.20.1.tgz"
+		"_resolved": "https://registry.npmjs.org/mapbox-gl/-/mapbox-gl-0.20.1.tgz",
+		"readme": "ERROR: No README data found!"
 	};
 
 /***/ },
@@ -11341,12 +11383,13 @@ var App =
 
 /***/ },
 /* 69 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	module.exports = ShelfPack;
-
+	(function (global, factory) {
+	     true ? module.exports = factory() :
+	    typeof define === 'function' && define.amd ? define(factory) :
+	    (global.ShelfPack = factory());
+	}(this, function () {
 
 	/**
 	 * Create a new ShelfPack bin allocator.
@@ -11410,6 +11453,23 @@ var App =
 	            }
 	            results.push(allocation);
 	        }
+	    }
+
+	    // Shrink the width/height of the sprite to the bare minimum.
+	    // Since shelf-pack doubles first width, then height when running out of shelf space
+	    // this can result in fairly large unused space both in width and height if that happens
+	    // towards the end of bin packing.
+	    if (this.shelves.length > 0) {
+	        var w2 = 0;
+	        var h2 = 0;
+
+	        for (var j = 0; j < this.shelves.length; j++) {
+	            var shelf = this.shelves[j];
+	            h2 += shelf.h;
+	            w2 = Math.max(shelf.w - shelf.free, w2);
+	        }
+
+	        this.resize(w2, h2);
 	    }
 
 	    return results;
@@ -11505,7 +11565,6 @@ var App =
 
 	/**
 	 * Resize the sprite.
-	 * The resize will fail if the requested dimensions are smaller than the current sprite dimensions.
 	 *
 	 * @param   {number}  w  Requested new sprite width
 	 * @param   {number}  h  Requested new sprite height
@@ -11514,10 +11573,6 @@ var App =
 	 * sprite.resize(256, 256);
 	 */
 	ShelfPack.prototype.resize = function(w, h) {
-	    if (w < this.w || h < this.h) {
-	        return false;
-	    }
-
 	    this.w = w;
 	    this.h = h;
 	    for (var i = 0; i < this.shelves.length; i++) {
@@ -11568,7 +11623,6 @@ var App =
 
 	/**
 	 * Resize the shelf.
-	 * The resize will fail if the requested width is smaller than the current shelf width.
 	 *
 	 * @private
 	 * @param   {number}  w  Requested new width of the shelf
@@ -11577,14 +11631,14 @@ var App =
 	 * shelf.resize(512);
 	 */
 	Shelf.prototype.resize = function(w) {
-	    if (w < this.w) {
-	        return false;
-	    }
 	    this.free += (w - this.w);
 	    this.w = w;
 	    return true;
 	};
 
+	return ShelfPack;
+
+	}));
 
 /***/ },
 /* 70 */
@@ -16126,7 +16180,9 @@ var App =
 	}
 
 	function compilePropertyReference(property) {
-	    return property === '$type' ? 'f.type' : 'p[' + JSON.stringify(property) + ']';
+	    return property === '$type' ? 'f.type' :
+	        property === '$id' ? 'f.id' :
+	        'p[' + JSON.stringify(property) + ']';
 	}
 
 	function compileComparisonOp(property, value, op, checkType) {
@@ -20184,7 +20240,7 @@ var App =
 	}
 
 	function readFeature(tag, feature, pbf) {
-	    if (tag == 1) feature._id = pbf.readVarint();
+	    if (tag == 1) feature.id = pbf.readVarint();
 	    else if (tag == 2) readTag(pbf, feature);
 	    else if (tag == 3) feature.type = pbf.readVarint();
 	    else if (tag == 4) feature._geometry = pbf.pos;
@@ -20349,8 +20405,8 @@ var App =
 	        properties: this.properties
 	    };
 
-	    if ('_id' in this) {
-	        result.id = this._id;
+	    if ('id' in this) {
+	        result.id = this.id;
 	    }
 
 	    return result;
@@ -22784,7 +22840,8 @@ var App =
 	      result = { uint_value: value }
 	    }
 	  } else {
-	    result = { string_value: '' + value }
+	    value = JSON.stringify(value)
+	    result = { string_value: value }
 	  }
 
 	  result.key = type + ':' + value
@@ -22924,6 +22981,7 @@ var App =
 	}
 
 	function FeatureWrapper (feature) {
+	  this.id = typeof feature.id === 'number' ? feature.id : undefined
 	  this.type = feature.type
 	  this.rawGeometry = feature.type === 1 ? [feature.geometry] : feature.geometry
 	  this.properties = feature.tags
@@ -24063,9 +24121,13 @@ var App =
 
 /***/ },
 /* 144 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	(function (global, factory) {
+	     true ? factory(exports) :
+	    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	    (factory((global.WhooTS = global.WhooTS || {})));
+	}(this, function (exports) {
 
 	/**
 	 * getURL
@@ -24089,11 +24151,11 @@ var App =
 	 * var layer = 'Natural2015';
 	 * var url = whoots.getURL(baseUrl, layer, 154308, 197167, 19);
 	 */
-	exports.getURL = function(baseUrl, layer, x, y, z, options) {
+	function getURL(baseUrl, layer, x, y, z, options) {
 	    options = options || {};
 
 	    var url = baseUrl + '?' + [
-	        'bbox='    + exports.getTileBBox(x, y, z),
+	        'bbox='    + getTileBBox(x, y, z),
 	        'format='  + (options.format || 'image/png'),
 	        'service=' + (options.service || 'WMS'),
 	        'version=' + (options.version || '1.1.1'),
@@ -24105,7 +24167,7 @@ var App =
 	    ].join('&');
 
 	    return url;
-	};
+	}
 
 
 	/**
@@ -24116,15 +24178,16 @@ var App =
 	 * @param    {Number}  z  Tile zoom
 	 * @returns  {String}  String of the bounding box
 	 */
-	exports.getTileBBox = function(x, y, z) {
+	function getTileBBox(x, y, z) {
 	    // for Google/OSM tile scheme we need to alter the y
 	    y = (Math.pow(2, z) - y - 1);
 
-	    var min = exports.getMercCoords(x * 256, y * 256, z),
-	        max = exports.getMercCoords((x + 1) * 256, (y + 1) * 256, z);
+	    var min = getMercCoords(x * 256, y * 256, z),
+	        max = getMercCoords((x + 1) * 256, (y + 1) * 256, z);
 
 	    return min[0] + ',' + min[1] + ',' + max[0] + ',' + max[1];
-	};
+	}
+
 
 	/**
 	 * getMercCoords
@@ -24134,14 +24197,21 @@ var App =
 	 * @param    {Number}  z  Tile zoom
 	 * @returns  {Array}   [x, y]
 	 */
-	exports.getMercCoords = function(x, y, z) {
+	function getMercCoords(x, y, z) {
 	    var resolution = (2 * Math.PI * 6378137 / 256) / Math.pow(2, z),
 	        merc_x = (x * resolution - 2 * Math.PI  * 6378137 / 2.0),
 	        merc_y = (y * resolution - 2 * Math.PI  * 6378137 / 2.0);
 
 	    return [merc_x, merc_y];
-	};
+	}
 
+	exports.getURL = getURL;
+	exports.getTileBBox = getTileBBox;
+	exports.getMercCoords = getMercCoords;
+
+	Object.defineProperty(exports, '__esModule', { value: true });
+
+	}));
 
 /***/ },
 /* 145 */
@@ -39491,8 +39561,8 @@ var App =
 /* 209 */
 /***/ function(module, exports) {
 
-	/**
-	 * lodash 4.0.6 (Custom Build) <https://lodash.com/>
+	/* WEBPACK VAR INJECTION */(function(global) {/**
+	 * lodash (Custom Build) <https://lodash.com/>
 	 * Build: `lodash modularize exports="npm" -o ./`
 	 * Copyright jQuery Foundation and other contributors <https://jquery.org/>
 	 * Released under MIT license <https://lodash.com/license>
@@ -39507,9 +39577,7 @@ var App =
 	var NAN = 0 / 0;
 
 	/** `Object#toString` result references. */
-	var funcTag = '[object Function]',
-	    genTag = '[object GeneratorFunction]',
-	    symbolTag = '[object Symbol]';
+	var symbolTag = '[object Symbol]';
 
 	/** Used to match leading and trailing whitespace. */
 	var reTrim = /^\s+|\s+$/g;
@@ -39526,12 +39594,21 @@ var App =
 	/** Built-in method references without a dependency on `root`. */
 	var freeParseInt = parseInt;
 
+	/** Detect free variable `global` from Node.js. */
+	var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+
+	/** Detect free variable `self`. */
+	var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+	/** Used as a reference to the global object. */
+	var root = freeGlobal || freeSelf || Function('return this')();
+
 	/** Used for built-in method references. */
 	var objectProto = Object.prototype;
 
 	/**
 	 * Used to resolve the
-	 * [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+	 * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
 	 * of values.
 	 */
 	var objectToString = objectProto.toString;
@@ -39547,7 +39624,6 @@ var App =
 	 * @static
 	 * @memberOf _
 	 * @since 2.4.0
-	 * @type {Function}
 	 * @category Date
 	 * @returns {number} Returns the timestamp.
 	 * @example
@@ -39555,23 +39631,29 @@ var App =
 	 * _.defer(function(stamp) {
 	 *   console.log(_.now() - stamp);
 	 * }, _.now());
-	 * // => Logs the number of milliseconds it took for the deferred function to be invoked.
+	 * // => Logs the number of milliseconds it took for the deferred invocation.
 	 */
-	var now = Date.now;
+	var now = function() {
+	  return root.Date.now();
+	};
 
 	/**
 	 * Creates a debounced function that delays invoking `func` until after `wait`
 	 * milliseconds have elapsed since the last time the debounced function was
 	 * invoked. The debounced function comes with a `cancel` method to cancel
 	 * delayed `func` invocations and a `flush` method to immediately invoke them.
-	 * Provide an options object to indicate whether `func` should be invoked on
-	 * the leading and/or trailing edge of the `wait` timeout. The `func` is invoked
-	 * with the last arguments provided to the debounced function. Subsequent calls
-	 * to the debounced function return the result of the last `func` invocation.
+	 * Provide `options` to indicate whether `func` should be invoked on the
+	 * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
+	 * with the last arguments provided to the debounced function. Subsequent
+	 * calls to the debounced function return the result of the last `func`
+	 * invocation.
 	 *
-	 * **Note:** If `leading` and `trailing` options are `true`, `func` is invoked
-	 * on the trailing edge of the timeout only if the debounced function is
-	 * invoked more than once during the `wait` timeout.
+	 * **Note:** If `leading` and `trailing` options are `true`, `func` is
+	 * invoked on the trailing edge of the timeout only if the debounced function
+	 * is invoked more than once during the `wait` timeout.
+	 *
+	 * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+	 * until to the next tick, similar to `setTimeout` with a timeout of `0`.
 	 *
 	 * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
 	 * for details over the differences between `_.debounce` and `_.throttle`.
@@ -39615,7 +39697,7 @@ var App =
 	      maxWait,
 	      result,
 	      timerId,
-	      lastCallTime = 0,
+	      lastCallTime,
 	      lastInvokeTime = 0,
 	      leading = false,
 	      maxing = false,
@@ -39666,7 +39748,7 @@ var App =
 	    // Either this is the first call, activity has stopped and we're at the
 	    // trailing edge, the system time has gone backwards and we're treating
 	    // it as the trailing edge, or we've hit the `maxWait` limit.
-	    return (!lastCallTime || (timeSinceLastCall >= wait) ||
+	    return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
 	      (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
 	  }
 
@@ -39680,7 +39762,6 @@ var App =
 	  }
 
 	  function trailingEdge(time) {
-	    clearTimeout(timerId);
 	    timerId = undefined;
 
 	    // Only invoke if we have `lastArgs` which means `func` has been
@@ -39696,8 +39777,8 @@ var App =
 	    if (timerId !== undefined) {
 	      clearTimeout(timerId);
 	    }
-	    lastCallTime = lastInvokeTime = 0;
-	    lastArgs = lastThis = timerId = undefined;
+	    lastInvokeTime = 0;
+	    lastArgs = lastCallTime = lastThis = timerId = undefined;
 	  }
 
 	  function flush() {
@@ -39718,7 +39799,6 @@ var App =
 	      }
 	      if (maxing) {
 	        // Handle invocations in a tight loop.
-	        clearTimeout(timerId);
 	        timerId = setTimeout(timerExpired, wait);
 	        return invokeFunc(lastCallTime);
 	      }
@@ -39734,34 +39814,8 @@ var App =
 	}
 
 	/**
-	 * Checks if `value` is classified as a `Function` object.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 0.1.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is correctly classified,
-	 *  else `false`.
-	 * @example
-	 *
-	 * _.isFunction(_);
-	 * // => true
-	 *
-	 * _.isFunction(/abc/);
-	 * // => false
-	 */
-	function isFunction(value) {
-	  // The use of `Object#toString` avoids issues with the `typeof` operator
-	  // in Safari 8 which returns 'object' for typed array and weak map constructors,
-	  // and PhantomJS 1.9 which returns 'function' for `NodeList` instances.
-	  var tag = isObject(value) ? objectToString.call(value) : '';
-	  return tag == funcTag || tag == genTag;
-	}
-
-	/**
 	 * Checks if `value` is the
-	 * [language type](http://www.ecma-international.org/ecma-262/6.0/#sec-ecmascript-language-types)
+	 * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
 	 * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
 	 *
 	 * @static
@@ -39825,8 +39879,7 @@ var App =
 	 * @since 4.0.0
 	 * @category Lang
 	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is correctly classified,
-	 *  else `false`.
+	 * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
 	 * @example
 	 *
 	 * _.isSymbol(Symbol.iterator);
@@ -39851,8 +39904,8 @@ var App =
 	 * @returns {number} Returns the number.
 	 * @example
 	 *
-	 * _.toNumber(3);
-	 * // => 3
+	 * _.toNumber(3.2);
+	 * // => 3.2
 	 *
 	 * _.toNumber(Number.MIN_VALUE);
 	 * // => 5e-324
@@ -39860,8 +39913,8 @@ var App =
 	 * _.toNumber(Infinity);
 	 * // => Infinity
 	 *
-	 * _.toNumber('3');
-	 * // => 3
+	 * _.toNumber('3.2');
+	 * // => 3.2
 	 */
 	function toNumber(value) {
 	  if (typeof value == 'number') {
@@ -39871,7 +39924,7 @@ var App =
 	    return NAN;
 	  }
 	  if (isObject(value)) {
-	    var other = isFunction(value.valueOf) ? value.valueOf() : value;
+	    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
 	    value = isObject(other) ? (other + '') : other;
 	  }
 	  if (typeof value != 'string') {
@@ -39886,6 +39939,7 @@ var App =
 
 	module.exports = debounce;
 
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 210 */
@@ -41025,6 +41079,21 @@ var App =
 	      code += digits.charAt(floor(Math.random() * 16));
 	    }
 	    return new Color(code);
+	  };
+
+	  chroma.average = function(colors) {
+	    var a, b, c, g, l, len, o, r, rgba;
+	    r = g = b = a = 0;
+	    l = colors.length;
+	    for (o = 0, len = colors.length; o < len; o++) {
+	      c = colors[o];
+	      rgba = chroma(c).rgba();
+	      r += rgba[0];
+	      g += rgba[1];
+	      b += rgba[2];
+	      a += rgba[3];
+	    }
+	    return new Color(r / l, g / l, b / l, a / l);
 	  };
 
 	  _input.rgb = function() {

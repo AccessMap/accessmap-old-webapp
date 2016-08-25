@@ -1,7 +1,3 @@
-// Leaflet (upon which mapbox.js is based) forces a global window.L
-// variable, leading to all kinds of problems for modular development.
-// As a result, none of the modules on npm work due to clobbering L.
-
 import mapboxgl from 'mapbox-gl';
 import '!style!css!mapbox-gl/dist/mapbox-gl.css';
 import Geocoder from 'mapbox-gl-geocoder';
@@ -9,6 +5,8 @@ import '!style!css!mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as chroma from 'chroma-js';
 import $ from 'jquery';
 import debounce from 'debounce';
+
+import bufferPoint from './bufferpoint';
 
 
 function App(mapbox_token) {
@@ -119,6 +117,93 @@ function App(mapbox_token) {
       },
       minzoom: zoomChange
     });
+
+    //
+    // Map controls
+    //
+
+    // Geocoder (search by address/POI)
+    map.addControl(new Geocoder());
+    // Navigation - zooming and orientation
+    map.addControl(new mapboxgl.Navigation({position: 'top-left'}));
+    // Geolocation (surprising amount of boilerplate)
+    map.addSource('geolocate', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: []
+      }
+    });
+    map.addSource('geolocate-error', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: []
+      }
+    });
+
+    map.addLayer({
+      id: 'geolocate-error',
+      source: 'geolocate-error',
+      type: 'fill',
+      paint: {
+        'fill-color': '#007cbf',
+        'fill-opacity': 0.2
+      }
+    });
+    map.addLayer({
+      id: 'geolocate-outline',
+      source: 'geolocate',
+      type: 'circle',
+      paint: {
+        'circle-radius': 10,
+        'circle-color': '#ffffff'
+      }
+    });
+    map.addLayer({
+      id: 'geolocate-center',
+      source: 'geolocate',
+      type: 'circle',
+      paint: {
+        'circle-radius': 8,
+        'circle-color': '#007cbf'
+      }
+
+    });
+
+    let geolocator = new mapboxgl.Geolocate({position: 'top-left'});
+    map.addControl(geolocator);
+
+    geolocator.on('geolocate', function(position) {
+      let coords = [position.coords.longitude, position.coords.latitude];
+      let location = {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: coords
+          }
+        }]
+      };
+      map.getSource('geolocate').setData(location);
+
+      // TODO: Replace bufferPoint with turf-buffer once it supports buffering
+      // a lat-lon point a distance in meters - currently makes an oval due to
+      // projection: https://github.com/Turfjs/turf-buffer/pull/33
+      let buffered = bufferPoint(location.features[0].geometry,
+                                 position.coords.accuracy);
+
+      let errorCircle = {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: buffered
+        }]
+      };
+
+      map.getSource('geolocate-error').setData(errorCircle);
+    });
   });
 
   //
@@ -142,9 +227,6 @@ function App(mapbox_token) {
     map.setPaintProperty('crossings', 'line-width', width);
   });
 
-  // Map controls
-  map.addControl(new Geocoder());
-  map.addControl(new mapboxgl.Navigation({position: 'top-left'}));
 }
 
 module.exports = App;
