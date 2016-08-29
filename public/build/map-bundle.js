@@ -83,9 +83,8 @@ var App =
 	  // AccessMap uses a versioned API - which one are we using?
 	  var api = '/api/v2';
 
-	  // GeoJSON vs. vector tile background zoom level switch
-	  // const zoomChange = 15;
-	  var zoomChange = 14;
+	  // Zoom point at which features (e.g. sidewalk) become clickable
+	  var clickable = 16;
 
 	  // -- Styling --
 	  // Sidewalk color scale
@@ -160,7 +159,7 @@ var App =
 	          stops: lineWidthStops
 	        }
 	      },
-	      minzoom: zoomChange
+	      minzoom: 14
 	    });
 
 	    //
@@ -247,6 +246,49 @@ var App =
 	      };
 
 	      map.getSource('geolocate-error').setData(errorCircle);
+	    });
+
+	    //
+	    // Map events - catch clicks, etc
+	    //
+	    map.on('click', function (e) {
+	      // Only allow clicks at high zoom levels
+	      if (map.getZoom() < clickable) {
+	        return;
+	      }
+
+	      // Display sidewalk/crossing info
+	      var gradePaths = map.queryRenderedFeatures(e.point, {
+	        layers: ['sidewalks', 'crossings']
+	      });
+
+	      if (!gradePaths.length) {
+	        return;
+	      }
+
+	      // Select the first feature - how is order decided? Hopefully it's the
+	      // 'top' layer, i.e. most visible.
+	      var path = gradePaths[0];
+
+	      // Prepare the popup message
+	      var gradePercent = path.properties.grade * 100;
+	      var message = '<p>Grade: ' + gradePercent.toFixed(1) + '%';
+
+	      var popup = new _mapboxGl2.default.Popup().setLngLat(e.lngLat).setHTML(message).addTo(map);
+	    });
+
+	    // Make cursor into 'clicker' pointer when hovering over clickable elements
+	    map.on('mousemove', function (e) {
+	      // Only allow clicks at high zoom levels
+	      if (map.getZoom() < clickable) {
+	        return;
+	      }
+
+	      var gradePaths = map.queryRenderedFeatures(e.point, {
+	        layers: ['sidewalks', 'crossings']
+	      });
+
+	      map.getCanvas().style.cursor = gradePaths.length ? 'pointer' : '';
 	    });
 	  });
 	}
