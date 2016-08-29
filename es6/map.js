@@ -23,7 +23,7 @@ function App(mapbox_token) {
   let colorScale = chroma.scale(['lime', 'yellow', 'red']);
 
   // Line widths
-  const lineWidth = 2;
+  const lineWidthStops = [[10, 0.5], [15, 2], [20, 8]];
   const shadowScale = 1.3;
 
   // Outline/shadow opacity
@@ -63,48 +63,27 @@ function App(mapbox_token) {
       attribution: '&copy; AccessMap'
     });
     map.addLayer({
-      id: 'sidewalks-high',
+      id: 'sidewalks',
       type: 'line',
       source: 'seattle',
       'source-layer': 'sidewalks',
       paint: {
-        'line-color': colorScale(1.0).hex(),
-        'line-width': lineWidth
+        'line-color': {
+          property: 'grade',
+          stops: [
+            [0.0, colorScale(0.0).hex()],
+            [0.05, colorScale(0.5).hex()],
+            [0.08333, colorScale(1.0).hex()]
+          ]
+        },
+        'line-width': {
+          stops: lineWidthStops
+        }
       },
       layout: {
         'line-cap': 'round'
-      },
-      filter: ['>', 'grade', 0.08333],
+      }
     });
-    map.addLayer({
-      id: 'sidewalks-mid',
-      type: 'line',
-      source: 'seattle',
-      'source-layer': 'sidewalks',
-      paint: {
-        'line-color': colorScale(0.5).hex(),
-        'line-width': lineWidth
-      },
-      layout: {
-        'line-cap': 'round'
-      },
-      filter: ['all', ['>=', 'grade', 0.05], ['<=', 'grade', 0.08333]],
-    });
-    map.addLayer({
-      id: 'sidewalks-low',
-      type: 'line',
-      source: 'seattle',
-      'source-layer': 'sidewalks',
-      paint: {
-        'line-color': colorScale(0).hex(),
-        'line-width': lineWidth,
-      },
-      layout: {
-        'line-cap': 'round'
-      },
-      filter: ['<', 'grade', 0.05],
-    });
-
     // Crossings
     map.addLayer({
       id: 'crossings',
@@ -113,7 +92,9 @@ function App(mapbox_token) {
       'source-layer': 'crossings',
       filter: ['==', 'curbramps', true],
       paint: {
-        'line-width': lineWidth
+        'line-width': {
+          stops: lineWidthStops
+        }
       },
       minzoom: zoomChange
     });
@@ -204,27 +185,6 @@ function App(mapbox_token) {
 
       map.getSource('geolocate-error').setData(errorCircle);
     });
-  });
-
-  //
-  // Map behavior - panning, clicking, etc
-  //
-  // Increase sidewalks + crossings width when zooming in
-  map.on('zoom', function() {
-    let zoom = map.getZoom();
-    let width = lineWidth;
-    let dropShadowOpacity = outlineOpacity;
-    let lineOpacity = 1.0
-    if (zoom > zoomChange) {
-      width = lineWidth * Math.pow(zoom / zoomChange, 6);
-    } else {
-      dropShadowOpacity = outlineOpacity * Math.pow(zoom / zoomChange, 4);
-    }
-    let swLines = ['sidewalks-low', 'sidewalks-mid', 'sidewalks-high'];
-    for (let swLine of swLines) {
-      map.setPaintProperty(swLine, 'line-width', width);
-    }
-    map.setPaintProperty('crossings', 'line-width', width);
   });
 
 }
