@@ -9,8 +9,8 @@ import '!style!css!mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as chroma from 'chroma-js';
 import $ from 'jquery';
 import debounce from 'debounce';
-import * as isolines from 'turf-isolines';
-import * as buffer from 'turf-buffer';
+import turfIsolines  from '@turf/isolines';
+import turfBuffer from '@turf/buffer';
 
 
 function App(mapbox_token) {
@@ -21,8 +21,9 @@ function App(mapbox_token) {
 
   // -- Styling --
   // Sidewalk color scale
-  let colorScale = chroma.scale(['#3E60BD', '#FD4C51'])
-                    .correctLightness();
+  // let colorScale = chroma.scale(['#3E60BD', '#FD4C51'])
+  //                   .correctLightness();
+  let colorScale = chroma.scale(['lime', 'yellow', 'red']);
 
   // Line widths
   const lineWidth = 2;
@@ -75,6 +76,25 @@ function App(mapbox_token) {
         }
       }
     });
+    let breaks = [0, 2000, 4000, 6000, 8000, 10000];
+    let maxBreak = Math.max(...breaks);
+    let colorStops = []
+    for (let brk of breaks) {
+      colorStops.push([brk, colorScale(brk / maxBreak).hex()]);
+    }
+
+    map.addLayer({
+      id: 'isochrone-tins',
+      type: 'fill',
+      source: 'isochrones',
+      paint: {
+        'fill-opacity': 0.4,
+        'fill-color': {
+          property: 'cost',
+          stops: colorStops
+        }
+      }
+    });
 
     // Place a marker at the current location
     map.addSource('origin', {
@@ -106,24 +126,26 @@ function App(mapbox_token) {
       let lon = point.features[0].geometry.coordinates[0];
       $.get('/api/v2/travelcost.json?lat=' + lat + '&lon=' + lon)
         .done(function(data) {
-          let breaks = [0, 2000, 4000, 6000, 8000];
+          let breaks = [0, 2000, 4000, 6000, 8000, 10000];
           console.log(data);
-          let lines = isolines.default(data, 'cost', 50, breaks);
+          let lines = turfIsolines(data, 'cost', 200, breaks);
           console.log(lines);
-          let buffered = buffer.default(lines, 1, 'meters');
-          console.log(buffered);
+          let buffered = turfBuffer(lines, 2, 'meters');
           for (let i = 0; i < lines.features.length; i++) {
             let cost = lines.features[i].properties.cost;
             buffered.features[i].properties.cost = cost;
           }
-          // let tinned = turf.tin(data, 'cost');
-          // for (let i = 0; i < tinned.features.length; i++) {
-          //   let p = tinned.features[i].properties;
-          //   let z = (p.a + p.b + p.c) / 3;
-          //   console.log(z);
-          //   tinned.features[i].properties.z = z;
-          // }
+
+          console.log(buffered);
           map.getSource('isochrones').setData(buffered);
+
+          // let tinned = turfTin(data, 'cost');
+          // for (let feature of tinned.features) {
+          //   let p = feature.properties;
+          //   feature.properties.cost = (p.a + p.b + p.c) / 3;
+          // }
+
+          // map.getSource('isochrones').setData(tinned);
         });
     }
 
