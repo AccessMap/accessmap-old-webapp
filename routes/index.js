@@ -8,18 +8,30 @@ var models = require('../models');
 
 var router = express.Router();
 
-///////////
-// Index //
-///////////
+//
+// Index
+//
 
-/* GET index page. */
+// GET index page
 router.get('/', function(req, res) {
-  res.render('index', { user: req.user });
+  res.render('index', {
+    mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
+    user: req.user
+  });
 });
 
-////////////////////////////
-// Registration and login //
-////////////////////////////
+//
+// About page
+//
+
+// GET index page
+router.get('/about', function(req, res) {
+  res.render('about', { user: req.user });
+});
+
+//
+// Registration and login
+//
 
 function isAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
@@ -31,18 +43,18 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
-/* GET comingsoon. */
+// GET comingsoon
 router.get('/comingsoon', function(req, res) {
   res.render('comingsoon');
 });
 
-/* GET register. */
+// GET register
 router.get('/register', function(req, res) {
   res.redirect('/comingsoon');
   res.render('register');
 });
 
-/* POST register */
+// POST register
 router.post('/register', function(req, res) {
   var username = req.body.username;
   var email = req.body.email;
@@ -71,21 +83,21 @@ router.post('/register', function(req, res) {
   }
 });
 
-/* GET login page. */
+// GET login page
 router.get('/login', function(req, res) {
   // TODO: Remove the redirect to re-enable login page
   res.redirect('/comingsoon');
   res.render('login', { user: req.user });
 });
 
-/* POST login page. */
+// POST login page
 router.post('/login', passport.authenticate('local', {
   successReturnToOrRedirect: '/',
   failureRedirect: '/login',
   failureFlash: true
 }));
 
-/* GET logout page. */
+// GET logout page
 router.get('/logout', function(req, res) {
   res.redirect('/comingsoon');
   req.logout();
@@ -93,17 +105,17 @@ router.get('/logout', function(req, res) {
   res.redirect('/');
 });
 
-/* GET profile page. */
+// GET profile page
 router.get('/profile', function(req, res) {
   res.redirect('/comingsoon');
   res.render('profile', { user: req.user });
 });
 
-///////////////
-// Map pages //
-///////////////
+//
+// Map pages
+//
 
-/* GET map page. */
+// GET map page
 router.get('/map', function(req, res) {
   res.render('map', {
     mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),

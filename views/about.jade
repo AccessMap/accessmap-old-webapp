@@ -1,0 +1,78 @@
+extends layout_wfooter
+
+block content
+  .container(style='width: 100%; padding: 0px 0px;')
+    .jumbotron.text-center
+      .img
+      .container
+        .row
+          a(name='about')
+          h1 What is AccessMap?
+          p For someone with limited mobility, using the sidewalk in a new area can be like driving with no directions, hitting dead end after dead end: there are many obstacles that can prevent access (no curb ramps, too steep of hills, bad surface conditions) and there are next to no resources available that provide this information.
+          // TODO: include an illustrative image of this point.
+
+          p The goal of AccessMap is to enable safe, accessible trip planning on #[b pedestrian ways] for people with limited mobility. To meet that end, the people working on the AccessMap project develop tools for trip planning as well as tools for gathering and maintaining open data about sidewalks, curb ramps, construction information, etc. We are starting with Seattle, but hope to expand to other locations soon using the OpenStreetMap-based efforts of the #[a(href='https://opensidewalks.com') OpenSidewalks] project.
+
+    .container
+      .row
+        .text-center
+          a(name='datasources')
+          h2 Where do we get our data?
+          p We collect data from many sources to get a more complete picture of sidewalk accessibility.
+        .col-md-3.text-center
+          h3 Basemap
+          a(href='https://mapbox.com/') Mapbox
+          p (who get their data from #[a(href='https://openstreetmap.org') OpenStreetMap])
+        .col-md-3.text-center
+          h3 Sidewalks + Curb Ramps
+          a(href='https://data.seattle.gov/') Seattle Department of Transportation
+        .col-md-3.text-center
+          h3 Street Crossings
+          p Extrapolated from street intersections and nearby sidewalks, contributed by #[a(href='http://uwescience.github.io/DSSG_sidewalk/2015/08/28/Sidewalks-Project-Summary.html') the DSSG 2015 Sidewalks team].
+        .col-md-3.text-center
+          h3 Elevation
+          a(href='http://nationalmap.gov/elevation.html') National Elevation Dataset, USGS
+
+      .row
+        .text-center
+          a(name='getinvolved')
+          h2 Get Involved
+
+        .col-md-4
+          .row.text-center
+            a.btn.btn-primary.btn-lg(href='https://docs.google.com/forms/d/1nVlY14QMSAjwPB6iV2pQiTodjujX2U-mX0Tth2lxR-4/viewform')
+              i.fa.fa-pencil
+              p Take our survey
+          .row
+            p.text-justify Help us make our trip planning software better tailored to your needs by filling out our survey. All responses are helpful!
+
+        .col-md-4
+          .row.text-center
+            a.btn.btn-primary.btn-lg(href='mailto:developers@accessmapseattle.com')
+              i.fa.fa-envelope
+              p Get in contact
+          .row
+            p.text-justify If you would like to get involved with AccessMap, or help bring AccessMap to your city, contact us via email.
+
+        .col-md-4
+          .row.text-center
+            a.btn.btn-success.btn-lg(href='https://www.washington.edu/giving/make-a-gift/?page=funds&source_typ=3&source=TASKAR')
+              i.fa.fa-gift
+              p Donate to AccessMap through TCAT
+          .row
+            p.text-justify If you would like to make a donation to AccessMap, click the Donate button above and donate to the Taskar Center for Accessible Technology with a #[b comment mentioning the AccessMap project].
+
+            p Donations will go towards funding the development of AccessMap as well as incidental costs (AccessMap is largely a volunteer effort).
+
+      .row
+        .text-center
+          a(name='support')
+          h2 Support
+        p This project would not be where it is today without the help of the following people and organizations:
+        ul.list-unstyled
+          li The Taskar Center for Accessible Technology (and its director Anat Caspi)
+          li The University of Washington eScience Institute and its DSSG program
+          li Alan Borning, Department of Computer Science and Engineering at UW
+          li The Seattle Commission for People with Disabilities
+          li Seattle Department of Transportation
+    hr

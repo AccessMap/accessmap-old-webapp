@@ -1,10 +1,14 @@
 body {
-  padding-top: 0px;
   font-family: sans-serif;
   height: 100%;
   width: 100%;
 }
 
+.row {
+  padding: 10px;
+}
+
+/* For navbar/footer spacing */
 .fill {
   padding-top: 50px;
   padding-bottom: 0px;
@@ -16,8 +20,8 @@ body {
 
 .container .jumbotron {
   border-radius: 0px;
+  background-color: rgba(0, 0, 0, 0.1);
   padding-top: 0;
-  padding-bottom: 40px;
   color: black;
   overflow: hidden;
   position: relative;
@@ -25,18 +29,27 @@ body {
   text-align-last: center;
 }
 
-.jumbotron img {
+.jumbotron .img {
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
-  height: auto;
+  height: 100%;
   opacity: 0.2;
+  background-image: url("../images/hill-splash.jpg");
+  background-size: cover;
+  z-index: -1;
 }
 
+.jumbotron .container {
+  background-color: transparent;
+}
+
+/*
 .jumbotron p {
   font-size: 1.6em;
 }
+*/
 
 .jumbotron h1 {
   font-family: 'Montserrat', sans-serif;
@@ -44,10 +57,6 @@ body {
 
 .container i {
   font-size: 150%;
-}
-
-.container .row {
-  padding-bottom: 40px;
 }
 
 table img {

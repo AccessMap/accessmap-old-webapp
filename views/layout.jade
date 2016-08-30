@@ -47,13 +47,15 @@ html
             li
               a(href='#')
               span.sr-only (current)
-            li: a(href='/map') The Map
-            if (!user)
-              li: a(href='/login') Log in
-              li: a(href='/register') Register
-            if (user)
-              li: a(href='/profile') Profile
-              li: a(href='/logout') Log out
+            li: a(href='/about#getinvolved') Get Involved
+            li: a(href='/about') About
+            //
+              if (!user)
+                li: a(href='/login') Log in
+                li: a(href='/register') Register
+              if (user)
+                li: a(href='/profile') Profile
+                li: a(href='/logout') Log out
 
 
     .container-fluid.fill
