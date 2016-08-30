@@ -171,7 +171,7 @@ var App =
 
 	    // Street crossings
 	    map.addLayer({
-	      id: 'sidewalks-shadow',
+	      id: 'sidewalks-outline',
 	      type: 'line',
 	      source: 'seattle',
 	      'source-layer': 'sidewalks',
@@ -180,7 +180,6 @@ var App =
 	        'line-width': {
 	          stops: [[12, 1.5], [clickable, 5], [20, 12]]
 	        },
-	        'line-translate': [-0.5, 0.5],
 	        'line-opacity': {
 	          stops: [[13, 0.0], [clickable, 0.1], [20, 0.2]]
 	        }
