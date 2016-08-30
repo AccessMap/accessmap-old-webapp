@@ -20,6 +20,15 @@ function App(mapbox_token) {
   // Sidewalk color scale
   let colorScale = chroma.scale(['lime', 'yellow', 'red']);
 
+  // Set the legend scale
+  let gradientHTML = '';
+  for (let i = 0; i <= 100; i++) {
+    gradientHTML += '<span class="grad-step" style="background-color:';
+    gradientHTML += colorScale(i / 100.);
+    gradientHTML += '"></span>'
+  }
+  $('.gradient').append(gradientHTML);
+
   // Map initialization
   mapboxgl.accessToken = mapbox_token;
 
@@ -272,6 +281,7 @@ function App(mapbox_token) {
 
       map.getCanvas().style.cursor = (gradePaths.length) ? 'pointer': '';
     });
+
   });
 }
 

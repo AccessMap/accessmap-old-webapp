@@ -90,6 +90,15 @@ var App =
 	  // Sidewalk color scale
 	  var colorScale = chroma.scale(['lime', 'yellow', 'red']);
 
+	  // Set the legend scale
+	  var gradientHTML = '';
+	  for (var i = 0; i <= 100; i++) {
+	    gradientHTML += '<span class="grad-step" style="background-color:';
+	    gradientHTML += colorScale(i / 100.);
+	    gradientHTML += '"></span>';
+	  }
+	  (0, _jquery2.default)('.gradient').append(gradientHTML);
+
 	  // Map initialization
 	  _mapboxGl2.default.accessToken = mapbox_token;
 
