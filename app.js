@@ -12,7 +12,9 @@ var session = require('express-session'),
     LocalStrategy = require('passport-local').Strategy;
 
 var models = require('./models');
-var routes = require('./routes/index');
+var index = require('./routes/index');
+var api = require('./routes/api');
+var tiles = require('./routes/tiles');
 
 var app = express();
 var env = process.env.NODE_ENV || 'development';
@@ -27,12 +29,20 @@ if (env == 'production') {
 } else if (env == 'development') {
   var secret = 'developmentSecret';
 }
+
+// Store session info (automatically) in the database
+var SequelizeStore = require('connect-session-sequelize')(session.Store);
+
 app.use(session({
-  store: new (require('connect-pg-simple')(session))(),
+  store: new SequelizeStore({
+    db: models.sequelize
+  }),
   secret: secret,
   resave: false,
   saveUninitialized: false
 }));
+
+// Set up flash messages (e.g. bad login message at top of page)
 app.use(flash());
 app.use(function(req, res, next) {
   res.locals.errorMessage = req.flash('error');
@@ -110,7 +120,9 @@ passport.deserializeUser(function(id, done) {
 });
 
 // Routes
-app.use('/', routes);
+app.use('/', index);
+app.use('/api', api);
+app.use('/tiles', tiles);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

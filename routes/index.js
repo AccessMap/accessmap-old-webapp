@@ -8,18 +8,38 @@ var models = require('../models');
 
 var router = express.Router();
 
-///////////
-// Index //
-///////////
+//
+// SSL - specific to Azure ACME (letsencrypt) plugin
+//
+router.use('/.well-known', express.static('.well-known'));
+router.get('/.well-known/acme-challenge/:fileid', function(req, res){
+  res.send('Requesting '+fileid)
+})
 
-/* GET index page. */
+//
+// Index
+//
+
+// GET index page
 router.get('/', function(req, res) {
-  res.render('index', { user: req.user });
+  res.render('index', {
+    mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
+    user: req.user
+  });
 });
 
-////////////////////////////
-// Registration and login //
-////////////////////////////
+//
+// About page
+//
+
+// GET index page
+router.get('/about', function(req, res) {
+  res.render('about', { user: req.user });
+});
+
+//
+// Registration and login
+//
 
 function isAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
@@ -31,12 +51,18 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
-/* GET register. */
+// GET comingsoon
+router.get('/comingsoon', function(req, res) {
+  res.render('comingsoon');
+});
+
+// GET register
 router.get('/register', function(req, res) {
+  res.redirect('/comingsoon');
   res.render('register');
 });
 
-/* POST register */
+// POST register
 router.post('/register', function(req, res) {
   var username = req.body.username;
   var email = req.body.email;
@@ -65,38 +91,49 @@ router.post('/register', function(req, res) {
   }
 });
 
-/* GET login page. */
+// GET login page
 router.get('/login', function(req, res) {
+  // TODO: Remove the redirect to re-enable login page
+  res.redirect('/comingsoon');
   res.render('login', { user: req.user });
 });
 
-/* POST login page. */
+// POST login page
 router.post('/login', passport.authenticate('local', {
   successReturnToOrRedirect: '/',
   failureRedirect: '/login',
   failureFlash: true
 }));
 
-/* GET logout page. */
+// GET logout page
 router.get('/logout', function(req, res) {
+  res.redirect('/comingsoon');
   req.logout();
   req.flash('success', 'You have successfully logged out.');
   res.redirect('/');
 });
 
-/* GET profile page. */
+// GET profile page
 router.get('/profile', function(req, res) {
+  res.redirect('/comingsoon');
   res.render('profile', { user: req.user });
 });
 
-///////////////
-// Map pages //
-///////////////
+//
+// Map pages
+//
 
-/* GET map page. */
+// GET map page
 router.get('/map', function(req, res) {
   res.render('map', {
-    api_url: JSON.stringify(process.env.API_URL),
+    mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
+    user: req.user
+  });
+});
+
+router.get('/isochrones', function(req, res) {
+  res.render('isochrones', {
+    mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
     user: req.user
   });
 });
@@ -108,7 +145,6 @@ router.get('/improve', function(req, res) {
 router.get('/learnsidewalks', isAuthenticated, function(req, res, next) {
   res.render('learnsidewalks', {
     learn_url: JSON.stringify(process.env.LEARN_URL),
-    api_url: JSON.stringify(process.env.API_URL),
     user: req.user.username
   });
 });
@@ -122,5 +158,6 @@ router.get('/getdata', isAuthenticated, function(req, res, next) {
     }
   });
 });
+
 
 module.exports = router;

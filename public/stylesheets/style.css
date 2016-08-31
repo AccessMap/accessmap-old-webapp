@@ -1,10 +1,14 @@
 body {
-  padding-top: 0px;
   font-family: sans-serif;
   height: 100%;
   width: 100%;
 }
 
+.row {
+  padding: 10px;
+}
+
+/* For navbar/footer spacing */
 .fill {
   padding-top: 50px;
   padding-bottom: 0px;
@@ -15,19 +19,37 @@ body {
 }
 
 .container .jumbotron {
-  background: url("/images/hill-splash.jpg");
-  background-size: cover;
-  background-position: right center;
-  background-repeat: no-repeat;
   border-radius: 0px;
+  background-color: rgba(0, 0, 0, 0.1);
   padding-top: 0;
-  padding-bottom: 40px;
-  color: white;
+  color: black;
+  overflow: hidden;
+  position: relative;
+  text-align: justify;
+  text-align-last: center;
 }
 
+.jumbotron .img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.2;
+  background-image: url("../images/hill-splash.jpg");
+  background-size: cover;
+  z-index: -1;
+}
+
+.jumbotron .container {
+  background-color: transparent;
+}
+
+/*
 .jumbotron p {
   font-size: 1.6em;
 }
+*/
 
 .jumbotron h1 {
   font-family: 'Montserrat', sans-serif;
@@ -35,10 +57,6 @@ body {
 
 .container i {
   font-size: 150%;
-}
-
-.container .row {
-  padding-bottom: 40px;
 }
 
 table img {
@@ -53,7 +71,7 @@ h2 {
   font-family: 'Montserrat', sans-serif;
 }
 .navbar {
-  background-color: #84B942;
+  background-color: white;
   background-image: none;
   font-color: #FFFFFF;
   border: none;
@@ -69,31 +87,36 @@ h2 {
   width: auto;
 }
 
-.navbar .fa {
-  font-size: 130%;
+.footer {
+  text-align: center;
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-left: auto;
 }
 
-.navbar-inverse .navbar-nav>li>a{
-  color: white;
+.footer span {
+  padding: 10px;
+}
+
+.footer .fa {
+  font-size: 200%;
+}
+
+.navbar-default .navbar-nav>li>a{
+  color: #3a4e7a;
   font-size: 120%;
   font-family: 'Montserrat', sans-serif;
   text-shadow: none;
 }
 
-.navbar-inverse .navbar-nav>li>a:hover{
-  color: #1A4274;
-}
-
-.navbar-inverse .navbar-nav>li>span>a{
-  color: white;
+.navbar-default .navbar-nav>li>span>a{
   font-size: 120%;
   text-shadow: none;
   padding: 5px 5px;
   line-height: 50px;
 }
 
-.navbar-inverse .navbar-header>a{
-  color: white;
+.navbar-default .navbar-header>a{
   font-family: 'Montserrat', sans-serif;
   font-size: 180%;
   text-shadow: none;

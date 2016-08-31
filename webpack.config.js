@@ -1,27 +1,62 @@
 var path = require('path');
+var webpack = require('webpack');
+
 module.exports = {
+  context: path.join(__dirname, 'es6'),
   entry: {
-    map: './es6/map.js',
-    learnsidewalks: './es6/learnsidewalks.js'
+    map: './map.js',
+    isochrones: './isochrones.js'
   },
   output: {
-    path: __dirname,
-    filename: 'public/build/[name]-bundle.js',
-    library: 'App',
-    libraryTarget: 'umd'
+      path: path.join(__dirname, 'public', 'build'),
+      filename: './[name]-bundle.js',
+      library: 'App'
+  },
+  resolve: {
+      extensions: ['', '.js'],
+      alias: {
+          webworkify: 'webworkify-webpack',
+          // 'mapbox-gl': path.resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
+      }
+  },
+  node: {
+    console: true,
+    net: 'empty',
+    tls: 'empty'
   },
   module: {
-    loaders: [
-      { test: path.join(__dirname, 'es6'),
-        exclude: /node_modules/,
-        loader: 'babel-loader' },
-      // json-loader required for mapbox.js' referral to its own package.json
-      { test: /\.json$/,
-        loader: 'json' },
-      { test: /\.css$/,
-        loader: 'style-loader!css-loader' },
-      { test: /\.png$/,
-        loader: 'url-loader?limit=100000' }
-    ]
-  }
-};
+      loaders: [{
+          test: /\.json$/,
+          loader: 'json-loader'
+      }, {
+          test: path.join(__dirname, 'es6'),
+          exclude: /node_modules/,
+          loader: 'babel',
+          query: {
+            presets: ['es2015']
+          }
+      }, {
+          test: /\.js$/,
+          include: path.resolve('node_modules/mapbox-gl-shaders/index.js'),
+          loader: 'transform/cacheable?brfs'
+      }, {
+          test: /\.css$/,
+          loader: 'style-loader!css-loader'
+      }, {
+          test: require.resolve('mapbox-gl-geocoder'),
+          loader: 'imports?mapboxgl=mapbox-gl'
+      }],
+      postLoaders: [{
+          includes: [
+            /node_modules\/mapbox-gl-shaders/,
+            /node_modules\/request/
+          ],
+          loader: 'transform',
+          query: 'brfs'
+      }],
+      noParse: /node_modules\/json-schema\/lib\/validate\.js/
+  },
+  plugins: [
+    new webpack.OldWatchingPlugin()
+  ]
+}
