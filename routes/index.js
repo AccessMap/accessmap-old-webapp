@@ -9,6 +9,14 @@ var models = require('../models');
 var router = express.Router();
 
 //
+// SSL - specific to Azure ACME (letsencrypt) plugin
+//
+router.use('/.well-known', express.static('.well-known'));
+router.get('/.well-known/acme-challenge/:fileid', function(req, res){
+  res.send('Requesting '+fileid)
+})
+
+//
 // Index
 //
 
