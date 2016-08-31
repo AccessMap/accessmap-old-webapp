@@ -123,6 +123,8 @@ passport.deserializeUser(function(id, done) {
 app.use('/', index);
 app.use('/api', api);
 app.use('/tiles', tiles);
+// SSL - specific to Azure ACME (letsencrypt) plugin
+app.use('/.well-known', express.static('.well-known'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
