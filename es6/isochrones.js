@@ -10,6 +10,7 @@ import * as chroma from 'chroma-js';
 import $ from 'jquery';
 import debounce from 'debounce';
 import turfIsolines  from '@turf/isolines';
+import turfTin  from '@turf/tin';
 import turfBuffer from '@turf/buffer';
 
 
@@ -17,7 +18,8 @@ function App(mapbox_token) {
   // AccessMap uses a versioned API - which one are we using?
   const api = '/api/v2';
 
-  const start = [-122.333170, 47.606707];
+  const start = [-122.33747226325991, 47.611531556855084];
+  // const start = [-122.333170, 47.606707];
 
   // -- Styling --
   // Sidewalk color scale
@@ -83,19 +85,6 @@ function App(mapbox_token) {
       colorStops.push([brk, colorScale(brk / maxBreak).hex()]);
     }
 
-    map.addLayer({
-      id: 'isochrone-tins',
-      type: 'fill',
-      source: 'isochrones',
-      paint: {
-        'fill-opacity': 0.4,
-        'fill-color': {
-          property: 'cost',
-          stops: colorStops
-        }
-      }
-    });
-
     // Place a marker at the current location
     map.addSource('origin', {
       type: 'geojson',
@@ -127,16 +116,13 @@ function App(mapbox_token) {
       $.get('/api/v2/travelcost.json?lat=' + lat + '&lon=' + lon)
         .done(function(data) {
           let breaks = [0, 2000, 4000, 6000, 8000, 10000];
-          console.log(data);
           let lines = turfIsolines(data, 'cost', 200, breaks);
-          console.log(lines);
           let buffered = turfBuffer(lines, 2, 'meters');
           for (let i = 0; i < lines.features.length; i++) {
             let cost = lines.features[i].properties.cost;
             buffered.features[i].properties.cost = cost;
           }
 
-          console.log(buffered);
           map.getSource('isochrones').setData(buffered);
 
           // let tinned = turfTin(data, 'cost');

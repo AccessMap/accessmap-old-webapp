@@ -32,11 +32,16 @@ if (env == 'production') {
 
 // Store session info (automatically) in the database
 var SequelizeStore = require('connect-session-sequelize')(session.Store);
+var store = new SequelizeStore({
+  db: models.sequelize
+});
+
+if (env === 'development') {
+  store.sync();
+}
 
 app.use(session({
-  store: new SequelizeStore({
-    db: models.sequelize
-  }),
+  store: store,
   secret: secret,
   resave: false,
   saveUninitialized: false
