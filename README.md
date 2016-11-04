@@ -13,6 +13,7 @@ For the map to work correctly, these environment variables need to be set:
 | `TILES_URL` | The vector tiles endpoint for serving sidewalk and crossing vector tiles. AccessMap uses the tilesplash server (see the accessmap-vt repo).
 
 For the production website, these need to be set:
+
 | ENV variable | Description |
 | --- | --- |
 | `API_URL` | The JSON endpoint (URL) that sends GeoJSON for sidewalks, curb ramps, etc - the AccessMap API |
