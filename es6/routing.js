@@ -7,7 +7,7 @@ import $ from 'jquery';
 import debounce from 'debounce';
 
 
-function routingDemo(map, api) {
+function routingDemo(map) {
   //
   // Routing
   //
@@ -208,7 +208,7 @@ function routingDemo(map, api) {
     destination = destination.concat().reverse();
     let coords = origin.concat(destination);
     // FIXME: send coords as data?
-    let req = $.get(api + '/route.json?waypoints=' + '[' + coords + ']');
+    let req = $.get('api/v2/route.json?waypoints=' + '[' + coords + ']');
     req.done(function(data) {
         // Draw the route from origin to destination
         if(data.code === 'Ok') {

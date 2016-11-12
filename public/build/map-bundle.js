@@ -83,7 +83,7 @@ var App =
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	function App(mapbox_token, api, routing) {
+	function App(mapbox_token, routing) {
 	  // Zoom point at which features (e.g. sidewalk) become clickable
 	  var clickable = 16;
 
@@ -346,7 +346,7 @@ var App =
 	    });
 
 	    if (routing) {
-	      (0, _routing2.default)(map, api);
+	      (0, _routing2.default)(map);
 	    }
 	  });
 	}
@@ -54625,7 +54625,7 @@ var App =
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	function routingDemo(map, api) {
+	function routingDemo(map) {
 	  //
 	  // Routing
 	  //
@@ -54818,7 +54818,7 @@ var App =
 	    destination = destination.concat().reverse();
 	    var coords = origin.concat(destination);
 	    // FIXME: send coords as data?
-	    var req = _jquery2.default.get(api + '/route.json?waypoints=' + '[' + coords + ']');
+	    var req = _jquery2.default.get('api/v2/route.json?waypoints=' + '[' + coords + ']');
 	    req.done(function (data) {
 	      // Draw the route from origin to destination
 	      if (data.code === 'Ok') {

@@ -10,7 +10,7 @@ import bufferPoint from './bufferpoint';
 import routingDemo from './routing';
 
 
-function App(mapbox_token, api, routing) {
+function App(mapbox_token, routing) {
   // Zoom point at which features (e.g. sidewalk) become clickable
   const clickable = 16;
 
@@ -285,7 +285,7 @@ function App(mapbox_token, api, routing) {
     });
 
     if (routing) {
-      routingDemo(map, api);
+      routingDemo(map);
     }
 
   });
