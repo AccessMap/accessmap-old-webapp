@@ -16,6 +16,16 @@ var router = express.Router();
 router.get('/', function(req, res) {
   res.render('index', {
     mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
+    api: JSON.stringify(process.env.API_URL + '/v2'),
+    user: req.user
+  });
+});
+
+// GET routing page
+router.get('/routing', function(req, res) {
+  res.render('routing', {
+    mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
+    api: JSON.stringify(process.env.API_URL + '/v2'),
     user: req.user
   });
 });

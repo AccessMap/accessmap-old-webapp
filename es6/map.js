@@ -7,9 +7,10 @@ import $ from 'jquery';
 import debounce from 'debounce';
 
 import bufferPoint from './bufferpoint';
+import routingDemo from './routing';
 
 
-function App(mapbox_token) {
+function App(mapbox_token, api, routing) {
   // Zoom point at which features (e.g. sidewalk) become clickable
   const clickable = 16;
 
@@ -130,6 +131,8 @@ function App(mapbox_token) {
         'line-color': {
           property: 'grade',
           stops: [
+            [-0.08333, colorScale(1.0).hex()],
+            [-0.05, colorScale(0.5).hex()],
             [0.0, colorScale(0.0).hex()],
             [0.05, colorScale(0.5).hex()],
             [0.08333, colorScale(1.0).hex()]
@@ -280,6 +283,10 @@ function App(mapbox_token) {
 
       map.getCanvas().style.cursor = (gradePaths.length) ? 'pointer': '';
     });
+
+    if (routing) {
+      routingDemo(map, api);
+    }
 
   });
 }
