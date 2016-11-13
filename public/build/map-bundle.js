@@ -146,11 +146,14 @@ var App =
 	      type: 'line',
 	      source: 'seattle',
 	      'source-layer': 'crossings',
-	      filter: ['==', 'curbramps', true],
+	      //      filter: ['==', 'curbramps', true],
 	      paint: {
 	        'line-color': '#000000',
 	        'line-width': {
-	          stops: [[12, 0.5], [clickable, 2], [20, 8]]
+	          stops: [[12, 1.5], [clickable, 5], [20, 12]]
+	        },
+	        'line-opacity': {
+	          stops: [[13, 0.0], [clickable, 0.1], [20, 0.2]]
 	        }
 	      },
 	      layout: {
@@ -159,16 +162,33 @@ var App =
 	    }, 'bridge-path-bg');
 
 	    map.addLayer({
-	      id: 'crossings',
+	      id: 'crossings-ramps',
 	      type: 'line',
 	      source: 'seattle',
 	      'source-layer': 'crossings',
 	      filter: ['==', 'curbramps', true],
 	      paint: {
-	        'line-color': '#ffffff',
+	        'line-color': '#222222',
 	        'line-width': {
-	          stops: [[12, 0.1], [clickable, 0.5], [20, 2]]
-	        }
+	          stops: [[12, 0.3], [clickable, 1], [20, 6]]
+	        },
+	        'line-opacity': 0.7
+	      },
+	      minzoom: 14
+	    }, 'bridge-path-bg');
+
+	    map.addLayer({
+	      id: 'crossings-notramps',
+	      type: 'line',
+	      source: 'seattle',
+	      'source-layer': 'crossings',
+	      filter: ['==', 'curbramps', false],
+	      paint: {
+	        'line-color': '#222222',
+	        'line-width': {
+	          stops: [[12, 0.3], [clickable, 1], [20, 6]]
+	        },
+	        'line-opacity': 0.3
 	      },
 	      minzoom: 14
 	    }, 'bridge-path-bg');
