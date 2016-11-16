@@ -22,7 +22,7 @@ function routingDemo(map) {
       type: 'Feature',
       geometry: {
         type: 'Point',
-        coordinates: [-122.312434, 47.655375]
+        coordinates: [-122.336158, 47.606637]
       },
       properties: {
         waypoint: 'origin'
@@ -31,7 +31,7 @@ function routingDemo(map) {
       type: 'Feature',
       geometry: {
         type: 'Point',
-        coordinates: [-122.318028, 47.658788]
+        coordinates: [-122.330572, 47.603704]
       },
       properties: {
        waypoint: 'destination'
@@ -221,10 +221,10 @@ function routingDemo(map) {
               properties: {}
             }]
           }
-          console.log(data);
           map.getSource('route').setData(fc);
         } else {
           console.log('Could not get route');
+          console.log(data);
         }
     });
   }

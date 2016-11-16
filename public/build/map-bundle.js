@@ -109,7 +109,7 @@ var App =
 	  var map = new _mapboxGl2.default.Map({
 	    container: 'map',
 	    style: 'mapbox://styles/mapbox/streets-v8',
-	    center: [-122.308690, 47.652810],
+	    center: [-122.333592, 47.605628],
 	    zoom: 15
 	  });
 
@@ -193,7 +193,7 @@ var App =
 	      minzoom: 14
 	    }, 'bridge-path-bg');
 
-	    // Street crossings
+	    // Sidewalks
 	    map.addLayer({
 	      id: 'sidewalks-outline',
 	      type: 'line',
@@ -333,7 +333,7 @@ var App =
 
 	      // Display sidewalk/crossing info
 	      var gradePaths = map.queryRenderedFeatures(e.point, {
-	        layers: ['sidewalks', 'crossings']
+	        layers: ['sidewalks', 'crossings-ramps', 'crossings-notramps']
 	      });
 
 	      if (!gradePaths.length) {
@@ -359,7 +359,7 @@ var App =
 	      }
 
 	      var gradePaths = map.queryRenderedFeatures(e.point, {
-	        layers: ['sidewalks', 'crossings']
+	        layers: ['sidewalks', 'crossings-ramps', 'crossings-notramps']
 	      });
 
 	      map.getCanvas().style.cursor = gradePaths.length ? 'pointer' : '';
@@ -54660,7 +54660,7 @@ var App =
 	      type: 'Feature',
 	      geometry: {
 	        type: 'Point',
-	        coordinates: [-122.312434, 47.655375]
+	        coordinates: [-122.336158, 47.606637]
 	      },
 	      properties: {
 	        waypoint: 'origin'
@@ -54669,7 +54669,7 @@ var App =
 	      type: 'Feature',
 	      geometry: {
 	        type: 'Point',
-	        coordinates: [-122.318028, 47.658788]
+	        coordinates: [-122.330572, 47.603704]
 	      },
 	      properties: {
 	        waypoint: 'destination'
@@ -54851,10 +54851,10 @@ var App =
 	            properties: {}
 	          }]
 	        };
-	        console.log(data);
 	        map.getSource('route').setData(fc);
 	      } else {
 	        console.log('Could not get route');
+	        console.log(data);
 	      }
 	    });
 	  }

@@ -36,7 +36,7 @@ function App(mapbox_token, routing) {
   let map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v8',
-    center: [-122.308690, 47.652810],
+    center: [-122.333592, 47.605628],
     zoom: 15
   });
 
@@ -122,7 +122,7 @@ function App(mapbox_token, routing) {
       minzoom: 14
     }, 'bridge-path-bg');
 
-    // Street crossings
+    // Sidewalks
     map.addLayer({
       id: 'sidewalks-outline',
       type: 'line',
@@ -269,7 +269,7 @@ function App(mapbox_token, routing) {
 
       // Display sidewalk/crossing info
       let gradePaths = map.queryRenderedFeatures(e.point, {
-        layers: ['sidewalks', 'crossings']
+        layers: ['sidewalks', 'crossings-ramps', 'crossings-notramps']
       });
 
       if (!gradePaths.length) {
@@ -298,7 +298,7 @@ function App(mapbox_token, routing) {
       }
 
       let gradePaths = map.queryRenderedFeatures(e.point, {
-        layers: ['sidewalks', 'crossings']
+        layers: ['sidewalks', 'crossings-ramps', 'crossings-notramps']
       });
 
       map.getCanvas().style.cursor = (gradePaths.length) ? 'pointer': '';
