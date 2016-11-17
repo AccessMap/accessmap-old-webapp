@@ -16,7 +16,9 @@ module.exports = {
       extensions: ['', '.js'],
       alias: {
           webworkify: 'webworkify-webpack',
-          // 'mapbox-gl': path.resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
+          'mapbox-gl$': path.resolve('./node_modules/mapbox-gl/dist/mapbox-gl-dev.js')
+          // TODO: switch between -dev and non-dev on production vs. not
+          // 'mapbox-gl$': path.resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
       }
   },
   node: {
@@ -33,7 +35,8 @@ module.exports = {
           exclude: /node_modules/,
           loader: 'babel',
           query: {
-            presets: ['es2015']
+            presets: ['es2015'],
+            plugins: ['transform-flow-strip-types']
           }
       }, {
           test: /\.js$/,
@@ -46,14 +49,14 @@ module.exports = {
           test: require.resolve('mapbox-gl-geocoder'),
           loader: 'imports?mapboxgl=mapbox-gl'
       }],
-      postLoaders: [{
-          includes: [
-            /node_modules\/mapbox-gl-shaders/,
-            /node_modules\/request/
-          ],
-          loader: 'transform',
-          query: 'brfs'
-      }],
+      // postLoaders: [{
+      //     includes: [
+      //       /node_modules\/mapbox-gl-shaders/,
+      //       /node_modules\/request/
+      //     ],
+      //     loader: 'transform',
+      //     query: 'brfs'
+      // }],
       noParse: /node_modules\/json-schema\/lib\/validate\.js/
   },
   plugins: [

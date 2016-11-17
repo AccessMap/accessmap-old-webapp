@@ -1,10 +1,8 @@
 import mapboxgl from 'mapbox-gl';
 import '!style!css!mapbox-gl/dist/mapbox-gl.css';
 import Geocoder from 'mapbox-gl-geocoder';
-import '!style!css!mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as chroma from 'chroma-js';
 import $ from 'jquery';
-import debounce from 'debounce';
 
 import bufferPoint from './bufferpoint';
 import routingDemo from './routing';
@@ -175,9 +173,9 @@ function App(mapbox_token, routing) {
     //
 
     // Geocoder (search by address/POI)
-    map.addControl(new Geocoder());
+//    map.addControl(new Geocoder());
     // Navigation - zooming and orientation
-    map.addControl(new mapboxgl.Navigation({position: 'top-left'}));
+    map.addControl(new mapboxgl.NavigationControl({position: 'top-left'}));
     // Geolocation (surprising amount of boilerplate)
     map.addSource('geolocate', {
       type: 'geojson',
@@ -223,10 +221,12 @@ function App(mapbox_token, routing) {
 
     });
 
-    let geolocator = new mapboxgl.Geolocate({position: 'top-left'});
+    let geolocator = new mapboxgl.GeolocateControl({
+      position: 'top-left'
+    });
     map.addControl(geolocator);
 
-    geolocator.on('geolocate', function(position) {
+    function drawGeolocation(position) {
       let coords = [position.coords.longitude, position.coords.latitude];
       let location = {
         type: 'FeatureCollection',
@@ -255,12 +255,26 @@ function App(mapbox_token, routing) {
       };
 
       map.getSource('geolocate-error').setData(errorCircle);
-    });
+    }
+
+    geolocator.on('geolocate', drawGeolocation);
+
+    // Default map state is an initial geolocation attempt
+    if (!routing) {
+      window.navigator.geolocation.getCurrentPosition(function(d) {
+        drawGeolocation(d);
+        map.flyTo({
+          center: [d.coords.longitude, d.coords.latitude],
+          zoom: 17,
+          bearing: 0,
+          pitch: 0
+        });
+      });
+    }
 
     //
     // Map events - catch clicks, etc
     //
-
     map.on('click', function(e) {
       // Only allow clicks at high zoom levels
       if (map.getZoom() < clickable) {
@@ -304,11 +318,12 @@ function App(mapbox_token, routing) {
       map.getCanvas().style.cursor = (gradePaths.length) ? 'pointer': '';
     });
 
-    if (routing) {
-      routingDemo(map);
-    }
-
   });
+
+  if (routing) {
+    routingDemo(map);
+  }
+
 }
 
 module.exports = App;

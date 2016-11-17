@@ -5,7 +5,6 @@
 import mapboxgl from 'mapbox-gl';
 import '!style!css!mapbox-gl/dist/mapbox-gl.css';
 import Geocoder from 'mapbox-gl-geocoder';
-import '!style!css!mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as chroma from 'chroma-js';
 import $ from 'jquery';
 import debounce from 'debounce';
@@ -187,7 +186,7 @@ function App(mapbox_token) {
   });
 
   // Map controls
-  map.addControl(new Geocoder());
+//  map.addControl(new Geocoder());
   map.addControl(new mapboxgl.Navigation({position: 'top-left'}));
 }
 
