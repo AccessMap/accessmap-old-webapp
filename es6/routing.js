@@ -374,13 +374,22 @@ function routingDemo(map, colorScale) {
     // Update coloring scheme for map
     // TODO: transform based on y value as well - should modify color scale
     let stops = map.getPaintProperty('sidewalks', 'line-color').stops;
-    stops = stops.map(function(d, i) {
+    stops = data.map(function(d, i) {
       let x = 1e-2 * data[i].x;
       let y = colorScale(1e-2 * data[i].y).hex();
       return [x, y]
     });
+    for (let i = (data.length - 1); i > 0; i--) {
+      // Densify the color stops - Mapbox's interpolation seems to cause
+      // darkening/gray-ing between values
+      let midx = 1e-2 * (data[i - 1].x + data[i].x) / 2;
+      let midy = colorScale(1e-2 * (data[i - 1].y + data[i].y) / 2).hex();
+      stops.splice(i, 0, [midx, midy]);
+    }
+
     map.setPaintProperty('sidewalks', 'line-color', {
       property: 'grade',
+      colorSpace: 'lab',
       stops: stops
     });
   }

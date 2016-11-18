@@ -86,7 +86,7 @@ var App =
 	  //
 
 	  // Sidewalk color scale
-	  var colorScale = chroma.scale(['lime', 'yellow', 'red']);
+	  var colorScale = chroma.scale(['lime', 'yellow', 'red']).mode('lab');
 
 	  // Set the legend scale
 	  var gradientHTML = '';
@@ -214,7 +214,7 @@ var App =
 	      'source-layer': 'sidewalks',
 	      paint: {
 	        'line-color': {
-	          type: 'exponential',
+	          colorSpace: 'lab',
 	          property: 'grade',
 	          stops: [[-0.08333, colorScale(1.0).hex()], [-0.05, colorScale(0.5).hex()], [0.0, colorScale(0.0).hex()], [0.05, colorScale(0.5).hex()], [0.08333, colorScale(1.0).hex()]]
 	        },
@@ -56295,13 +56295,22 @@ var App =
 	    // Update coloring scheme for map
 	    // TODO: transform based on y value as well - should modify color scale
 	    var stops = map.getPaintProperty('sidewalks', 'line-color').stops;
-	    stops = stops.map(function (d, i) {
+	    stops = data.map(function (d, i) {
 	      var x = 1e-2 * data[i].x;
 	      var y = colorScale(1e-2 * data[i].y).hex();
 	      return [x, y];
 	    });
+	    for (var _i = data.length - 1; _i > 0; _i--) {
+	      // Densify the color stops - Mapbox's interpolation seems to cause
+	      // darkening/gray-ing between values
+	      var midx = 1e-2 * (data[_i - 1].x + data[_i].x) / 2;
+	      var midy = colorScale(1e-2 * (data[_i - 1].y + data[_i].y) / 2).hex();
+	      stops.splice(_i, 0, [midx, midy]);
+	    }
+
 	    map.setPaintProperty('sidewalks', 'line-color', {
 	      property: 'grade',
+	      colorSpace: 'lab',
 	      stops: stops
 	    });
 	  }

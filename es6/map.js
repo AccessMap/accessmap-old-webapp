@@ -17,7 +17,7 @@ function App(mapbox_token, routing) {
   //
 
   // Sidewalk color scale
-  let colorScale = chroma.scale(['lime', 'yellow', 'red']);
+  let colorScale = chroma.scale(['lime', 'yellow', 'red']).mode('lab');
 
   // Set the legend scale
   let gradientHTML = '';
@@ -147,7 +147,7 @@ function App(mapbox_token, routing) {
       'source-layer': 'sidewalks',
       paint: {
         'line-color': {
-          type: 'exponential',
+          colorSpace: 'lab',
           property: 'grade',
           stops: [
             [-0.08333, colorScale(1.0).hex()],
