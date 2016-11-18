@@ -1,7 +1,8 @@
 import $ from 'jquery';
+import * as d3 from 'd3';
 
 
-function routingDemo(map) {
+function routingDemo(map, colorScale) {
   //
   // Routing
   //
@@ -256,6 +257,135 @@ function routingDemo(map) {
     updateRoute(waypoints.features[0].geometry.coordinates,
                 waypoints.features[1].geometry.coordinates);
   });
+
+  //
+  // TODO: Build the cost plot (use d3) with control points, make it interact
+  //       with map and store/retrieve settings in cookie.
+
+  //
+  // create plot
+  //
+
+  // create svg canvas
+  let svg = d3.select('#costplot')
+              .append('svg')
+              .attr('width', 400)
+              .attr('height', 200);
+  let margin = 50;
+  let w = svg.attr('width') - margin;
+  let h = svg.attr('height') - margin;
+
+  // set up d3 axes
+
+  let g = svg.append('g')
+    .attr('transform', 'translate(' + margin / 2 + ',' + margin / 2 + ')');
+
+  let x = d3.scaleLinear()
+    .domain([-10, 10])
+    .range([0, w])
+    .clamp(true);
+  let y = d3.scaleLinear()
+    .domain([0, 100])
+    .range([h, 0])
+    .clamp(true);
+
+  g.append('g')
+    .attr('class', 'axis axis-x')
+    .attr('transform', 'translate(0,' + h + ')')
+    .call(d3.axisBottom(x));
+
+  g.append('g')
+    .attr('class', 'axis axis-y')
+    .call(d3.axisLeft(y));
+
+  // * d3 place initial points
+  //   TODO: grab from cookie, if available
+  let data = [[-9, 100], [-5, 30], [-1, 0], [5, 30], [10, 100]];
+  data = data.map(function (d, i) {
+    return {x: d[0], y: d[1], id: i}
+  });
+
+  let line = d3.line()
+    .x(function(d) { return x(d.x) })
+    .y(function(d) { return y(d.y) });
+
+  let lines = g.selectAll('lines')
+    .data([data])
+  .enter().append('path')
+    .attr('class', 'lines')
+    .attr('d', function(d) { return line(d) })
+    .style('fill', 'none')
+    .style('stroke', 'blue')
+    .style('stroke-width', '2px');
+
+  let pointGroup = g.append('g')
+    .attr('class', 'points');
+
+  let point = pointGroup.selectAll('points')
+    .data(data)
+  .enter().append('circle')
+    .attr('cx', function(d) { return x(d.x) })
+    .attr('cy', function(d) { return y(d.y) })
+    .attr('r', 5)
+    .style('fill', 'black')
+    .call(d3.drag()
+      .on('start drag', dragged));
+
+//  point.append('circle')
+//    .attr('cx', function(d) { return x(d.x) })
+//    .attr('cy', function(d) { return y(d.y) })
+//    .attr('r', 5)
+//    .style('fill', 'black');
+
+  function dragged(d) {
+    // Using a linear scale + tracking drag events has some odd behavior -
+    // It doesn't originate at a reasonable location. Have to hack around it
+    // until we understand the proper transformations/settings
+    // The hack: use dx and dy and convert manually to get setting. Likely
+    // introduces some error
+
+    // Note: can't modify cutoffs via control points
+
+    let dx = d3.event.dx * (20 / w);
+    let dy = -1 * d3.event.dy * (100 / h);
+
+    if (d.id == 1 || d.id == 3) {
+      // between control points
+      d.x += dx;
+      d.y += dy;
+
+    } else {
+      // Center control point - only left/right allowed
+      d.x += dx;
+    }
+
+    // Update
+    d3.select(this)
+      .attr('cx', function(d) { return x(d.x) })
+      .attr('cy', function(d) { return y(d.y) });
+
+    lines
+      .attr('d', line(data));
+
+    updateColors();
+  }
+
+  function updateColors() {
+    // Update coloring scheme for map
+    // TODO: transform based on y value as well - should modify color scale
+    let stops = map.getPaintProperty('sidewalks', 'line-color').stops;
+    stops = stops.map(function(d, i) {
+      let x = 1e-2 * data[i].x;
+      let y = colorScale(1e-2 * data[i].y).hex();
+      return [x, y]
+    });
+    map.setPaintProperty('sidewalks', 'line-color', {
+      property: 'grade',
+      stops: stops
+    });
+  }
+
+  map.on('load', updateColors);
 }
 
 module.exports = routingDemo;

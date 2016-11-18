@@ -147,6 +147,7 @@ function App(mapbox_token, routing) {
       'source-layer': 'sidewalks',
       paint: {
         'line-color': {
+          type: 'exponential',
           property: 'grade',
           stops: [
             [-0.08333, colorScale(1.0).hex()],
@@ -321,7 +322,7 @@ function App(mapbox_token, routing) {
   });
 
   if (routing) {
-    routingDemo(map);
+    routingDemo(map, colorScale);
   }
 
 }

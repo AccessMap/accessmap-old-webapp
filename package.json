@@ -55,6 +55,7 @@
     "brfs": "^1.4.3",
     "chroma-js": "^1.1.1",
     "css-loader": "^0.23.1",
+    "d3": "^4.3.0",
     "debounce": "^1.0.0",
     "imports-loader": "^0.6.5",
     "jquery": "^2.2.4",
