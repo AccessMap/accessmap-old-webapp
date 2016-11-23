@@ -372,20 +372,34 @@ function routingDemo(map, colorScale) {
 
   function updateColors() {
     // Update coloring scheme for map
-    // TODO: transform based on y value as well - should modify color scale
-    let stops = map.getPaintProperty('sidewalks', 'line-color').stops;
-    stops = data.map(function(d, i) {
-      let x = 1e-2 * data[i].x;
-      let y = colorScale(1e-2 * data[i].y).hex();
+    // TODO: have separate modes: uphill vs. downhill. Current method uses
+    // line direction, which has no meaning on the map view
+    function densify(arr) {
+      arr = arr.slice();
+      for (let i = (arr.length - 1); i > 0; i--) {
+        arr.splice(i, 0, {
+          x: (arr[i - 1].x + arr[i].x) / 2,
+          y: (arr[i - 1].y + arr[i].y) / 2
+        });
+      }
+      return arr;
+    }
+
+    let denseData = densify(densify(data));
+
+    let stops = denseData.map(function(d) {
+      let x = 1e-2 * d.x;
+      let y = colorScale(1e-2 * d.y).hex();
       return [x, y]
     });
-    for (let i = (data.length - 1); i > 0; i--) {
-      // Densify the color stops - Mapbox's interpolation seems to cause
-      // darkening/gray-ing between values
-      let midx = 1e-2 * (data[i - 1].x + data[i].x) / 2;
-      let midy = colorScale(1e-2 * (data[i - 1].y + data[i].y) / 2).hex();
-      stops.splice(i, 0, [midx, midy]);
-    }
+
+    // for (let i = (data.length - 1); i > 0; i--) {
+    //   // Densify the color stops - Mapbox's interpolation seems to cause
+    //   // darkening/gray-ing between values
+    //   let midx = 1e-2 * (data[i - 1].x + data[i].x) / 2;
+    //   let midy = colorScale(1e-2 * (data[i - 1].y + data[i].y) / 2).hex();
+    //   stops.splice(i, 0, [midx, midy]);
+    // }
 
     map.setPaintProperty('sidewalks', 'line-color', {
       property: 'grade',

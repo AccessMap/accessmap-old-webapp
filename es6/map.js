@@ -1,6 +1,7 @@
 import mapboxgl from 'mapbox-gl';
 import '!style!css!mapbox-gl/dist/mapbox-gl.css';
-import Geocoder from 'mapbox-gl-geocoder';
+import MapboxGeocoder from 'mapbox-gl-geocoder';
+import '!style!css!mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as chroma from 'chroma-js';
 import $ from 'jquery';
 
@@ -67,6 +68,28 @@ function App(mapbox_token, routing) {
     // Layers - draw lines, dots, etc on map from source data
     //
 
+    // Uncomment to directly access the OSM data in mapbox - sidewalks!
+    // map.addLayer({
+    //   id: 'sidewalksosm',
+    //   type: 'line',
+    //   source: 'composite',
+    //   'source-layer': 'road',
+    //   filter: ['all', ['==', 'class', 'path'], ['==', 'type', 'sidewalk']],
+    //   paint: {
+    //     'line-color': '#ff00ff',
+    //     'line-width': {
+    //       stops: [[12, 1.5], [clickable, 5], [20, 12]]
+    //     },
+    //     'line-opacity': {
+    //       stops: [[13, 0.2], [clickable, 0.6], [20, 1]]
+    //     }
+    //   },
+    //   layout: {
+    //     'line-cap': 'round'
+    //   }
+    // }, 'bridge-path-bg');
+
+
     // Crossings
     map.addLayer({
       id: 'crossings-outline',
@@ -115,7 +138,7 @@ function App(mapbox_token, routing) {
         'line-width': {
           stops: [[12, 0.3], [clickable, 1], [20, 6]]
         },
-        'line-opacity': 0.3
+        'line-opacity': 0.2
       },
       minzoom: 14
     }, 'bridge-path-bg');
@@ -174,7 +197,9 @@ function App(mapbox_token, routing) {
     //
 
     // Geocoder (search by address/POI)
-//    map.addControl(new Geocoder());
+    let geocoder = new MapboxGeocoder({accessToken: mapboxgl.accessToken});
+    map.addControl(geocoder);
+//    map.addControl(new MapboxGeocoder());
     // Navigation - zooming and orientation
     map.addControl(new mapboxgl.NavigationControl({position: 'top-left'}));
     // Geolocation (surprising amount of boilerplate)
