@@ -8,6 +8,9 @@ import $ from 'jquery';
 import bufferPoint from './bufferpoint';
 import routingDemo from './routing';
 
+import AccessMapCostControl from './costControl';
+import '!style!css!./costControl/costControl.css';
+
 
 function App(mapbox_token, routing) {
   // Zoom point at which features (e.g. sidewalk) become clickable
@@ -88,7 +91,6 @@ function App(mapbox_token, routing) {
     //     'line-cap': 'round'
     //   }
     // }, 'bridge-path-bg');
-
 
     // Crossings
     map.addLayer({
@@ -286,17 +288,17 @@ function App(mapbox_token, routing) {
     geolocator.on('geolocate', drawGeolocation);
 
     // Default map state is an initial geolocation attempt
-    if (!routing) {
-      window.navigator.geolocation.getCurrentPosition(function(d) {
-        drawGeolocation(d);
-        map.flyTo({
-          center: [d.coords.longitude, d.coords.latitude],
-          zoom: 17,
-          bearing: 0,
-          pitch: 0
-        });
-      });
-    }
+    // if (!routing) {
+    //   window.navigator.geolocation.getCurrentPosition(function(d) {
+    //     drawGeolocation(d);
+    //     map.flyTo({
+    //       center: [d.coords.longitude, d.coords.latitude],
+    //       zoom: 17,
+    //       bearing: 0,
+    //       pitch: 0
+    //     });
+    //   });
+    // }
 
     //
     // Map events - catch clicks, etc
@@ -348,8 +350,9 @@ function App(mapbox_token, routing) {
 
   if (routing) {
     routingDemo(map, colorScale);
+    let costControl = new AccessMapCostControl();
+    map.addControl(costControl);
   }
-
 }
 
 module.exports = App;
