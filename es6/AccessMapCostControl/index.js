@@ -1,13 +1,12 @@
 import * as d3 from 'd3';
 import * as chroma from 'chroma-js';
 import $ from 'jquery';
-// import events from 'events';
 import extend from 'xtend';
 
 
-// TODO: make use of es6 features (e.g. class constructor) function AccessMapCostControl(options) {
+// TODO: make use of es6 features (e.g. class constructor) function
+// AccessMapCostControl(options) {
 function AccessMapCostControl(options) {
-  // this._eventEmitter = new events.eventEmitter();
   this.options = extend({}, this.options, options);
 }
 
@@ -62,9 +61,13 @@ AccessMapCostControl.prototype = {
       this._map.removeSource(source);
     }
 
-    this._map.removeLayer('waypoints-outline');
-    this._map.removeLayer('waypoints');
-    this._map.removeLayer('waypoints-text');
+    this._map.removeLayer('origin-outline');
+    this._map.removeLayer('origin');
+    this._map.removeLayer('origin-text');
+    this._map.removeLayer('destination-outline');
+    this._map.removeLayer('destination');
+    this._map.removeLayer('destination-text');
+
     this._map.removeLayer('route');
     this._map.removeLayer('route-outline');
     this._map.removeLayer('route-waypointpaths');
@@ -74,10 +77,36 @@ AccessMapCostControl.prototype = {
 
   _setupLayers: function() {
     // Store waypoint locations to share with drag operations
-    this._waypoints = {};
+    this._origin = {
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: []
+        },
+        properties: {
+          label: 'A'
+        }
+      }]
+    }
+
+    this._destination = {
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: []
+        },
+        properties: {
+          label: 'B'
+        }
+      }]
+    }
 
     // Add sources and layers for routing
-    this._sources = ['waypoints', 'route-path', 'route-segments',
+    this._sources = ['origin', 'destination', 'route-path', 'route-segments',
                      'route-waypointpaths'];
 
     //
@@ -154,9 +183,9 @@ AccessMapCostControl.prototype = {
 
       // waypoints
       map.addLayer({
-        id: 'waypoints-outline',
+        id: 'origin-outline',
         type: 'circle',
-        source: 'waypoints',
+        source: 'origin',
         paint: {
           'circle-radius': 12,
           'circle-color': '#000'
@@ -164,27 +193,49 @@ AccessMapCostControl.prototype = {
       });
 
       map.addLayer({
-        id: 'waypoints',
+        id: 'destination-outline',
         type: 'circle',
-        source: 'waypoints',
+        source: 'destination',
         paint: {
-          'circle-radius': 10,
-          'circle-color': {
-            property: 'waypoint',
-            type: 'categorical',
-            stops: [
-              ['origin', '#00ff00'],
-              ['intermediate', '#888888'],
-              ['destination', '#ffff00']
-            ]
-          }
+          'circle-radius': 12,
+          'circle-color': '#000'
         }
       });
 
       map.addLayer({
-        id: 'waypoints-text',
+        id: 'origin',
+        type: 'circle',
+        source: 'origin',
+        paint: {
+          'circle-radius': 10,
+          'circle-color': '#aaaaff'
+        }
+      });
+
+      map.addLayer({
+        id: 'destination',
+        type: 'circle',
+        source: 'destination',
+        paint: {
+          'circle-radius': 10,
+          'circle-color': '#ffff00'
+        }
+      });
+
+      map.addLayer({
+        id: 'origin-text',
         type: 'symbol',
-        source: 'waypoints',
+        source: 'origin',
+        layout: {
+          'text-field': '{label}',
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold']
+        }
+      });
+
+      map.addLayer({
+        id: 'destination-text',
+        type: 'symbol',
+        source: 'destination',
         layout: {
           'text-field': '{label}',
           'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold']
@@ -196,92 +247,88 @@ AccessMapCostControl.prototype = {
   _setupMouseInteraction: function() {
     let map = this._map;
     //
-    // Mouse interaction with waypoints
+    // Mouse interaction with waypoints - adapted from mapbox example
     //
+    let canvas = map.getCanvasContainer();
     let isCursorOverPoint = false;
     let isDragging = false;
-    let label = null;
-    let canvas = this._map.getCanvasContainer();
+    this._dragging = null;
 
     let that = this;
-
-    map.on('mousemove', function(e) {
-      // Set cursor to 'dragging' if it's above a waypoint
-      let features = map.queryRenderedFeatures(e.point, {
-        layers: ['waypoints']
-      });
-
-      // Figure out which waypoint we're over and track it globally
-      if (features.length) {
-        canvas.style.cursor = 'move';
-        isCursorOverPoint = true;
-        map.dragPan.disable();
-      } else {
-        map.setPaintProperty('waypoints', 'circle-color', {
-          property: 'waypoint',
-          type: 'categorical',
-          stops: [
-            ['origin', '#00ff00'],
-            ['intermediate', '#888888'],
-            ['destination', '#ffff00']
-          ]
-        });
-
-        canvas.style.cursor = '';
-        isCursorOverPoint = false;
-        map.dragPan.enable();
-      }
-    });
-
-    map.on('mousedown', function(e) {
+    function mouseDown() {
       if (!isCursorOverPoint) return;
-
-      // Find the waypoint under the mouse
-      let features = map.queryRenderedFeatures(e.point, {
-        layers: ['waypoints']
-      });
-      label = features[0].properties.label;
 
       isDragging = true;
 
+      if (isCursorOverPoint == 'origin') {
+        that._dragging = 'origin';
+      } else {
+        that._dragging = 'destination';
+      }
+      // Set a cursor indicator
       canvas.style.cursor = 'grab';
 
-      // Given new start (origin) and end (destination) points, request a new
-      // route and draw it
-      function onMove(e) {
-        if (!isDragging) return;
-
-        let coords = e.lngLat;
-
-        canvas.style.cursor = 'grabbing';
-
-        for (var feature of that._waypoints.features) {
-          if (feature.properties.label == label) {
-            feature.geometry.coordinates = [coords.lng, coords.lat];
-          }
-        }
-        // let waypointGeometry = that._waypoints.features[dragPoint].geometry;
-        // waypointGeometry.coordinates = [coords.lng, coords.lat];
-        map.getSource('waypoints').setData(that._waypoints);
-      }
-
-      function onUp(e) {
-        if (!isDragging) return;
-
-        // Get a route
-        let features = that._waypoints.features
-        let origin = features[0].geometry.coordinates;
-        let destination = features[features.length - 1].geometry.coordinates;
-        that.getRoute(origin, destination);
-
-        // Reset the cursor
-        canvas.style.cursor = '';
-        isDragging = false;
-      }
-
+      // Mouse events
       map.on('mousemove', onMove);
       map.on('mouseup', onUp);
-    }, true);
+    }
+
+    function onMove(e) {
+      if (!isDragging) return;
+      let coords = [e.lngLat.lng, e.lngLat.lat];
+
+      // Set a UI indicator for dragging.
+      canvas.style.cursor = 'grabbing';
+
+      // Update the marker state + update source to trigger render
+      if (that._dragging == 'origin') {
+        that._origin.features[0].geometry.coordinates = coords;
+        map.getSource('origin').setData(that._origin);
+      } else {
+        that._destination.features[0].geometry.coordinates = coords;
+        map.getSource('destination').setData(that._destination);
+      }
+    }
+
+    function onUp(e) {
+      if (!isDragging) return;
+      var coords = e.lngLat;
+
+      canvas.style.cursor = '';
+      isDragging = false;
+
+      // Request a route
+      that.getRoute(that._origin.features[0].geometry.coordinates,
+                    that._destination.features[0].geometry.coordinates);
+    }
+
+    map.on('load', function(e) {
+      map.on('mousemove', function(e) {
+        var features = map.queryRenderedFeatures(e.point, {
+          layers: ['origin-outline', 'destination-outline']
+        });
+
+        // Change point and cursor style as a UI indicator
+        // and set a flag to enable other mouse events.
+        if (features.length) {
+          // Which feature are we over? This should be more sophisticated (e.g.
+          // use click location to select overlapping ones). For now, if markers
+          // overlap, select the index-0 one
+          let feature = features[0]
+
+          // Store source name for marker under the cursor
+          isCursorOverPoint = feature.layer.source;
+          canvas.style.cursor = 'move';
+          map.dragPan.disable();
+        } else {
+          canvas.style.cursor = '';
+          isCursorOverPoint = false;
+          map.dragPan.enable();
+        }
+      });
+
+      map.on('mousedown', mouseDown, true);
+    });
   },
 
   _setupPlot: function() {
@@ -419,37 +466,29 @@ AccessMapCostControl.prototype = {
 
   getRoute: function(origin, destination) {
     let map = this._map;
-    this._waypoints = {
-      type: 'FeatureCollection',
-      features: [{
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: origin
-        },
-        properties: {
-          waypoint: 'origin',
-          label: 'A'
-        }
-      }, {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: destination
-        },
-        properties: {
-         waypoint: 'destination',
-         label: 'B'
-        }
-      }]
-    }
 
-    map.getSource('waypoints').setData(this._waypoints);
-    // origin and destination need to be in lat-lon
-    let originLonLat = origin.concat().reverse();
-    let destLonLat = destination.concat().reverse();
-    let coords = originLonLat.concat(destLonLat);
-    // FIXME: send coords as data?
+    //
+    // handle marker state
+    //
+
+    // store new marker locations (copy values to be safe)
+    this._origin.features[0].geometry.coordinates = origin.slice();
+    this._destination.features[0].geometry.coordinates = destination.slice();
+
+    // update marker sources (triggers redraw)
+    map.getSource('origin').setData(this._origin);
+    map.getSource('destination').setData(this._destination);
+
+    //
+    // request route
+    //
+
+    // origin and destination need to be in lat-lon for request (and
+    // concatenated)
+    let coords = origin.reverse().concat(destination.reverse());
+
+    // Send request, handle data
+    let that = this;
     let req = $.get(this.options.api + '?waypoints=' + '[' + coords + ']');
     req.done(function(data) {
       // Draw the route from origin to destination
@@ -466,10 +505,12 @@ AccessMapCostControl.prototype = {
         // Route segments - can be individually colored
         let segments = data.routes[0].segments;
 
-        // Path from origin/destination to route (e.g. dotted lines)
+        // Path from origin/destination to route (e.g. dotted lines in gmaps)
         let pathCoords = path.features[0].geometry.coordinates;
-        let originPath = [origin, pathCoords[0]];
-        let destPath = [pathCoords[pathCoords.length - 1], destination];
+        let originPath = [that._origin.features[0].geometry.coordinates,
+                          pathCoords[0]];
+        let destPath = [pathCoords[pathCoords.length - 1],
+                        that._destination.features[0].geometry.coordinates];
 
         let waypointPaths = {
           type: 'FeatureCollection',
