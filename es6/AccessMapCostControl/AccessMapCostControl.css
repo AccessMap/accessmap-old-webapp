@@ -14,3 +14,16 @@
   box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
   padding: 5px;
 }
+
+.geocoder-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align:middle;
+  speak:none;
+  background-repeat:no-repeat;
+}
+
+.geocoder-icon-search {
+  background-image: url(icons/search.svg);
+}

@@ -6,9 +6,7 @@ import * as chroma from 'chroma-js';
 import $ from 'jquery';
 
 import bufferPoint from './bufferpoint';
-
 import AccessMapCostControl from './AccessMapCostControl';
-import '!style!css!./AccessMapCostControl/AccessMapCostControl.css';
 
 
 function App(mapbox_token, routing) {

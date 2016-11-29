@@ -3,6 +3,7 @@ import * as chroma from 'chroma-js';
 import $ from 'jquery';
 import extend from 'xtend';
 
+import '!style!css!./AccessMapCostControl.css';
 
 // TODO: make use of es6 features (e.g. class constructor) function
 // AccessMapCostControl(options) {
@@ -42,12 +43,23 @@ AccessMapCostControl.prototype = {
     let el = this.container = document.createElement('div');
     el.className = 'mapboxgl-ctrl-costcontrol mapboxgl-ctrl';
 
-    let costplot = document.createElement('div');
-    costplot.className = 'costplot';
+    this._originEl = document.createElement('input');
+    this._originEl.type = 'text';
+    this._originEl.placeholder = 'Search address';
 
-    el.appendChild(costplot);
+    // TODO: Icon is bound to `this` to make clickable later
+    this._searchIcon = document.createElement('span');
+    this._searchIcon.className = 'geocoder-icon geocoder-icon-search';
 
-    this._setupPlot();
+    // let costplot = document.createElement('div');
+    // costplot.className = 'costplot';
+
+    // el.appendChild(costplot);
+
+    // this._drawCostPlot();
+
+    el.appendChild(this._originEl);
+    el.appendChild(this._searchIcon);
 
     return el;
   },
@@ -331,7 +343,7 @@ AccessMapCostControl.prototype = {
     });
   },
 
-  _setupPlot: function() {
+  _drawCostPlot: function() {
     let options = this.options;
     let map = this._map;
     // create svg canvas
