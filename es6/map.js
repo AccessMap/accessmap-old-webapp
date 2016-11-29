@@ -3,10 +3,10 @@ import '!style!css!mapbox-gl/dist/mapbox-gl.css';
 import MapboxGeocoder from 'mapbox-gl-geocoder';
 import '!style!css!mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as chroma from 'chroma-js';
-import $ from 'jquery';
 
 import bufferPoint from './bufferpoint';
 import AccessMapCostControl from './AccessMapCostControl';
+import AccessMapGradeControl from './AccessMapGradeControl';
 
 
 function App(mapbox_token, routing) {
@@ -19,15 +19,6 @@ function App(mapbox_token, routing) {
 
   // Sidewalk color scale
   let colorScale = chroma.scale(['lime', 'yellow', 'red']).mode('lab');
-
-  // Set the legend scale
-  let gradientHTML = '';
-  for (let i = 0; i <= 100; i++) {
-    gradientHTML += '<span class="grad-step" style="background-color:';
-    gradientHTML += colorScale(i / 100.);
-    gradientHTML += '"></span>'
-  }
-  $('.gradient').append(gradientHTML);
 
   // Map initialization
   mapboxgl.accessToken = mapbox_token;
@@ -343,6 +334,9 @@ function App(mapbox_token, routing) {
     });
 
   });
+
+  let gradeControl = new AccessMapGradeControl();
+  map.addControl(gradeControl, 'bottom-right');
 
   if (routing) {
     let costControl = new AccessMapCostControl();

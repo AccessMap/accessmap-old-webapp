@@ -1,0 +1,43 @@
+.mapboxgl-ctrl-gradectrl,
+.mapboxgl-ctrl-gradectrl *,
+.mapboxgl-ctrl-gradectrl *:after,
+.mapboxgl-ctrl-gradectrl *:before {
+  -webkit-box-sizing:border-box;
+     -moz-box-sizing:border-box;
+          box-sizing:border-box;
+}
+.mapboxgl-ctrl-gradectrl {
+  font: 15px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  background-color: white;
+  z-index: 1;
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+  padding: 5px;
+}
+
+.gradectrl-title h4 {
+    margin: 0 0 10px;
+}
+
+.grad-step {
+    display: inline-block;
+    height: 20px;
+    width: 1px;
+}
+
+.domain-min {
+    text-align: left;
+    float: left;
+}
+
+.domain-mid {
+  float: right;
+  position: relative;
+  left: -50%; /* or right 50% */
+  text-align: center;
+}
+
+.domain-max {
+    text-align: right;
+    float: right;
+}
