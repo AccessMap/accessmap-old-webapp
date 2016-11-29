@@ -6,7 +6,6 @@ import * as chroma from 'chroma-js';
 import $ from 'jquery';
 
 import bufferPoint from './bufferpoint';
-import routingDemo from './routing';
 
 import AccessMapCostControl from './AccessMapCostControl';
 import '!style!css!./AccessMapCostControl/AccessMapCostControl.css';
@@ -348,9 +347,11 @@ function App(mapbox_token, routing) {
   });
 
   if (routing) {
-    routingDemo(map, colorScale);
     let costControl = new AccessMapCostControl();
     map.addControl(costControl);
+    map.on('load', function() {
+      costControl.getRoute([-122.336158, 47.606637], [-122.330572, 47.603704]);
+    });
   }
 }
 
