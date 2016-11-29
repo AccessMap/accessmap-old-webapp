@@ -13,7 +13,7 @@ function AccessMapGradeControl(options) {
 AccessMapGradeControl.prototype = {
 
   options: {
-    title: 'Grade (%)',
+    xlabel: 'grade (%)',
     domain: [0, 5, 10],
     colorScale: chroma.scale(['lime', 'yellow', 'red']).mode('lab')
   },
@@ -26,9 +26,9 @@ AccessMapGradeControl.prototype = {
     let el = this.container = document.createElement('div');
     el.className = 'mapboxgl-ctrl-gradectrl mapboxgl-ctrl';
 
-    let titleEl = document.createElement('h4');
-    titleEl.className = 'gradectrl-title';
-    titleEl.innerHTML = this.options.title;
+    let xLabelEl = document.createElement('div');
+    xLabelEl.className = 'gradectrl-xlabel';
+    xLabelEl.innerHTML = this.options.xlabel;
 
     let plotEl = document.createElement('div');
     plotEl.className = 'gradectrl-plot';
@@ -39,25 +39,19 @@ AccessMapGradeControl.prototype = {
     let domainEl = document.createElement('div');
     domainEl.className = 'gradectrl-grade-domain';
 
-    let min = document.createElement('span');
-    min.className = 'domain-min'
-    min.innerHTML = this.options.domain[0];
-    let mid = document.createElement('span');
-    mid.className = 'domain-mid'
-    mid.innerHTML = this.options.domain[1]
-    let max = document.createElement('span');
-    max.className = 'domain-max'
-    max.innerHTML = this.options.domain[2]
-
-    domainEl.appendChild(min);
-    domainEl.appendChild(mid);
-    domainEl.appendChild(max);
+    let axisLabels = ['min', 'mid', 'max'];
+    for (let i = 0; i < 3; i++) {
+      let label = document.createElement('div');
+      label.className = 'domain-' + axisLabels[i];
+      label.innerHTML = this.options.domain[i];
+      domainEl.appendChild(label);
+    }
 
     plotEl.appendChild(gradeEl);
     plotEl.appendChild(domainEl);
 
-    el.appendChild(titleEl);
     el.appendChild(plotEl);
+    el.appendChild(xLabelEl);
 
     this._drawGradient();
 

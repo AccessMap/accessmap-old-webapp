@@ -2,17 +2,6 @@ extends layout
 append content
   .mapview
     #map
-      .legend
-        .legend-container
-          .legend-title
-            h4 Grade (%)
-          .legend-scale
-            .gradient
-            .domain
-              span.min 0.0
-              span.mid 5.0
-              span.max 8.3
-
   script(src='build/map-bundle.js')
   script.
     App(!{mapbox_token}, true);

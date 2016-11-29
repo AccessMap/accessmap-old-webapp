@@ -15,8 +15,9 @@
   padding: 5px;
 }
 
-.gradectrl-title h4 {
-    margin: 0 0 10px;
+.gradectrl-xlabel {
+    text-align: center;
+    margin: 0;
 }
 
 .grad-step {
@@ -25,19 +26,24 @@
     width: 1px;
 }
 
+.gradectrl-grade-domain {
+    height: 20px;
+}
+
 .domain-min {
-    text-align: left;
-    float: left;
+  display: inline-block;
+  text-align: left;
+  width: 33%;
 }
 
 .domain-mid {
-  float: right;
-  position: relative;
-  left: -50%; /* or right 50% */
+  display: inline-block;
   text-align: center;
+  width: 33%;
 }
 
 .domain-max {
-    text-align: right;
-    float: right;
+  display: inline-block;
+  text-align: right;
+  width: 33%;
 }
