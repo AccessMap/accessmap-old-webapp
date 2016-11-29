@@ -98,7 +98,6 @@ function App(mapbox_token, routing) {
       type: 'line',
       source: 'seattle',
       'source-layer': 'crossings',
-//      filter: ['==', 'curbramps', true],
       paint: {
         'line-color': '#000000',
         'line-width': {

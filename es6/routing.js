@@ -1,7 +1,7 @@
 import $ from 'jquery';
 
 
-function routingDemo(map, colorScale) {
+function routingDemo(map) {
   //
   // Routing
   //
@@ -20,24 +20,51 @@ function routingDemo(map, colorScale) {
   // route and draw it
   function updateRoute(origin, destination) {
     // origin and destination need to be in lat-lon
-    origin = origin.concat().reverse();
-    destination = destination.concat().reverse();
-    let coords = origin.concat(destination);
+    let originLonLat = origin.concat().reverse();
+    let destLonLat = destination.concat().reverse();
+    let coords = originLonLat.concat(destLonLat);
     // FIXME: send coords as data?
     let req = $.get('api/v2/route.json?waypoints=' + '[' + coords + ']');
     req.done(function(data) {
         // Draw the route from origin to destination
         if(data.code === 'Ok') {
-          let geometry = data.routes[0].geometry
-          let fc = {
+          // Complete path of route returned by routing system
+          let path = {
             type: 'FeatureCollection',
             features: [{
               type: 'Feature',
-              geometry: geometry,
-              properties: {}
+              geometry: data.routes[0].geometry
             }]
+          };
+
+          // Route segments - can be individually colored
+          let segments = data.routes[0].segments;
+
+          // Path from origin/destination to route (e.g. dotted lines)
+          let pathCoords = path.features[0].geometry.coordinates;
+          let originPath = [origin, pathCoords[0]];
+          let destPath = [pathCoords[pathCoords.length - 1], destination];
+
+          let waypointPaths = {
+            type: 'FeatureCollection',
+            features: []
+          };
+
+          for (var waypointPath of [originPath, destPath]) {
+            waypointPaths.features.push({
+              type: 'Feature',
+              geometry: {
+                type: 'LineString',
+                coordinates: waypointPath
+              },
+              properties: {}
+            });
           }
-          map.getSource('route').setData(fc);
+
+          // Update the map data layers
+          map.getSource('route-path').setData(path);
+          map.getSource('route-segments').setData(segments);
+          map.getSource('route-waypointpaths').setData(waypointPaths);
         } else {
           console.log('Could not get route');
           console.log(data);
@@ -116,24 +143,34 @@ function routingDemo(map, colorScale) {
     // Route display setup
     //
 
-    // Source to hold data - updates to this = rendering route line
-    map.addSource('route', {
-      type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: []
-      }
-    });
+    // Sources to hold routing data - updates to these = rendering route line
+    let emptyFeatureCollection = {
+      type: 'FeatureCollection',
+      features: []
+    }
+
+    let routeSources = ['route-path', 'route-segments', 'route-waypointpaths'];
+
+    for (var routeSource of routeSources) {
+      map.addSource(routeSource, {
+        type: 'geojson',
+        data: emptyFeatureCollection
+      });
+    }
 
     // Route outline - thicker line
     map.addLayer({
       id: 'route-outline',
       type: 'line',
-      source: 'route',
+      source: 'route-path',
       paint: {
         'line-width': 12,
-        'line-color': '#ffffff',
+        'line-color': '#000',
         'line-opacity': 0.8
+      },
+      layout: {
+        'line-cap': 'round',
+        'line-join': 'round'
       }
     });
 
@@ -141,16 +178,41 @@ function routingDemo(map, colorScale) {
     map.addLayer({
       id: 'route',
       type: 'line',
-      source: 'route',
+      source: 'route-segments',
       paint: {
-        'line-width': 5,
-        'line-color': '#0000ff',
+        'line-width': 8,
+        'line-color': {
+          property: 'cost',
+          stops: [
+            [1e9, '#00ff00'],
+            [5e9, '#ffff00'],
+            [1e10, '#ff0000']
+          ]
+        }
+      },
+      layout: {
+        'line-cap': 'round',
+        'line-join': 'round'
+      }
+    });
+
+    map.addLayer({
+      id: 'route-waypointpaths',
+      type: 'line',
+      source: 'route-waypointpaths',
+      paint: {
+        'line-width': 8,
+        'line-color': '#8888ff',
         'line-opacity': 0.8
+      },
+      layout: {
+        'line-cap': 'round',
+        'line-join': 'round'
       }
     });
 
     //
-    // Waypoints
+    // Waypoint controls
     //
 
     // Data source for waypoints - this is editing during dragging
@@ -209,13 +271,6 @@ function routingDemo(map, colorScale) {
 
       // Figure out which waypoint we're over and track it globally
       if (features.length) {
-        // let featureId = features[0].properties.routeId;
-        // for (let i = 0; i < waypoints.features.length; i++) {
-        //   let globalId = waypoints.features[i].properties.routeId;
-        //   if (featureId === globalId) {
-        //     dragPoint = i;
-        //   }
-        // }
         canvas.style.cursor = 'move';
         isCursorOverPoint = true;
         map.dragPan.disable();
