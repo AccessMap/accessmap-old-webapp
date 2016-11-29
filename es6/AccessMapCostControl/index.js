@@ -43,10 +43,7 @@ AccessMapCostControl.prototype = {
 
     el.appendChild(costplot);
 
-    let that = this;
-    map.on('load', function() {
-      that._setupPlot(that);
-    });
+    this._setupPlot();
 
     return el;
   },
@@ -58,11 +55,11 @@ AccessMapCostControl.prototype = {
     return this;
   },
 
-  _setupPlot: function(that) {
-    let options = that.options;
-    let map = that._map;
+  _setupPlot: function() {
+    let options = this.options;
+    let map = this._map;
     // create svg canvas
-    let svg = d3.select('.costplot')
+    let svg = d3.select(this.container)
                 .append('svg')
                 .attr('width', 400)
                 .attr('height', 200);

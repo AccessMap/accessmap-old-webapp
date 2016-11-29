@@ -8,8 +8,8 @@ import $ from 'jquery';
 import bufferPoint from './bufferpoint';
 import routingDemo from './routing';
 
-import AccessMapCostControl from './costControl';
-import '!style!css!./costControl/costControl.css';
+import AccessMapCostControl from './AccessMapCostControl';
+import '!style!css!./AccessMapCostControl/AccessMapCostControl.css';
 
 
 function App(mapbox_token, routing) {
