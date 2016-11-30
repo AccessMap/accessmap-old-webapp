@@ -1,11 +1,9 @@
 import mapboxgl from 'mapbox-gl';
 import '!style!css!mapbox-gl/dist/mapbox-gl.css';
-import MapboxGeocoder from 'mapbox-gl-geocoder';
-import '!style!css!mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as chroma from 'chroma-js';
 
 import bufferPoint from './bufferpoint';
-import AccessMapCostControl from './AccessMapCostControl';
+import AccessMapRoutingControl from './AccessMapRoutingControl';
 import AccessMapGradeControl from './AccessMapGradeControl';
 
 
@@ -185,12 +183,8 @@ function App(mapbox_token, routing) {
     // Map controls
     //
 
-    // Geocoder (search by address/POI)
-    let geocoder = new MapboxGeocoder({accessToken: mapboxgl.accessToken});
-    map.addControl(geocoder);
-//    map.addControl(new MapboxGeocoder());
     // Navigation - zooming and orientation
-    map.addControl(new mapboxgl.NavigationControl({position: 'top-left'}));
+    map.addControl(new mapboxgl.NavigationControl());
     // Geolocation (surprising amount of boilerplate)
     map.addSource('geolocate', {
       type: 'geojson',
@@ -274,19 +268,6 @@ function App(mapbox_token, routing) {
 
     geolocator.on('geolocate', drawGeolocation);
 
-    // Default map state is an initial geolocation attempt
-    // if (!routing) {
-    //   window.navigator.geolocation.getCurrentPosition(function(d) {
-    //     drawGeolocation(d);
-    //     map.flyTo({
-    //       center: [d.coords.longitude, d.coords.latitude],
-    //       zoom: 17,
-    //       bearing: 0,
-    //       pitch: 0
-    //     });
-    //   });
-    // }
-
     //
     // Map events - catch clicks, etc
     //
@@ -339,10 +320,14 @@ function App(mapbox_token, routing) {
   map.addControl(gradeControl, 'bottom-right');
 
   if (routing) {
-    let costControl = new AccessMapCostControl();
-    map.addControl(costControl);
+    let routingControl = new AccessMapRoutingControl({
+      accessToken: mapbox_token,
+      api: 'api/v2/route.json'
+    });
+    map.addControl(routingControl);
     map.on('load', function() {
-      costControl.getRoute([-122.336158, 47.606637], [-122.330572, 47.603704]);
+      routingControl.getRoute([-122.336158, 47.606637],
+                              [-122.330572, 47.603704]);
     });
   }
 }

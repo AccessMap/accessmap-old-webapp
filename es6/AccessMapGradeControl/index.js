@@ -5,7 +5,6 @@ import extend from 'xtend';
 import '!style!css!./AccessMapGradeControl.css';
 
 // TODO: make use of es6 features (e.g. class constructor) function
-// AccessMapCostControl(options) {
 function AccessMapGradeControl(options) {
   this.options = extend({}, this.options, options);
 }

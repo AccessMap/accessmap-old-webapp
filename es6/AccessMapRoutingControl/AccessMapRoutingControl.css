@@ -1,0 +1,56 @@
+.mapboxgl-ctrl-accessmaproutingcontrol,
+.mapboxgl-ctrl-accessmaproutingcontrol *,
+.mapboxgl-ctrl-accessmaproutingcontrol *:after,
+.mapboxgl-ctrl-accessmaproutingcontrol *:before {
+  -webkit-box-sizing:border-box;
+     -moz-box-sizing:border-box;
+          box-sizing:border-box;
+}
+.mapboxgl-ctrl-accessmaproutingcontrol {
+  font: 15px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  background-color: white;
+  z-index: 1;
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+  padding: 5px;
+  width: 100%;
+}
+
+.geocoder-icon-search, .geocoder-container, .geocoder-icon-directions {
+  display: inline-block;
+}
+
+.geocoder-input {
+  border: 0;
+  padding: 10px;
+  width: 100%;
+  box-shadow:none;
+}
+
+  .geocoder-input:focus {
+    color:rgba(0,0,0,.75);
+    outline:0;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+  }
+
+.geocoder-icon {
+  display: inline-block;
+  vertical-align:middle;
+  speak: none;
+  width: 20px;
+  height: 20px;
+  margin: 5px;
+}
+
+  .geocoder-icon-search {
+    background-image: url(icons/search.svg);
+    background-size: cover;
+    margin-bottom: 5px;
+  }
+
+  .geocoder-icon-directions {
+    background-image: url(icons/map-signs.svg);
+    background-size: cover;
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
