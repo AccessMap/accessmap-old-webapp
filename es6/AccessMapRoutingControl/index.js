@@ -68,14 +68,15 @@ AccessMapRoutingControl.prototype = {
     this._originEl.type = 'text';
     this._originEl.placeholder = 'Starting location';
     this._originEl.title = 'Starting location';
+    this._originEl.style.display = 'none';
     this._originEl.addEventListener('keydown', this._onKeyDownOrigin);
     this._originEl.addEventListener('change', this._onChangeOrigin);
 
     let destinationEl = this._destinationEl = document.createElement('input');
     this._destinationEl.className = 'geocoder-input geocoder-input-destination';
     this._destinationEl.type = 'text';
+    this._destinationEl.title = 'Destination location';
     this._destinationEl.placeholder = 'Search address';
-    this._originEl.title = 'Search address';
     this._destinationEl.addEventListener('keydown', this._onKeyDownDestination);
     this._destinationEl.addEventListener('change', this._onChangeDestination);
 
@@ -96,36 +97,49 @@ AccessMapRoutingControl.prototype = {
     let directionsIcon = document.createElement('div');
     directionsIcon.className = 'geocoder-icon geocoder-icon-directions';
     directionsIcon.title = 'Get directions (route, no text)';
+
+    let settingsIcon = document.createElement('div');
+    settingsIcon.className = 'geocoder-icon geocoder-icon-settings';
+    settingsIcon.style.display = 'none';
+
     // TODO: fix the that-this hack using bind() and a separate function
     let that = this;
     directionsIcon.addEventListener('click', function() {
       // Toggle the presence of the 'origin' search box
       if (that._routingMode) {
-        let children = originContainer.childNodes;
-        for (var child of children) {
-          originContainer.removeChild(child);
-          return;
-        }
+        // switch to search-only mode
+        originEl.style.display = 'none';
+        settingsIcon.style.display = 'none';
         that._routingMode = false;
       } else {
-        // The origin geocoder is not present - insert it
-        originContainer.appendChild(originEl);
-        that._originTypeahead = new Typeahead(originEl, [], { filter: false });
-        that._originTypeahead.getItemValue = function(item) { return item.place_name; };
+        // switch to routing mode
+        originEl.style.display = 'block';
+        settingsIcon.style.display = 'inline-block';
 
-        // Update the placehodler text
+        // Update the placeholder text
         destinationEl.placeholder = 'Destination location';
         destinationEl.title = 'Destination location';
         that._routingMode = true;
       }
     });
 
-    this._settingsIcon = document.createElement('div');
-    this._settingsIcon.className = 'geocoder-icon geocoder-icon-settings';
+    settingsIcon.addEventListener('click', function() {
+      if (typeof that.svgcontainer === 'undefined') {
+        that._drawCostPlot();
+      } else {
+        that.container.removeChild(that.svgcontainer);
+        that.svgcontainer = undefined;
+      }
+    });
 
+    originContainer.appendChild(originEl);
     el.appendChild(searchIcon);
     el.appendChild(searchContainer);
     el.appendChild(directionsIcon);
+    el.appendChild(settingsIcon);
+
+    this._originTypeahead = new Typeahead(originEl, [], { filter: false });
+    this._originTypeahead.getItemValue = function(item) { return item.place_name; };
 
     this._destinationTypeahead = new Typeahead(destinationEl, [],
                                                { filter: false });
@@ -439,28 +453,36 @@ AccessMapRoutingControl.prototype = {
   _drawCostPlot: function() {
     let options = this.options;
     let map = this._map;
+
     // create svg canvas
-    let svg = d3.select(this.container)
-                .append('svg')
-                .attr('width', 400)
-                .attr('height', 200);
-    let margin = 50;
-    let w = svg.attr('width') - margin;
-    let h = svg.attr('height') - margin;
+    this.svgcontainer = document.createElement('div');
+    this.svgcontainer.className = 'svg-container';
+    this.container.appendChild(this.svgcontainer);
 
-    // set up d3 axes
+    this.svg = d3.select(this.svgcontainer)
+      .append('svg')
+      .attr('width', this.svgcontainer.clientWidth)
+      .attr('height', 150)
+      .classed('svg-content', true);
 
-    let g = svg.append('g')
-      .attr('transform', 'translate(' + margin / 2 + ',' + margin / 2 + ')');
+    let margin = {top: 20, right: 10, bottom: 20, left: 60};
+    let w = this.svg.attr('width') - margin.left - margin.right;
+    let h = this.svg.attr('height') - margin.top - margin.bottom;
 
+    // set up scales
     let x = d3.scaleLinear()
       .domain([-10, 10])
       .range([0, w])
       .clamp(true);
+
     let y = d3.scaleLinear()
       .domain([0, 100])
       .range([h, 0])
       .clamp(true);
+
+
+    let g = this.svg.append('g')
+      .attr('transform', 'translate(' + margin.left / 2 + ',' + margin.top / 2 + ')');
 
     g.append('g')
       .attr('class', 'axis axis-x')

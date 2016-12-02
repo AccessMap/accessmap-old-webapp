@@ -54,3 +54,14 @@
     margin-bottom: 5px;
     cursor: pointer;
   }
+
+  .geocoder-icon-settings {
+    background-image: url(icons/cog.svg);
+    background-size: cover;
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
+
+.svg-container {
+  width: 100%;
+}
