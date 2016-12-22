@@ -42,8 +42,8 @@ function App(mapbox_token, routing) {
         + window.location.hostname
         + (window.location.port ? ':' + window.location.port : '');
     }
-    let tilesUrl = window.location.origin + '/tiles/seattle/{z}/{x}/{y}.mvt';
-    let liveUrl = window.location.origin + '/tiles/live/{z}/{x}/{y}.mvt';
+    let tilesUrl = window.location.origin + '/tiles/seattle/{z}/{x}/{y}.pbf';
+    let liveUrl = window.location.origin + '/tiles/live/{z}/{x}/{y}.pbf';
 
     //
     // Data sources - used by layers to draw data
@@ -77,6 +77,11 @@ function App(mapbox_token, routing) {
         'circle-opacity': {
           stops: [[13, 0.3], [zoomStart, 0.5], [20, 1]]
         }
+      },
+      layout: {
+        visibility: {
+          stops: [[0, 'none'], [12, 'visible']]
+        }
       }
     });
 
@@ -89,6 +94,11 @@ function App(mapbox_token, routing) {
         'circle-color': '#ffbb00',
         'circle-radius': {
           stops: [[10, 1], [15, 6], [20, 19]]
+        }
+      },
+      layout: {
+        visibility: {
+          stops: [[0, 'none'], [12, 'visible']]
         }
       }
     });
@@ -183,7 +193,7 @@ function App(mapbox_token, routing) {
           stops: [[12, 0.5], [16, 3], [20, 30]]
         },
         'line-opacity': {
-          stops: [[12, 0.2], [zoomStart, 0.7], [20, 0.5]]
+          stops: [[8, 0.3], [zoomStart, 0.7], [20, 0.5]]
         }
       },
       layout: {
