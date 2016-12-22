@@ -72,7 +72,7 @@ function App(mapbox_token, routing) {
       paint: {
         'circle-color': '#000000',
         'circle-radius': {
-          stops: [[10, 2], [15, 8], [20, 22]]
+          stops: [[12, 2], [15, 8], [20, 22]]
         },
         'circle-opacity': {
           stops: [[13, 0.3], [zoomStart, 0.5], [20, 1]]
@@ -93,7 +93,7 @@ function App(mapbox_token, routing) {
       paint: {
         'circle-color': '#ffbb00',
         'circle-radius': {
-          stops: [[10, 1], [15, 6], [20, 19]]
+          stops: [[12, 1], [15, 6], [20, 19]]
         }
       },
       layout: {
