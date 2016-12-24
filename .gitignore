@@ -10,6 +10,7 @@ node_modules
 # Build files
 *.hot-update.js
 *.hot-update.json
+public/build/*.js
 
 # Secret environment variables
 set_envs.sh

@@ -1,0 +1,22 @@
+[Unit]
+Description=AccessMap Website Server
+
+[Service]
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=MAPBOX_TOKEN=<>
+Environment=API_URL=<>
+Environment=TILES_URL=<>
+Environment=DATABASE_URL=<>
+
+ExecStart=</path/to/node> ./server.js
+WorkingDirectory=</path/to/accessmap/repo/clone>
+Restart=always
+RestartSec=10
+StandardOutput=syslog+stdout
+StandardError=syslog+stdout
+SyslogIdentifier=accessmap
+User=<youruser>
+
+[Install]
+WantedBy=multi-user.target

@@ -4,14 +4,15 @@
   "description": "AccessMap web application",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack -w",
-    "prod": "webpack -w -p",
+    "build-dev": "webpack -w",
+    "build-prod": "webpack -p",
+    "dev": "npm run build-dev & npm run app",
+    "prod": "npm run build-prod & npm run app",
     "app": "node server.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://hackcessible@accessmap.scm.azurewebsites.net:443/accessmap.git"
+    "url": "https://github.com/accessmap/accessmap.git"
   },
   "author": "",
   "license": "MIT",
@@ -36,6 +37,7 @@
     "file-loader": "^0.9.0",
     "history": "^1.12.6",
     "jade": "~1.11.0",
+    "mapbox-gl": "^0.29.0",
     "morgan": "~1.6.1",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",

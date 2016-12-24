@@ -65,35 +65,24 @@ function App(mapbox_token, routing) {
     // FIXME: tried using 'symbol' layer with roadblock-15 sprite, but it
     //        wouldn't render (though other symbols would)
     map.addLayer({
-      id: 'construction-outline',
-      type: 'circle',
-      source: 'live',
-      'source-layer': 'construction',
-      paint: {
-        'circle-color': '#000000',
-        'circle-radius': {
-          stops: [[12, 2], [15, 8], [20, 22]]
-        },
-        'circle-opacity': {
-          stops: [[13, 0.3], [zoomStart, 0.5], [20, 1]]
-        }
-      },
-      layout: {
-        visibility: {
-          stops: [[0, 'none'], [12, 'visible']]
-        }
-      }
-    });
-
-    map.addLayer({
-      id: 'construction-fill',
+      id: 'construction',
       type: 'circle',
       source: 'live',
       'source-layer': 'construction',
       paint: {
         'circle-color': '#ffbb00',
         'circle-radius': {
-          stops: [[12, 1], [15, 6], [20, 19]]
+          stops: [[12, 1], [15, 5], [20, 15]]
+        },
+        'circle-opacity': {
+          stops: [[0, 0], [12, 0.1], [15, 0.8], [20, 1]]
+        },
+        'circle-stroke-color': 'black',
+        'circle-stroke-width':  {
+          stops: [[12, 1], [15, 2], [20, 3]]
+        },
+        'circle-stroke-opacity': {
+          stops: [[0, 0], [12, 0.1], [15, 0.8], [20, 1]]
         }
       },
       layout: {
@@ -303,7 +292,7 @@ function App(mapbox_token, routing) {
 
       // If construction is clicked, show that
       let construction = map.queryRenderedFeatures(e.point, {
-        layers: ['construction-outline']
+        layers: ['construction']
       });
 
       if (construction.length) {
@@ -380,7 +369,7 @@ function App(mapbox_token, routing) {
 
       let clickables = map.queryRenderedFeatures(e.point, {
         layers: ['sidewalks', 'crossings-ramps', 'crossings-noramps',
-                 'construction-outline']
+                 'construction']
       });
 
       map.getCanvas().style.cursor = (clickables.length) ? 'pointer': '';
