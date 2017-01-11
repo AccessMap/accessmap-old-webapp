@@ -616,66 +616,82 @@ AccessMapRoutingControl.prototype = {
 
     // Send request, handle data
     let that = this;
-    let req = $.get(this.options.api + '?waypoints=' + '[' + coords + ']');
-    req.done(function(data) {
+    $.get(this.options.api + '?waypoints=' + '[' + coords + ']')
+    .done(function(data, status) {
       // Draw the route from origin to destination
-      if(data.code === 'Ok') {
-        // Complete path of route returned by routing system
-        let path = {
-          type: 'FeatureCollection',
-          features: [{
-            type: 'Feature',
-            geometry: data.routes[0].geometry
-          }]
-        };
-
-        // Route segments - can be individually colored
-        let segments = data.routes[0].segments;
-
-        // Path from origin/destination to route (e.g. dotted lines in gmaps)
-        let pathCoords = path.features[0].geometry.coordinates;
-        let originPath = [that._origin.features[0].geometry.coordinates,
-                          pathCoords[0]];
-        let destPath = [pathCoords[pathCoords.length - 1],
-                        that._destination.features[0].geometry.coordinates];
-
-        let waypointPaths = {
-          type: 'FeatureCollection',
-          features: []
-        };
-
-        for (var waypointPath of [originPath, destPath]) {
-          waypointPaths.features.push({
-            type: 'Feature',
-            geometry: {
-              type: 'LineString',
-              coordinates: waypointPath
-            },
-            properties: {}
-          });
+      if (status === 'success') {
+        if(data.code === 'Ok') {
+          drawRoute(data);
+        } else {
+          // TODO: Update the control's UI with the error message, don't use
+          // alert
+          alert("No route from those locations.");
+          console.log(data);
         }
-
-        // Update the map data layers
-        map.getSource('route-path').setData(path);
-        map.getSource('route-segments').setData(segments);
-        map.getSource('route-waypointpaths').setData(waypointPaths);
-
-        // Zoom to the new route - route extent + 20%
-        let bbox = turfBbox(map.getSource('route-path')._data);
-        let dx = bbox[3] - bbox[1];
-        let dy = bbox[2] - bbox[0];
-        let zoomOut = 0.2;
-        bbox = [bbox[0] - zoomOut * dy,
-                bbox[1] - zoomOut * dx,
-                bbox[2] + zoomOut * dy,
-                bbox[3] + zoomOut * dx];
-
-        map.fitBounds([[bbox[0], bbox[1]],[bbox[2], bbox[3]]]);
       } else {
-        console.log('Could not get route');
-        console.log(data);
+        // TODO: Update the control's UI with the error message, don't use
+        // alert
+        alert('Received status ' + status);
       }
+    })
+    .fail(function(data, text) {
+      // TODO: Update the control's UI with the error message, don't use alert
+      alert('Could not contact routing server');
     });
+
+    function drawRoute(data) {
+      // Complete path of route returned by routing system
+      let path = {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: data.routes[0].geometry
+        }]
+      };
+
+      // Route segments - can be individually colored
+      let segments = data.routes[0].segments;
+
+      // Path from origin/destination to route (e.g. dotted lines in gmaps)
+      let pathCoords = path.features[0].geometry.coordinates;
+      let originPath = [that._origin.features[0].geometry.coordinates,
+                        pathCoords[0]];
+      let destPath = [pathCoords[pathCoords.length - 1],
+                      that._destination.features[0].geometry.coordinates];
+
+      let waypointPaths = {
+        type: 'FeatureCollection',
+        features: []
+      };
+
+      for (var waypointPath of [originPath, destPath]) {
+        waypointPaths.features.push({
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: waypointPath
+          },
+          properties: {}
+        });
+      }
+
+      // Update the map data layers
+      map.getSource('route-path').setData(path);
+      map.getSource('route-segments').setData(segments);
+      map.getSource('route-waypointpaths').setData(waypointPaths);
+
+      // Zoom to the new route - route extent + 20%
+      let bbox = turfBbox(map.getSource('route-path')._data);
+      let dx = bbox[3] - bbox[1];
+      let dy = bbox[2] - bbox[0];
+      let zoomOut = 0.2;
+      bbox = [bbox[0] - zoomOut * dy,
+              bbox[1] - zoomOut * dx,
+              bbox[2] + zoomOut * dy,
+              bbox[3] + zoomOut * dx];
+
+      map.fitBounds([[bbox[0], bbox[1]],[bbox[2], bbox[3]]]);
+    }
   },
 
   _geocode: function(searchInput, target) {

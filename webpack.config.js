@@ -2,7 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
-  context: path.join(__dirname, 'es6'),
+  context: path.join(__dirname, 'client'),
   entry: {
     map: './map.js',
     isochrones: './isochrones.js'
@@ -31,7 +31,7 @@ module.exports = {
           test: /\.json$/,
           loader: 'json-loader'
       }, {
-          test: path.join(__dirname, 'es6'),
+          test: path.join(__dirname, 'client'),
           exclude: /node_modules/,
           loader: 'babel',
           query: {

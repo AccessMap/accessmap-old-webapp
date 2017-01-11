@@ -56,18 +56,16 @@ function App(mapbox_token, routing) {
       attribution: '&copy; AccessMap'
     });
 
-    map.addSource('live', {
-      type: 'vector',
-      tiles: [liveUrl]
-    });
-
     // live
     // FIXME: tried using 'symbol' layer with roadblock-15 sprite, but it
     //        wouldn't render (though other symbols would)
     map.addLayer({
       id: 'construction',
       type: 'circle',
-      source: 'live',
+      source: {
+        type: 'vector',
+        tiles: [liveUrl]
+      },
       'source-layer': 'construction',
       paint: {
         'circle-color': '#ffbb00',
@@ -109,7 +107,7 @@ function App(mapbox_token, routing) {
           stops: [[12, 0.5], [16, 2], [20, 20]]
         },
         'line-opacity': {
-          stops: [[13, 0.0], [zoomStart, 0.05], [20, 0.15]]
+          stops: [[13, 0.0], [zoomStart, 0.1], [20, 0.2]]
         }
       },
       layout: {
@@ -126,10 +124,10 @@ function App(mapbox_token, routing) {
       paint: {
         'line-color': '#000000',
         'line-width': {
-          stops: [[12, 0.5], [16, 2], [20, 20]]
+          stops: [[12, 0.5], [16, 3], [20, 20]]
         },
         'line-opacity': {
-          stops: [[13, 0.0], [zoomStart, 0.3], [20, 0.3]]
+          stops: [[13, 0.0], [zoomStart, 0.4], [20, 0.5]]
         },
       },
       layout: {
