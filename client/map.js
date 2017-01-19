@@ -1,6 +1,6 @@
 import mapboxgl from 'mapbox-gl';
 import '!style!css!mapbox-gl/dist/mapbox-gl.css';
-import * as chroma from 'chroma-js';
+import chroma from 'chroma-js';
 
 import bufferPoint from './bufferpoint';
 import AccessMapRoutingControl from './AccessMapRoutingControl';
@@ -18,7 +18,11 @@ function App(mapbox_token, routing) {
   //
 
   // Sidewalk color scale
-  let colorScale = chroma.scale(['lime', 'yellow', 'red']).mode('lab');
+  let colors = [chroma('lime'), chroma('yellow'), chroma('red')];
+  for (var i = 0; i < colors.length; i++) {
+    colors[i] = colors[i].brighten(1);
+  }
+  let colorScale = chroma.scale(colors).mode('lab');
 
   // Map initialization
   mapboxgl.accessToken = mapbox_token;
@@ -42,7 +46,7 @@ function App(mapbox_token, routing) {
         + window.location.hostname
         + (window.location.port ? ':' + window.location.port : '');
     }
-    let tilesUrl = window.location.origin + '/tiles/seattle/{z}/{x}/{y}.pbf';
+    let pedestrianUrl = window.location.origin + '/tiles/pedestrian/{z}/{x}/{y}.pbf';
     let liveUrl = window.location.origin + '/tiles/live/{z}/{x}/{y}.pbf';
 
     //
@@ -50,9 +54,9 @@ function App(mapbox_token, routing) {
     //
 
     // Custom-rolled vector tiles
-    map.addSource('seattle', {
+    map.addSource('pedestrian', {
       type: 'vector',
-      tiles: [tilesUrl],
+      tiles: [pedestrianUrl],
       attribution: '&copy; AccessMap'
     });
 
@@ -98,7 +102,7 @@ function App(mapbox_token, routing) {
     map.addLayer({
       id: 'crossings-noramps',
       type: 'line',
-      source: 'seattle',
+      source: 'pedestrian',
       'source-layer': 'crossings',
       filter: ['!=', 'curbramps', true],
       paint: {
@@ -118,7 +122,7 @@ function App(mapbox_token, routing) {
     map.addLayer({
       id: 'crossings-ramps',
       type: 'line',
-      source: 'seattle',
+      source: 'pedestrian',
       'source-layer': 'crossings',
       filter: ['==', 'curbramps', true],
       paint: {
@@ -140,15 +144,15 @@ function App(mapbox_token, routing) {
     map.addLayer({
       id: 'sidewalks-outline',
       type: 'line',
-      source: 'seattle',
+      source: 'pedestrian',
       'source-layer': 'sidewalks',
       paint: {
         'line-color': '#000000',
         'line-width': {
-          stops: [[12, 1], [zoomStart, 1.5], [20, 2]]
+          stops: [[12, 0.5], [zoomStart, 1], [20, 2]]
         },
         'line-opacity': {
-          stops: [[13, 0.0], [zoomStart, 0.1], [20, 0.2]]
+          stops: [[10, 0.0], [zoomStart, 0.4], [20, 0.5]]
         },
         'line-gap-width': {
           stops: [[12, 0.5], [16, 3], [20, 30]]
@@ -162,7 +166,7 @@ function App(mapbox_token, routing) {
     map.addLayer({
       id: 'sidewalks',
       type: 'line',
-      source: 'seattle',
+      source: 'pedestrian',
       'source-layer': 'sidewalks',
       paint: {
         'line-color': {
@@ -171,7 +175,7 @@ function App(mapbox_token, routing) {
           stops: [
             [-0.08333, colorScale(1.0).hex()],
             [-0.05, colorScale(0.5).hex()],
-            [0.0, colorScale(0.0).hex()],
+            [-0.00, colorScale(0.0).hex()],
             [0.05, colorScale(0.5).hex()],
             [0.08333, colorScale(1.0).hex()]
           ]
@@ -180,7 +184,7 @@ function App(mapbox_token, routing) {
           stops: [[12, 0.5], [16, 3], [20, 30]]
         },
         'line-opacity': {
-          stops: [[8, 0.3], [zoomStart, 0.7], [20, 0.5]]
+          stops: [[8, 0.0], [zoomStart, 0.7], [20, 0.5]]
         }
       },
       layout: {
@@ -375,7 +379,9 @@ function App(mapbox_token, routing) {
 
   });
 
-  let gradeControl = new AccessMapGradeControl();
+  let gradeControl = new AccessMapGradeControl({
+    colorScale: colorScale
+  });
   map.addControl(gradeControl, 'bottom-right');
 
   if (routing) {
@@ -390,5 +396,7 @@ function App(mapbox_token, routing) {
     });
   }
 }
+
+App.prototype.chroma = chroma;
 
 module.exports = App;
