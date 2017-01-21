@@ -200,10 +200,8 @@ AccessMapRoutingControl.prototype = {
       this._map.removeSource(source);
     }
 
-    this._map.removeLayer('origin-outline');
     this._map.removeLayer('origin');
     this._map.removeLayer('origin-text');
-    this._map.removeLayer('destination-outline');
     this._map.removeLayer('destination');
     this._map.removeLayer('destination-text');
 
@@ -270,17 +268,51 @@ AccessMapRoutingControl.prototype = {
 
       // Routing lines
       map.addLayer({
+        id: 'route-waypointpaths',
+        type: 'line',
+        source: 'route-waypointpaths',
+        paint: {
+          'line-color': '#000',
+          'line-opacity': 0.6,
+          'line-width': {
+            stops: [
+              [12, 4],
+              [15, 6],
+              [20, 16]
+            ]
+          },
+          'line-dasharray': {
+            stops: [
+              [12, [0, 1]],
+              [15, [0, 1.5]],
+              [20, [0, 4]]
+            ]
+          }
+        },
+        layout: {
+          'line-cap': 'round'
+        }
+      });
+
+      map.addLayer({
         id: 'route-outline',
         type: 'line',
         source: 'route-path',
         paint: {
           'line-color': '#000',
-          'line-opacity': 0.5,
+          'line-opacity': 0.8,
+          'line-gap-width': {
+            stops: [
+              [12, 3],
+              [15, 7],
+              [20, 23]
+            ]
+          },
           'line-width': {
             stops: [
-              [12, 6],
-              [15, 11],
-              [20, 20]
+              [12, 1.5],
+              [15, 2.5],
+              [20, 3.5]
             ]
           }
         },
@@ -289,6 +321,9 @@ AccessMapRoutingControl.prototype = {
           'line-join': 'round'
         }
       });
+
+      let mid = '#b3e0ff';
+      mid = '#ff9933';
 
       map.addLayer({
         id: 'route',
@@ -300,9 +335,9 @@ AccessMapRoutingControl.prototype = {
             type: 'interval',
             stops: [
               [-2, '#ff0000'],
-              [that.options.maxdown, '#ffaa00'],
+              [that.options.maxdown, mid],
               [(that.options.maxdown + that.options.ideal) / 2, '#32adff'],
-              [(that.options.ideal + that.options.maxup) / 2, '#ffaa00'],
+              [(that.options.ideal + that.options.maxup) / 2, mid],
               [that.options.maxup, '#ff0000'],
               [2, '#ff0000']
             ]
@@ -311,28 +346,7 @@ AccessMapRoutingControl.prototype = {
             stops: [
               [12, 4],
               [15, 8],
-              [20, 16]
-            ]
-          }
-        },
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round'
-        }
-      });
-
-      map.addLayer({
-        id: 'route-waypointpaths',
-        type: 'line',
-        source: 'route-waypointpaths',
-        paint: {
-          'line-color': '#8888ff',
-          'line-opacity': 0.8,
-          'line-width': {
-            stops: [
-              [12, 4],
-              [15, 8],
-              [20, 16]
+              [20, 24]
             ]
           }
         },
@@ -344,32 +358,15 @@ AccessMapRoutingControl.prototype = {
 
       // waypoints
       map.addLayer({
-        id: 'origin-outline',
-        type: 'circle',
-        source: 'origin',
-        paint: {
-          'circle-radius': 12,
-          'circle-color': '#000'
-        }
-      });
-
-      map.addLayer({
-        id: 'destination-outline',
-        type: 'circle',
-        source: 'destination',
-        paint: {
-          'circle-radius': 12,
-          'circle-color': '#000'
-        }
-      });
-
-      map.addLayer({
         id: 'origin',
         type: 'circle',
         source: 'origin',
         paint: {
-          'circle-radius': 10,
-          'circle-color': '#aaaaff'
+          'circle-radius': 12,
+          'circle-color': '#66ff33',
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#000',
+          'circle-stroke-opacity': 0.7
         }
       });
 
@@ -378,8 +375,10 @@ AccessMapRoutingControl.prototype = {
         type: 'circle',
         source: 'destination',
         paint: {
-          'circle-radius': 10,
-          'circle-color': '#ffff00'
+          'circle-radius': 12,
+          'circle-color': '#ffff00',
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#000'
         }
       });
 
@@ -466,7 +465,7 @@ AccessMapRoutingControl.prototype = {
     map.on('load', function(e) {
       map.on('mousemove', function(e) {
         var features = map.queryRenderedFeatures(e.point, {
-          layers: ['origin-outline', 'destination-outline']
+          layers: ['origin', 'destination']
         });
 
         // Change point and cursor style as a UI indicator
