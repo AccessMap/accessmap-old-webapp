@@ -1,8 +1,9 @@
 # Vim temp files
 *.swp
 
-# Node installed modules
+# Node stuff
 node_modules
+npm-debug.log*
 
 # Logs
 *.log

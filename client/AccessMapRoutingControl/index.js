@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import * as chroma from 'chroma-js';
+import chroma from 'chroma-js';
 import $ from 'jquery';
 import extend from 'xtend';
 import debounce from 'lodash.debounce';
@@ -29,11 +29,10 @@ AccessMapRoutingControl.prototype = {
     api: null,
     zoom: 17,
     // control points for the elevation cost function
-    a: [-10, 100],
-    b: [-5, 30],
-    c: [-1, 0],
-    d: [4, 30],
-    e: [8.33, 100]
+    maxdown: -0.1,
+    ideal: -0.01,
+    maxup: 0.0833,
+    colorScale: chroma.scale(['lime', 'yellow', 'red'])
   },
 
   onAdd: function(map) {
@@ -125,8 +124,47 @@ AccessMapRoutingControl.prototype = {
 
     settingsIcon.addEventListener('click', function() {
       if (typeof that.svgcontainer === 'undefined') {
+        // Note: these are repetitive components - should at least make into
+        // function
+        let div = document.createElement('div');
+        div.appendChild(document.createTextNode('Maximum uphill incline:'));
+        that.container.appendChild(div);
+        that.up = document.createElement('input');
+        that.up.className = 'control-slider';
+        that.up.setAttribute('type', 'range');
+        that.up.setAttribute('min', 0);
+        that.up.setAttribute('max', 10);
+        that.up.setAttribute('step', 0.1);
+        that.up.setAttribute('value', 8.3);
+        that.container.appendChild(that.up);
+
+        let div2 = document.createElement('div');
+        div2.appendChild(document.createTextNode('Maximum downhill incline:'));
+        that.container.appendChild(div2);
+        that.down = document.createElement('input');
+        that.down.className = 'control-slider';
+        that.down.setAttribute('type', 'range');
+        that.down.setAttribute('min', 0);
+        that.down.setAttribute('max', 10);
+        that.down.setAttribute('step', 0.1);
+        that.down.setAttribute('value', 9);
+        that.container.appendChild(that.down);
+
+        // let div3 = document.createElement('div');
+        // div3.appendChild(document.createTextNode('Ideal incline:'));
+        // that.container.appendChild(div3);
+        // that.ideal = document.createElement('input');
+        // that.ideal.className = 'control-slider';
+        // that.ideal.setAttribute('type', 'range');
+        // that.ideal.setAttribute('min', -2);
+        // that.ideal.setAttribute('max', 2);
+        // that.ideal.setAttribute('step', 0.1);
+        // that.ideal.setAttribute('value', -1);
+        // that.container.appendChild(that.ideal);
+
         that._drawCostPlot();
       } else {
+        that.container.removeChild(that.up);
         that.container.removeChild(that.svgcontainer);
         that.svgcontainer = undefined;
       }
@@ -237,12 +275,12 @@ AccessMapRoutingControl.prototype = {
         source: 'route-path',
         paint: {
           'line-color': '#000',
-          'line-opacity': 0.8,
+          'line-opacity': 0.5,
           'line-width': {
             stops: [
-              [12, 7],
-              [15, 12],
-              [20, 21]
+              [12, 6],
+              [15, 11],
+              [20, 20]
             ]
           }
         },
@@ -258,11 +296,15 @@ AccessMapRoutingControl.prototype = {
         source: 'route-segments',
         paint: {
           'line-color': {
-            property: 'cost',
+            property: 'grade',
+            type: 'interval',
             stops: [
-              [1e9, '#00ff00'],
-              [5e9, '#ffff00'],
-              [1e10, '#ff0000']
+              [-2, '#ff0000'],
+              [that.options.maxdown, '#ffaa00'],
+              [(that.options.maxdown + that.options.ideal) / 2, '#32adff'],
+              [(that.options.ideal + that.options.maxup) / 2, '#ffaa00'],
+              [that.options.maxup, '#ff0000'],
+              [2, '#ff0000']
             ]
           },
           'line-width': {
@@ -451,7 +493,6 @@ AccessMapRoutingControl.prototype = {
   },
 
   _drawCostPlot: function() {
-    let options = this.options;
     let map = this._map;
 
     // create svg canvas
@@ -493,16 +534,33 @@ AccessMapRoutingControl.prototype = {
       .attr('class', 'axis axis-y')
       .call(d3.axisLeft(y));
 
-    // * d3 place initial points
-    //   TODO: grab from cookie, if available
-    let data = [options.a, options.b, options.c, options.d, options.e];
-    data = data.map(function (d, i) {
-      return {x: d[0], y: d[1], id: i}
-    });
-
+    // d3 place initial points
+    // TODO: grab from cookie, if available
     let line = d3.line()
       .x(function(d) { return x(d.x) })
       .y(function(d) { return y(d.y) });
+
+    let data = [{
+      x: 100 * this.options.maxdown,
+      y: 100,
+      id: 'maxdown'
+    }, {
+      x: 100 * (this.options.maxdown + this.options.ideal) / 2,
+      y: 10,
+      id: 'low_mid'
+    }, {
+      x: 100 * this.options.ideal,
+      y: 0,
+      id: 'ideal'
+    }, {
+      x: 100 * (this.options.ideal + this.options.maxup) / 2,
+      y: 10,
+      id: 'high_mid'
+    }, {
+      x: 100 * this.options.maxup,
+      y: 100,
+      id: 'maxup'
+    }];
 
     let lines = g.selectAll('lines')
       .data([data])
@@ -516,51 +574,62 @@ AccessMapRoutingControl.prototype = {
     let pointGroup = g.append('g')
       .attr('class', 'points');
 
-    let point = pointGroup.selectAll('points')
+    let points = pointGroup.selectAll('points')
       .data(data)
     .enter().append('circle')
       .attr('cx', function(d) { return x(d.x) })
       .attr('cy', function(d) { return y(d.y) })
       .attr('r', 5)
-      .style('fill', 'black')
-      .call(d3.drag()
-        .on('start drag', dragged));
+      .attr('class', function(d) { return 'point-' + d.id })
+      .style('fill', 'black');
 
-    function dragged(d) {
-      // Using a linear scale + tracking drag events has some odd behavior -
-      // It doesn't originate at a reasonable location. Have to hack around it
-      // until we understand the proper transformations/settings
-      // The hack: use dx and dy and convert manually to get setting. Likely
-      // introduces some error
+    function update() {
+      // Recalculate midpoints
+      data[1].x = (data[0].x + data[2].x) / 2
+      data[3].x = (data[2].x + data[4].x) / 2
 
-      // Note: can't modify cutoffs via control points
+      // Clear all and redraw
+      let points = pointGroup.selectAll('circle')
+        .data([]);
 
-      let dx = d3.event.dx * (20 / w);
-      let dy = -1 * d3.event.dy * (100 / h);
+      points.exit().remove();
 
-      if (d.id == 1 || d.id == 3) {
-        // between control points
-        d.x += dx;
-        d.y += dy;
-
-      } else {
-        // Center control point - only left/right allowed
-        d.x += dx;
-      }
-
-      // Update
-      d3.select(this)
+      points
+        .data(data)
+      .enter().append('circle')
         .attr('cx', function(d) { return x(d.x) })
-        .attr('cy', function(d) { return y(d.y) });
+        .attr('cy', function(d) { return y(d.y) })
+        .attr('r', 5)
+        .style('fill', 'black');
 
       lines
         .attr('d', line(data));
 
-      updateColors();
+      updateColors(data);
     }
 
-    function updateColors() {
-      let colorScale = chroma.scale(['lime', 'yellow', 'red']);
+    this.up.addEventListener('input', function(e) {
+      let incline = e.target.valueAsNumber;
+      data[4].x = incline;
+      that.options.maxup = incline / 100;
+      update();
+    });
+
+    this.down.addEventListener('input', function(e) {
+      let incline = e.target.valueAsNumber;
+      data[0].x = -incline;
+      that.options.maxdown = -incline / 100;
+      update();
+    });
+
+    // this.ideal.addEventListener('input', function(e) {
+    //   let ideal = e.target.valueAsNumber;
+    //   data[2].x = ideal;
+    //   update();
+    // });
+
+    let that = this;
+    function updateColors(data) {
       // Update coloring scheme for map
       // TODO: have separate modes: uphill vs. downhill. Current method uses
       // line direction, which has no meaning on the map view
@@ -579,7 +648,7 @@ AccessMapRoutingControl.prototype = {
 
       let stops = denseData.map(function(d) {
         let x = 1e-2 * d.x;
-        let y = colorScale(1e-2 * d.y).hex();
+        let y = that.options.colorScale(1e-2 * d.y).hex();
         return [x, y]
       });
 
@@ -606,17 +675,31 @@ AccessMapRoutingControl.prototype = {
     map.getSource('origin').setData(this._origin);
     map.getSource('destination').setData(this._destination);
 
+    // Prepare routing preferences
+    // TODO: extract these from user interface
+    let cost = {
+      avoid: ['curbs', 'construction'].join('|'),
+      maxdown: this.options.maxdown,
+      ideal: this.options.ideal,
+      maxup: this.options.maxup,
+      origin: origin.reverse(),
+      destination: destination.reverse()
+    };
+
+    // Convert unnested JSON to encoded GET querystring
+    let paramArray = [];
+    for (var c in cost) {
+      if (cost.hasOwnProperty(c)) {
+        paramArray.push(c + '=' + cost[c]);
+      }
+    }
+
     //
     // request route
     //
 
-    // origin and destination need to be in lat-lon for request (and
-    // concatenated)
-    let coords = origin.reverse().concat(destination.reverse());
-
-    // Send request, handle data
     let that = this;
-    $.get(this.options.api + '?waypoints=' + '[' + coords + ']')
+    $.get(this.options.api + '?' + paramArray.join('&'))
     .done(function(data, status) {
       // Draw the route from origin to destination
       if (status === 'success') {

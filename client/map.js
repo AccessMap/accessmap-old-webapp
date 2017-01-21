@@ -34,6 +34,10 @@ function App(mapbox_token, routing) {
     zoom: zoomStart
   });
 
+  // Disable accidental map rotating / camera angle changes
+  map.dragRotate.disable();
+  map.touchZoomRotate.disableRotation();
+
   map.on('load', function() {
     let bounds = map.getBounds().toArray();
     let bbox = bounds[0].concat(bounds[1]).join(',');
@@ -387,7 +391,8 @@ function App(mapbox_token, routing) {
   if (routing) {
     let routingControl = new AccessMapRoutingControl({
       accessToken: mapbox_token,
-      api: 'api/v2/route.json'
+      api: 'api/v2/route.json',
+      colorScale: colorScale
     });
     map.addControl(routingControl);
     map.on('load', function() {
@@ -396,7 +401,5 @@ function App(mapbox_token, routing) {
     });
   }
 }
-
-App.prototype.chroma = chroma;
 
 module.exports = App;
