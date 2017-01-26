@@ -16,15 +16,17 @@ var router = express.Router();
 router.get('/', function(req, res) {
   res.render('index', {
     mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
-    user: req.user
+    user: req.user,
+    routing: false
   });
 });
 
 // GET routing page
 router.get('/routing', function(req, res) {
-  res.render('routing', {
+  res.render('index', {
     mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
-    user: req.user
+    user: req.user,
+    routing: true
   });
 });
 

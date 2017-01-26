@@ -6,6 +6,7 @@ import debounce from 'lodash.debounce';
 import Typeahead from 'suggestions';
 import MapboxClient from 'mapbox/lib/services/geocoding';
 import turfBbox from '@turf/bbox';
+import mapboxgl from 'mapbox-gl';
 
 import '!style!css!./AccessMapRoutingControl.css';
 
@@ -183,8 +184,89 @@ AccessMapRoutingControl.prototype = {
                                                { filter: false });
     this._destinationTypeahead.getItemValue = function(item) { return item.place_name; };
 
+    this._contextMenu();
+
     return el;
   },
+
+  _contextMenu: function() {
+    let map = this._map;
+    let that = this;
+    map.on('contextmenu', function(e) {
+      let html = `
+      <div id="contextmenu">
+      <ul>
+      <li id="origin">
+        <a>Set Origin</a>
+      </li>
+      <li id="destination">
+        <a>Set Destination</a>
+      </li>
+      </ul>
+      </div>
+      `;
+      if (this.contextPopup) this.contextPopup.remove();
+      this.contextPopup = new mapboxgl.Popup();
+      this.contextPopup.setLngLat(e.lngLat)
+        .setHTML(html)
+        .addTo(map);
+
+      // Set up choice listeners
+      let originEl = document.getElementById('origin');
+      let destinationEl = document.getElementById('destination');
+
+      originEl.addEventListener('click', () => {
+        // Move waypoint
+        map.getSource('origin').setData({
+          type: 'FeatureCollection',
+          features: [{
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: e.lngLat
+            },
+            properties: {}
+          }]
+        });
+
+        let o = [e.lngLat.lng, e.lngLat.lat];
+        let d = map.getSource('destination')
+          ._data
+          .features[0]
+          .geometry
+          .coordinates;
+
+        that.getRoute(o, d);
+        this.contextPopup.remove();
+      });
+
+      destinationEl.addEventListener('click', () => {
+        // Move waypoint
+        map.getSource('destination').setData({
+          type: 'FeatureCollection',
+          features: [{
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: e.lngLat
+            },
+            properties: {}
+          }]
+        });
+
+        let o = map.getSource('origin')
+          ._data
+          .features[0]
+          .geometry
+          .coordinates;
+        let d = [e.lngLat.lng, e.lngLat.lat];
+
+        that.getRoute(o, d);
+        this.contextPopup.remove();
+      });
+    });
+  },
+
 
   _enableOrigin: function() {
     this._originTypeahead = new Typeahead(originEl, [], { filter: false });

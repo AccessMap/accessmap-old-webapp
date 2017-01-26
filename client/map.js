@@ -153,7 +153,7 @@ function App(mapbox_token, routing) {
       paint: {
         'line-color': '#000000',
         'line-width': {
-          stops: [[12, 0.5], [zoomStart, 1], [20, 2]]
+          stops: [[12, 0.2], [zoomStart, 1], [20, 2]]
         },
         'line-opacity': {
           stops: [[10, 0.0], [zoomStart, 0.4], [20, 0.5]]
