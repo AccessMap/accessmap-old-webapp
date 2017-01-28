@@ -213,18 +213,12 @@ AccessMapRoutingControl.prototype = {
       let destinationEl = document.getElementById('destination');
 
       originEl.addEventListener('click', () => {
-        that._origin = [e.lngLat.lng, e.lngLat.lat];
-        that._originMarker.setLngLat(that._origin);
-
-        that.getRoute(that._origin, that._destination);
+        that.getRoute([e.lngLat.lng, e.lngLat.lat], that._destination);
         this._contextPopup.remove();
       });
 
       destinationEl.addEventListener('click', () => {
-        that._destination = [e.lngLat.lng, e.lngLat.lat];
-        that._destinationMarker.setLngLat(that._destination);
-
-        that.getRoute(that._origin, that._destination);
+        that.getRoute(that._origin, [e.lngLat.lng, e.lngLat.lat]);
         this._contextPopup.remove();
       });
     });
