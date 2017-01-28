@@ -10,6 +10,14 @@ import mapboxgl from 'mapbox-gl';
 
 import '!style!css!./AccessMapRoutingControl.css';
 
+// FIXME: the Typeahead class fires an extra 'change' event on click. This
+// is bad - it launches two route requests. This is a messy hack around
+// that copied from version 1.3.1
+Typeahead.prototype.value = function(value) {
+  this.selected = value;
+  this.el.value = this.getItemValue(value);
+};
+
 /**
  * A pedestrian routing control for Accessmap. Not yet suited for use away from
  * accessmapseattle.com
@@ -44,13 +52,10 @@ AccessMapRoutingControl.prototype = {
 
     // Bind this object to event-called functions
     this._onChange = this._onChange.bind(this);
-    this._onChangeOrigin = this._onChangeOrigin.bind(this);
-    this._onChangeDestination = this._onChangeDestination.bind(this);
     this._onKeyDownOrigin = this._onKeyDownOrigin.bind(this);
     this._onKeyDownDestination = this._onKeyDownDestination.bind(this);
 
     this._setupLayers();
-    this._setupMouseInteraction();
 
     // FIXME: Add split screen, apply sidewalk layer coloring
 
@@ -70,7 +75,9 @@ AccessMapRoutingControl.prototype = {
     this._originEl.title = 'Starting location';
     this._originEl.style.display = 'none';
     this._originEl.addEventListener('keydown', this._onKeyDownOrigin);
-    this._originEl.addEventListener('change', this._onChangeOrigin);
+    this._originEl.addEventListener('change', () => {
+      this._onChange(this._originTypeahead);
+    });
 
     let destinationEl = this._destinationEl = document.createElement('input');
     this._destinationEl.className = 'geocoder-input geocoder-input-destination';
@@ -78,7 +85,9 @@ AccessMapRoutingControl.prototype = {
     this._destinationEl.title = 'Destination location';
     this._destinationEl.placeholder = 'Search address';
     this._destinationEl.addEventListener('keydown', this._onKeyDownDestination);
-    this._destinationEl.addEventListener('change', this._onChangeDestination);
+    this._destinationEl.addEventListener('change', () => {
+      this._onChange(this._destinationTypeahead);
+    });
 
     let originContainer = this._originContainer = document.createElement('div');
     this._originContainer.className = 'geocoder-origin-container';
@@ -151,18 +160,6 @@ AccessMapRoutingControl.prototype = {
         that.down.setAttribute('value', 9);
         that.container.appendChild(that.down);
 
-        // let div3 = document.createElement('div');
-        // div3.appendChild(document.createTextNode('Ideal incline:'));
-        // that.container.appendChild(div3);
-        // that.ideal = document.createElement('input');
-        // that.ideal.className = 'control-slider';
-        // that.ideal.setAttribute('type', 'range');
-        // that.ideal.setAttribute('min', -2);
-        // that.ideal.setAttribute('max', 2);
-        // that.ideal.setAttribute('step', 0.1);
-        // that.ideal.setAttribute('value', -1);
-        // that.container.appendChild(that.ideal);
-
         that._drawCostPlot();
       } else {
         that.container.removeChild(that.up);
@@ -205,9 +202,9 @@ AccessMapRoutingControl.prototype = {
       </ul>
       </div>
       `;
-      if (this.contextPopup) this.contextPopup.remove();
-      this.contextPopup = new mapboxgl.Popup();
-      this.contextPopup.setLngLat(e.lngLat)
+      if (this._contextPopup) this._contextPopup.remove();
+      this._contextPopup = new mapboxgl.Popup();
+      this._contextPopup.setLngLat(e.lngLat)
         .setHTML(html)
         .addTo(map);
 
@@ -216,53 +213,19 @@ AccessMapRoutingControl.prototype = {
       let destinationEl = document.getElementById('destination');
 
       originEl.addEventListener('click', () => {
-        // Move waypoint
-        map.getSource('origin').setData({
-          type: 'FeatureCollection',
-          features: [{
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: e.lngLat
-            },
-            properties: {}
-          }]
-        });
+        that._origin = [e.lngLat.lng, e.lngLat.lat];
+        that._originMarker.setLngLat(that._origin);
 
-        let o = [e.lngLat.lng, e.lngLat.lat];
-        let d = map.getSource('destination')
-          ._data
-          .features[0]
-          .geometry
-          .coordinates;
-
-        that.getRoute(o, d);
-        this.contextPopup.remove();
+        that.getRoute(that._origin, that._destination);
+        this._contextPopup.remove();
       });
 
       destinationEl.addEventListener('click', () => {
-        // Move waypoint
-        map.getSource('destination').setData({
-          type: 'FeatureCollection',
-          features: [{
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: e.lngLat
-            },
-            properties: {}
-          }]
-        });
+        that._destination = [e.lngLat.lng, e.lngLat.lat];
+        that._destinationMarker.setLngLat(that._destination);
 
-        let o = map.getSource('origin')
-          ._data
-          .features[0]
-          .geometry
-          .coordinates;
-        let d = [e.lngLat.lng, e.lngLat.lat];
-
-        that.getRoute(o, d);
-        this.contextPopup.remove();
+        that.getRoute(that._origin, that._destination);
+        this._contextPopup.remove();
       });
     });
   },
@@ -282,11 +245,8 @@ AccessMapRoutingControl.prototype = {
       this._map.removeSource(source);
     }
 
-    this._map.removeLayer('origin');
-    this._map.removeLayer('origin-text');
-    this._map.removeLayer('destination');
-    this._map.removeLayer('destination-text');
-
+    this._originMarker.remove();
+    this._destinationMarker.remove();
     this._map.removeLayer('route');
     this._map.removeLayer('route-outline');
     this._map.removeLayer('route-waypointpaths');
@@ -296,37 +256,8 @@ AccessMapRoutingControl.prototype = {
 
   _setupLayers: function() {
     // Store waypoint locations to share with drag operations
-    this._origin = {
-      type: 'FeatureCollection',
-      features: [{
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: []
-        },
-        properties: {
-          label: 'A'
-        }
-      }]
-    }
-
-    this._destination = {
-      type: 'FeatureCollection',
-      features: [{
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: []
-        },
-        properties: {
-          label: 'B'
-        }
-      }]
-    }
-
     // Add sources and layers for routing
-    this._sources = ['origin', 'destination', 'route-path', 'route-segments',
-                     'route-waypointpaths'];
+    this._sources = ['route-path', 'route-segments', 'route-waypointpaths'];
 
     //
     // Add sources
@@ -437,139 +368,6 @@ AccessMapRoutingControl.prototype = {
           'line-join': 'round'
         }
       });
-
-      // waypoints
-      map.addLayer({
-        id: 'origin',
-        type: 'circle',
-        source: 'origin',
-        paint: {
-          'circle-radius': 12,
-          'circle-color': '#66ff33',
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#000',
-          'circle-stroke-opacity': 0.7
-        }
-      });
-
-      map.addLayer({
-        id: 'destination',
-        type: 'circle',
-        source: 'destination',
-        paint: {
-          'circle-radius': 12,
-          'circle-color': '#ffff00',
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#000'
-        }
-      });
-
-      map.addLayer({
-        id: 'origin-text',
-        type: 'symbol',
-        source: 'origin',
-        layout: {
-          'text-field': '{label}',
-          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold']
-        }
-      });
-
-      map.addLayer({
-        id: 'destination-text',
-        type: 'symbol',
-        source: 'destination',
-        layout: {
-          'text-field': '{label}',
-          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold']
-        }
-      });
-    });
-  },
-
-  _setupMouseInteraction: function() {
-    let map = this._map;
-    //
-    // Mouse interaction with waypoints - adapted from mapbox example
-    //
-    let canvas = map.getCanvasContainer();
-    let isCursorOverPoint = false;
-    let isDragging = false;
-    this._dragging = null;
-
-    let that = this;
-    function mouseDown() {
-      if (!isCursorOverPoint) return;
-
-      isDragging = true;
-
-      if (isCursorOverPoint == 'origin') {
-        that._dragging = 'origin';
-      } else {
-        that._dragging = 'destination';
-      }
-      // Set a cursor indicator
-      canvas.style.cursor = 'grab';
-
-      // Mouse events
-      map.on('mousemove', onMove);
-      map.on('mouseup', onUp);
-    }
-
-    function onMove(e) {
-      if (!isDragging) return;
-      let coords = [e.lngLat.lng, e.lngLat.lat];
-
-      // Set a UI indicator for dragging.
-      canvas.style.cursor = 'grabbing';
-
-      // Update the marker state + update source to trigger render
-      if (that._dragging == 'origin') {
-        that._origin.features[0].geometry.coordinates = coords;
-        map.getSource('origin').setData(that._origin);
-      } else {
-        that._destination.features[0].geometry.coordinates = coords;
-        map.getSource('destination').setData(that._destination);
-      }
-    }
-
-    function onUp(e) {
-      if (!isDragging) return;
-      var coords = e.lngLat;
-
-      canvas.style.cursor = '';
-      isDragging = false;
-
-      // Request a route
-      that.getRoute(that._origin.features[0].geometry.coordinates,
-                    that._destination.features[0].geometry.coordinates);
-    }
-
-    map.on('load', function(e) {
-      map.on('mousemove', function(e) {
-        var features = map.queryRenderedFeatures(e.point, {
-          layers: ['origin', 'destination']
-        });
-
-        // Change point and cursor style as a UI indicator
-        // and set a flag to enable other mouse events.
-        if (features.length) {
-          // Which feature are we over? This should be more sophisticated (e.g.
-          // use click location to select overlapping ones). For now, if markers
-          // overlap, select the index-0 one
-          let feature = features[0]
-
-          // Store source name for marker under the cursor
-          isCursorOverPoint = feature.layer.source;
-          canvas.style.cursor = 'move';
-          map.dragPan.disable();
-        } else {
-          canvas.style.cursor = '';
-          isCursorOverPoint = false;
-          map.dragPan.enable();
-        }
-      });
-
-      map.on('mousedown', mouseDown, true);
     });
   },
 
@@ -742,6 +540,8 @@ AccessMapRoutingControl.prototype = {
   },
 
   getRoute: function(origin, destination) {
+    // Origin and destination are [lng, lat] arrays
+
     let map = this._map;
 
     //
@@ -749,12 +549,72 @@ AccessMapRoutingControl.prototype = {
     //
 
     // store new marker locations (copy values to be safe)
-    this._origin.features[0].geometry.coordinates = origin.slice();
-    this._destination.features[0].geometry.coordinates = destination.slice();
+    this._origin = origin.slice();
+    this._destination = destination.slice();
 
-    // update marker sources (triggers redraw)
-    map.getSource('origin').setData(this._origin);
-    map.getSource('destination').setData(this._destination);
+    let markerSVG = `
+    <svg id="origin-marker" viewBox="0 0 400 600">
+      <g>
+    <path
+       transform="translate(10,10)"
+       d="m 182.9,551.7 c 0,0.1 0.2,0.3 0.2,0.3 0,0 175.2,-269 175.2,-357.4 C 358.3,64.5 269.5,7.9 182.9,7.7 96.3,7.9 7.5,64.5 7.5,194.6 7.5,283 182.8,552 182.8,552 c 0,0 0.1,-0.3 0.1,-0.3 z"
+       fill="#00aeef"
+       stroke="#000000"
+       stroke-width="30px" />
+        <text
+          font-style="normal"
+          font-weight="bold"
+          font-size="40px"
+          line-height="125%"
+          font-family="sans-serif"
+          word-spacing="0px"
+          fill="#000000"
+          x="109.15977"
+          y="308.76724">
+          <tspan x="109.15977" y="308.76724" font-size="245px">A</tspan>
+        </text>
+      </g>
+    </svg>
+    `;
+    let markerNames = ['origin', 'destination']
+    for (var i = 0; i < markerNames.length; i++) {
+      let div = document.createElement('div');
+      div.insertAdjacentHTML('beforeend', markerSVG);
+      div.className = 'marker';
+
+      let width = 30
+      div.style.width = width + 'px';
+
+      let fill = div.getElementsByTagName('path')[0];
+      var name,
+          coords,
+          tspan;
+      if (i === 0) {
+        name = 'origin';
+        coords = origin;
+        tspan = div.getElementsByTagName('tspan')[0];
+        tspan.innerHTML = 'A';
+        fill.setAttribute('fill', '#00ff00');
+      } else {
+        name = 'destination';
+        coords = destination;
+        tspan = div.getElementsByTagName('tspan')[0];
+        tspan.innerHTML = 'B';
+        fill.setAttribute('fill', '#ffff00');
+      }
+
+      let markerVar = '_' + name + 'Marker';
+
+      if (this[markerVar]) this[markerVar].remove();
+
+      this[markerVar] = new mapboxgl.Marker(div, {
+        offset: [-(width / 2), -(600 / 400) * (width)]
+      });
+
+      this[markerVar]
+        .setLngLat(coords)
+        .addTo(map);
+    }
 
     // Prepare routing preferences
     // TODO: extract these from user interface
@@ -763,8 +623,8 @@ AccessMapRoutingControl.prototype = {
       maxdown: this.options.maxdown,
       ideal: this.options.ideal,
       maxup: this.options.maxup,
-      origin: origin.reverse(),
-      destination: destination.reverse()
+      origin: origin.slice().reverse(),
+      destination: destination.slice().reverse()
     };
 
     // Convert unnested JSON to encoded GET querystring
@@ -818,10 +678,10 @@ AccessMapRoutingControl.prototype = {
 
       // Path from origin/destination to route (e.g. dotted lines in gmaps)
       let pathCoords = path.features[0].geometry.coordinates;
-      let originPath = [that._origin.features[0].geometry.coordinates,
+      let originPath = [that._origin,
                         pathCoords[0]];
       let destPath = [pathCoords[pathCoords.length - 1],
-                      that._destination.features[0].geometry.coordinates];
+                      that._destination];
 
       let waypointPaths = {
         type: 'FeatureCollection',
@@ -892,9 +752,9 @@ AccessMapRoutingControl.prototype = {
     if (this._routingMode) {
       // Did the user select start and end locations?
       let originSelected = this._originTypeahead.selected;
-      let destinationSelected = this._destinationTypeahead.selected;
-      if ((originSelected !== null) && (destinationSelected !== null)) {
-        this.getRoute(originSelected.center, destinationSelected.center);
+      let destSelected = this._destinationTypeahead.selected;
+      if ((originSelected !== null) && (destSelected !== null)) {
+        this.getRoute(originSelected.center, destSelected.center);
       } else {
         // Only one has been selected - route to it
         zoomToSelection.call(this, selected);
@@ -906,14 +766,6 @@ AccessMapRoutingControl.prototype = {
 
   // FIXME: these are redundant patterns (separate functions for
   // origin/destination) - fix that
-  _onChangeOrigin: function() {
-    this._onChange(this._originTypeahead);
-  },
-
-  _onChangeDestination: function() {
-    this._onChange(this._destinationTypeahead);
-  },
-
   _onKeyDownOrigin: debounce(function(e) {
     // Ignore tab, esc, left, right, enter, up, down
     if (e.metakey || [9, 27, 37, 39, 13, 38, 40].indexOf(e.keyCode) !== -1) {

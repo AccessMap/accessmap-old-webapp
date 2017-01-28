@@ -20,7 +20,7 @@ function App(mapbox_token, routing) {
   // Sidewalk color scale
   let colors = [chroma('lime'), chroma('yellow'), chroma('red')];
   for (var i = 0; i < colors.length; i++) {
-    colors[i] = colors[i].brighten(1);
+    colors[i] = colors[i].brighten(1.5);
   }
   let colorScale = chroma.scale(colors).mode('lab');
 
@@ -78,14 +78,14 @@ function App(mapbox_token, routing) {
       paint: {
         'circle-color': '#ffbb00',
         'circle-radius': {
-          stops: [[12, 1], [15, 5], [20, 15]]
+          stops: [[12, 1], [15, 4], [20, 14]]
         },
         'circle-opacity': {
           stops: [[0, 0], [12, 0.1], [15, 0.8], [20, 1]]
         },
         'circle-stroke-color': 'black',
         'circle-stroke-width':  {
-          stops: [[12, 1], [15, 2], [20, 3]]
+          stops: [[12, 1], [15, 1.5], [20, 2]]
         },
         'circle-stroke-opacity': {
           stops: [[0, 0], [12, 0.1], [15, 0.8], [20, 1]]
@@ -153,7 +153,7 @@ function App(mapbox_token, routing) {
       paint: {
         'line-color': '#000000',
         'line-width': {
-          stops: [[12, 0.2], [zoomStart, 1], [20, 2]]
+          stops: [[12, 0.2], [zoomStart, 0.7], [20, 1.75]]
         },
         'line-opacity': {
           stops: [[10, 0.0], [zoomStart, 0.4], [20, 0.5]]
