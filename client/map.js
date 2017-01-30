@@ -88,12 +88,7 @@ function App(mapbox_token, routing) {
           stops: [[12, 1], [15, 1.5], [20, 2]]
         },
         'circle-stroke-opacity': {
-          stops: [[0, 0], [12, 0.1], [15, 0.8], [20, 1]]
-        }
-      },
-      layout: {
-        visibility: {
-          stops: [[0, 'none'], [12, 'visible']]
+          stops: [[0, 0], [12, 0], [15, 0.8], [20, 1]]
         }
       }
     });

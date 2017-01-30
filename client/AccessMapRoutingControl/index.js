@@ -307,7 +307,7 @@ AccessMapRoutingControl.prototype = {
         source: 'route-path',
         paint: {
           'line-color': '#000',
-          'line-opacity': 0.8,
+          'line-opacity': 0.7,
           'line-gap-width': {
             stops: [
               [12, 3],
@@ -318,8 +318,8 @@ AccessMapRoutingControl.prototype = {
           'line-width': {
             stops: [
               [12, 1.5],
-              [15, 2.5],
-              [20, 3.5]
+              [15, 2],
+              [20, 3]
             ]
           }
         },
@@ -328,9 +328,6 @@ AccessMapRoutingControl.prototype = {
           'line-join': 'round'
         }
       });
-
-      let mid = '#b3e0ff';
-      mid = '#ff9933';
 
       map.addLayer({
         id: 'route',
@@ -342,9 +339,7 @@ AccessMapRoutingControl.prototype = {
             type: 'interval',
             stops: [
               [-2, '#ff0000'],
-              [that.options.maxdown, mid],
-              [(that.options.maxdown + that.options.ideal) / 2, '#32adff'],
-              [(that.options.ideal + that.options.maxup) / 2, mid],
+              [that.options.maxdown, '#32adff'],
               [that.options.maxup, '#ff0000'],
               [2, '#ff0000']
             ]
@@ -588,13 +583,13 @@ AccessMapRoutingControl.prototype = {
         coords = origin;
         tspan = div.getElementsByTagName('tspan')[0];
         tspan.innerHTML = 'A';
-        fill.setAttribute('fill', '#00ff00');
+        fill.setAttribute('fill', '#ff88bb');
       } else {
         name = 'destination';
         coords = destination;
         tspan = div.getElementsByTagName('tspan')[0];
         tspan.innerHTML = 'B';
-        fill.setAttribute('fill', '#ffff00');
+        fill.setAttribute('fill', '#bbaaff');
       }
 
       let markerVar = '_' + name + 'Marker';

@@ -37,19 +37,22 @@
   display: inline-block;
   vertical-align:middle;
   speak: none;
-  width: 20px;
-  height: 20px;
-  margin: 5px;
+  width: 30px;
+  height: 30px;
+  padding: 3px;
 }
 
   .geocoder-icon-search {
     background-image: url(icons/search.svg);
     background-size: cover;
     margin-bottom: 5px;
+    padding: 8px;
+    width: 24px;
+    height: 24px;
   }
 
   .geocoder-icon-directions {
-    background-image: url(icons/map-signs.svg);
+    background-image: url(icons/directions.svg);
     background-size: cover;
     margin-bottom: 5px;
     cursor: pointer;

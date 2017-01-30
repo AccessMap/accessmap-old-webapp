@@ -16,8 +16,7 @@ module.exports = {
       extensions: ['', '.js'],
       alias: {
           webworkify: 'webworkify-webpack',
-          'mapbox-gl$': path.resolve('./node_modules/mapbox-gl/dist/mapbox-gl-dev.js'),
-          'mapbox-gl-geocoder$': path.resolve('./node_modules/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.min.js')
+          'mapbox-gl$': path.resolve('./node_modules/mapbox-gl/dist/mapbox-gl-dev.js')
           // TODO: switch between -dev and non-dev on production vs. not
       }
   },
@@ -48,9 +47,6 @@ module.exports = {
       }, {
           test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
           loader: 'url?limit=10000&mimetype=image/svg+xml'
-      }, {
-          test: require.resolve('mapbox-gl-geocoder'),
-          loader: 'imports?mapboxgl=mapbox-gl'
       }],
       // postLoaders: [{
       //     includes: [
