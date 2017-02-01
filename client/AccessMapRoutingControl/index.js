@@ -99,7 +99,7 @@ AccessMapRoutingControl.prototype = {
       if (!selected) return;
 
       that._origin = selected.center;
-      if (this._origin && this._destination) {
+      if (that._origin && that._destination) {
         that.getRoute(that._origin, that._destination)
       } else {
         that.flyTo(selected);
