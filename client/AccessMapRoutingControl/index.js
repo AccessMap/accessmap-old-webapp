@@ -136,43 +136,6 @@ AccessMapRoutingControl.prototype = {
       }
     });
 
-    settingsIcon.addEventListener('click', function() {
-      if (typeof that.svgcontainer === 'undefined') {
-        // Note: these are repetitive components - should at least make into
-        // function
-        let upContainer = that.upContainer = document.createElement('div');
-        upContainer.appendChild(document.createTextNode('Maximum uphill incline:'));
-        that.up = document.createElement('input');
-        that.up.className = 'control-slider';
-        that.up.setAttribute('type', 'range');
-        that.up.setAttribute('min', 0);
-        that.up.setAttribute('max', 10);
-        that.up.setAttribute('step', 0.1);
-        that.up.setAttribute('value', that.options.maxup * 100);
-        upContainer.appendChild(that.up);
-        that.container.appendChild(upContainer);
-
-        let downContainer = that.downContainer = document.createElement('div');
-        downContainer.appendChild(document.createTextNode('Maximum downhill incline:'));
-        that.down = document.createElement('input');
-        that.down.className = 'control-slider';
-        that.down.setAttribute('type', 'range');
-        that.down.setAttribute('min', 0);
-        that.down.setAttribute('max', 10);
-        that.down.setAttribute('step', 0.1);
-        that.down.setAttribute('value', that.options.maxdown * 100);
-        downContainer.appendChild(that.down);
-        that.container.appendChild(downContainer);
-
-        that._drawCostPlot();
-      } else {
-        that.container.removeChild(that.upContainer);
-        that.container.removeChild(that.downContainer);
-        that.container.removeChild(that.svgcontainer);
-        that.svgcontainer = undefined;
-      }
-    });
-
     originContainer.appendChild(originEl);
     el.appendChild(searchIcon);
     el.appendChild(searchContainer);
@@ -185,6 +148,54 @@ AccessMapRoutingControl.prototype = {
     this._destinationTypeahead = new Typeahead(destinationEl, [],
                                                { filter: false });
     this._destinationTypeahead.getItemValue = function(item) { return item.place_name; };
+
+    let upContainer = this.upContainer = document.createElement('div');
+    this.upContainer.style.display = 'none';
+    this.upContainer.appendChild(document.createTextNode('Maximum uphill incline:'));
+    this.up = document.createElement('input');
+    this.up.className = 'control-slider';
+    this.up.setAttribute('type', 'range');
+    this.up.setAttribute('min', this.options.ideal * 100);
+    this.up.setAttribute('max', 10);
+    this.up.setAttribute('step', 0.1);
+    this.up.setAttribute('value', this.options.maxup * 100);
+    this.upContainer.appendChild(this.up);
+    this.container.appendChild(this.upContainer);
+
+    let downContainer = this.downContainer = document.createElement('div');
+    this.downContainer.style.display = 'none';
+    this.downContainer.appendChild(document.createTextNode('Maximum downhill incline:'));
+    this.down = document.createElement('input');
+    this.down.className = 'control-slider';
+    this.down.setAttribute('type', 'range');
+    this.down.setAttribute('min', this.options.ideal * 100 * -1);
+    this.down.setAttribute('max', 10);
+    this.down.setAttribute('step', 0.1);
+    this.down.setAttribute('value', this.options.maxdown * 100 * -1);
+    this.downContainer.appendChild(this.down);
+    this.container.appendChild(this.downContainer);
+
+    settingsIcon.addEventListener('click', function() {
+      // Toggle displaying custom controls
+      if (upContainer.style.display === 'none') {
+        upContainer.style.display = 'block';
+      } else {
+        upContainer.style.display = 'none';
+      }
+
+      if (downContainer.style.display === 'none') {
+        downContainer.style.display = 'block';
+      } else {
+        downContainer.style.display = 'none';
+      }
+
+      if (that.svgcontainer === undefined) {
+        that._drawCostPlot();
+      } else {
+        that.container.removeChild(that.svgcontainer);
+        that.svgcontainer = undefined;
+      }
+    });
 
     return el;
   },
@@ -411,7 +422,7 @@ AccessMapRoutingControl.prototype = {
       .x(function(d) { return x(d.x) })
       .y(function(d) { return y(d.y) });
 
-    let data = [{
+    let data = this.data = [{
       x: 100 * this.options.maxdown,
       y: 100,
       id: 'maxdown'
@@ -475,22 +486,22 @@ AccessMapRoutingControl.prototype = {
 
       lines
         .attr('d', line(data));
-
-      updateColors(data);
     }
 
     this.up.addEventListener('input', function(e) {
       let incline = e.target.valueAsNumber;
-      data[4].x = incline;
+      that.data[4].x = incline;
       that.options.maxup = incline / 100;
       update();
+      updateColors(data);
     });
 
     this.down.addEventListener('input', function(e) {
       let incline = e.target.valueAsNumber;
-      data[0].x = -incline;
+      that.data[0].x = -incline;
       that.options.maxdown = -incline / 100;
       update();
+      updateColors(data);
     });
 
     // this.ideal.addEventListener('input', function(e) {
