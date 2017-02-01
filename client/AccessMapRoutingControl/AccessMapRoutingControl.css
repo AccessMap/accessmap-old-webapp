@@ -53,16 +53,49 @@
 
   .geocoder-icon-directions {
     background-image: url(icons/directions.svg);
-    background-size: cover;
+    background-size: 90%;
+    background-position: center;
+    background-repeat: no-repeat;
     margin-bottom: 5px;
-    cursor: pointer;
   }
 
-  .geocoder-icon-settings {
-    background-image: url(icons/cog.svg);
-    background-size: cover;
+  .geocoder-icon-manual {
+    background-image: url(icons/manual.svg);
+    background-size: 70%;
+    background-position: center;
+    background-repeat: no-repeat;
     margin-bottom: 5px;
-    cursor: pointer;
+  }
+
+  .geocoder-icon-powered {
+    background-image: url(icons/powered.svg);
+    background-size: 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-bottom: 5px;
+  }
+
+  .geocoder-icon-cane {
+    /* Icon author is Freepik at flaticon.com */
+    background-image: url(icons/cane.svg);
+    background-size: 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-bottom: 5px;
+  }
+
+  .geocoder-icon-custom {
+    background-image: url(icons/cog.svg);
+    background-size: 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-bottom: 5px;
+  }
+
+  .geocoder-preset:hover,
+  .geocoder-preset:active,
+  .geocoder-preset:focus {
+    background-position: center !important;
   }
 
 .svg-container {

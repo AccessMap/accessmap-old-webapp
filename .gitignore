@@ -11,7 +11,7 @@ npm-debug.log*
 # Build files
 *.hot-update.js
 *.hot-update.json
-public/build/*.js
+public/build/*
 
 # Secret environment variables
 set_envs.sh

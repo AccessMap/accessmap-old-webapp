@@ -387,10 +387,10 @@ function App(mapbox_token, routing) {
       colorScale: colorScale
     });
     map.addControl(routingControl);
-    map.on('load', function() {
-      routingControl.getRoute([-122.336158, 47.606637],
-                              [-122.330572, 47.603704]);
-    });
+    // map.on('load', function() {
+    //   routingControl.getRoute([-122.336158, 47.606637],
+    //                           [-122.330572, 47.603704]);
+    // });
   }
 }
 

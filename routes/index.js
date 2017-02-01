@@ -17,7 +17,7 @@ router.get('/', function(req, res) {
   res.render('index', {
     mapbox_token: JSON.stringify(process.env.MAPBOX_TOKEN),
     user: req.user,
-    routing: false
+    routing: true
   });
 });
 

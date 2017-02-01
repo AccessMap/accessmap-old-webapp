@@ -44,6 +44,8 @@ AccessMapRoutingControl.prototype = {
     maxdown: -0.1,
     ideal: -0.01,
     maxup: 0.0833,
+    curbramps: true,
+    construction: true,
     colorScale: chroma.scale(['lime', 'yellow', 'red'])
   },
 
@@ -66,6 +68,7 @@ AccessMapRoutingControl.prototype = {
   },
 
   _setupElements: function() {
+    let that = this;
     // Create div(s) to target with d3, input forms
     // To add things like icons, etc. create a span here with a specific
     // class and target with CSS
@@ -116,15 +119,36 @@ AccessMapRoutingControl.prototype = {
     directionsIcon.className = 'geocoder-icon geocoder-icon-directions';
     directionsIcon.title = 'Get directions (route, no text)';
 
-    let settingsIcon = document.createElement('div');
-    settingsIcon.className = 'geocoder-icon geocoder-icon-settings';
-    settingsIcon.style.display = 'none';
+    let profilesGroup = document.createElement('div');
+    profilesGroup.className = 'btn-group';
+    profilesGroup.setAttribute('role', 'toolbar');
+    profilesGroup.setAttribute('aria-label', '...');
+    profilesGroup.style.display = 'block';
+    profilesGroup.style.width = '100%';
+    profilesGroup.style.height = '40px';
+    profilesGroup.style.display = 'none';
+
+    let manualIcon = document.createElement('button');
+    profilesGroup.appendChild(manualIcon);
+    manualIcon.className = 'btn btn-default geocoder-icon geocoder-preset geocoder-icon-manual';
+
+    let poweredIcon = document.createElement('button');
+    profilesGroup.appendChild(poweredIcon);
+    poweredIcon.className = 'btn btn-default geocoder-icon geocoder-preset geocoder-icon-powered';
+
+    let caneIcon = document.createElement('button');
+    profilesGroup.appendChild(caneIcon);
+    caneIcon.className = 'btn btn-default geocoder-icon geocoder-preset geocoder-icon-cane';
+
+    let customIcon = document.createElement('button');
+    profilesGroup.appendChild(customIcon);
+    customIcon.className = 'btn btn-default geocoder-icon geocoder-preset geocoder-icon-custom';
 
     originContainer.appendChild(originEl);
     el.appendChild(searchIcon);
     el.appendChild(searchContainer);
     el.appendChild(directionsIcon);
-    el.appendChild(settingsIcon);
+    el.appendChild(profilesGroup);
 
     this._originTypeahead = new Typeahead(originEl, [], { filter: false });
     this._originTypeahead.getItemValue = function(item) { return item.place_name; };
@@ -225,6 +249,12 @@ AccessMapRoutingControl.prototype = {
 
     customContainer.appendChild(tabs);
 
+    function getNewRoute() {
+      if (that._origin && that._destination) {
+        that.getRoute(that._origin, that._destination);
+      }
+    }
+
     // Container for tab content
     let tabContent = document.createElement('div');
     tabContent.className = 'tab-content';
@@ -319,9 +349,17 @@ AccessMapRoutingControl.prototype = {
       uphillUpdate();
     });
 
+    up.on('slideStop', function(newVal) {
+      getNewRoute();
+    });
+
     down.on('slide', function(newVal) {
       options.maxdown = -newVal / 100;
       downhillUpdate();
+    });
+
+    down.on('slideStop', function(newVal) {
+      getNewRoute();
     });
 
     function updateColors() {
@@ -396,6 +434,10 @@ AccessMapRoutingControl.prototype = {
     construction.value = '';
     constructionLabel.appendChild(construction);
     constructionLabel.appendChild(document.createTextNode('Avoid Construction'));
+    construction.onclick = function(e) {
+      getNewRoute();
+    };
+
 
     let curbsDiv = document.createElement('div');
     curbsDiv.className = 'checkbox';
@@ -408,10 +450,55 @@ AccessMapRoutingControl.prototype = {
     curbs.value = '';
     curbsLabel.appendChild(curbs);
     curbsLabel.appendChild(document.createTextNode('Require curb ramps'));
+    curbs.onclick = function(e) {
+      getNewRoute();
+    };
 
     customContainer.appendChild(tabContent);
 
-    settingsIcon.addEventListener('click', function() {
+    manualIcon.addEventListener('click', function() {
+      if (customContainer.style.display !== 'none') {
+        customContainer.style.display = 'none';
+        defaultStyle();
+      }
+      // Set manual wheelchair preset, get route if already set
+      options.maxdown = -0.1;
+      options.maxup = 0.0833;
+      that.curbs.checked = true;
+      that.construction.checked = true;
+
+      getNewRoute();
+    });
+
+    poweredIcon.addEventListener('click', function() {
+      if (customContainer.style.display !== 'none') {
+        customContainer.style.display = 'none';
+        defaultStyle();
+      }
+      // Set manual wheelchair preset, get route if already set
+      options.maxdown = -0.1;
+      options.maxup = 0.1;
+      that.curbs.checked = true;
+      that.construction.checked = true;
+
+      getNewRoute();
+    });
+
+    poweredIcon.addEventListener('click', function() {
+      if (customContainer.style.display !== 'none') {
+        customContainer.style.display = 'none';
+        defaultStyle();
+      }
+      // Set manual wheelchair preset, get route if already set
+      options.maxdown = -0.1;
+      options.maxup = 0.1;
+      that.curbs.checked = false;
+      that.construction.checked = true;
+
+      getNewRoute();
+    });
+
+    customIcon.addEventListener('click', function() {
       // Toggle displaying custom controls
       if (customContainer.style.display === 'none') {
         customContainer.style.display = 'block';
@@ -422,20 +509,19 @@ AccessMapRoutingControl.prototype = {
       }
     });
 
-    let that = this;
     directionsIcon.addEventListener('click', function() {
       // Toggle the presence of the 'origin' search box
       if (that._mode === 'routing') {
         // switch to search-only mode
         originEl.style.display = 'none';
-        settingsIcon.style.display = 'none';
+        profilesGroup.style.display = 'none';
         customContainer.style.display = 'none';
         that._mode = 'view';
         defaultStyle();
       } else {
         // switch to routing mode
         originEl.style.display = 'block';
-        settingsIcon.style.display = 'inline-block';
+        profilesGroup.style.display = 'block';
 
         // Update the placeholder text
         destinationEl.placeholder = 'Destination location';
