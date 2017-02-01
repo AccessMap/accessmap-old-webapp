@@ -115,27 +115,6 @@ AccessMapRoutingControl.prototype = {
     settingsIcon.className = 'geocoder-icon geocoder-icon-settings';
     settingsIcon.style.display = 'none';
 
-    // TODO: fix the that-this hack using bind() and a separate function
-    let that = this;
-    directionsIcon.addEventListener('click', function() {
-      // Toggle the presence of the 'origin' search box
-      if (that._routingMode) {
-        // switch to search-only mode
-        originEl.style.display = 'none';
-        settingsIcon.style.display = 'none';
-        that._routingMode = false;
-      } else {
-        // switch to routing mode
-        originEl.style.display = 'block';
-        settingsIcon.style.display = 'inline-block';
-
-        // Update the placeholder text
-        destinationEl.placeholder = 'Destination location';
-        destinationEl.title = 'Destination location';
-        that._routingMode = true;
-      }
-    });
-
     originContainer.appendChild(originEl);
     el.appendChild(searchIcon);
     el.appendChild(searchContainer);
@@ -149,6 +128,11 @@ AccessMapRoutingControl.prototype = {
                                                { filter: false });
     this._destinationTypeahead.getItemValue = function(item) { return item.place_name; };
 
+    // Custom route controls
+    let customContainer = this.customContainer = document.createElement('div');
+    this.customContainer.display = 'none';
+    this.container.appendChild(customContainer);
+
     let upContainer = this.upContainer = document.createElement('div');
     this.upContainer.style.display = 'none';
     this.upContainer.appendChild(document.createTextNode('Maximum uphill incline:'));
@@ -160,7 +144,7 @@ AccessMapRoutingControl.prototype = {
     this.up.setAttribute('step', 0.1);
     this.up.setAttribute('value', this.options.maxup * 100);
     this.upContainer.appendChild(this.up);
-    this.container.appendChild(this.upContainer);
+    this.customContainer.appendChild(this.upContainer);
 
     let downContainer = this.downContainer = document.createElement('div');
     this.downContainer.style.display = 'none';
@@ -173,8 +157,9 @@ AccessMapRoutingControl.prototype = {
     this.down.setAttribute('step', 0.1);
     this.down.setAttribute('value', this.options.maxdown * 100 * -1);
     this.downContainer.appendChild(this.down);
-    this.container.appendChild(this.downContainer);
+    this.customContainer.appendChild(this.downContainer);
 
+    let that = this;
     settingsIcon.addEventListener('click', function() {
       // Toggle displaying custom controls
       if (upContainer.style.display === 'none') {
@@ -192,8 +177,29 @@ AccessMapRoutingControl.prototype = {
       if (that.svgcontainer === undefined) {
         that._drawCostPlot();
       } else {
-        that.container.removeChild(that.svgcontainer);
+        that.customContainer.removeChild(that.svgcontainer);
         that.svgcontainer = undefined;
+      }
+    });
+
+    directionsIcon.addEventListener('click', function() {
+      // Toggle the presence of the 'origin' search box
+      if (that._routingMode) {
+        // switch to search-only mode
+        originEl.style.display = 'none';
+        settingsIcon.style.display = 'none';
+        customContainer.style.display = 'none';
+        that._routingMode = false;
+      } else {
+        // switch to routing mode
+        originEl.style.display = 'block';
+        settingsIcon.style.display = 'inline-block';
+        customContainer.style.display = 'block';
+
+        // Update the placeholder text
+        destinationEl.placeholder = 'Destination location';
+        destinationEl.title = 'Destination location';
+        that._routingMode = true;
       }
     });
 
@@ -380,7 +386,7 @@ AccessMapRoutingControl.prototype = {
     // create svg canvas
     this.svgcontainer = document.createElement('div');
     this.svgcontainer.className = 'svg-container';
-    this.container.appendChild(this.svgcontainer);
+    this.customContainer.appendChild(this.svgcontainer);
 
     this.svg = d3.select(this.svgcontainer)
       .append('svg')
