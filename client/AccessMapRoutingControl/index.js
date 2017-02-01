@@ -129,59 +129,146 @@ AccessMapRoutingControl.prototype = {
     this._destinationTypeahead.getItemValue = function(item) { return item.place_name; };
 
     // Custom route controls
-    let customContainer = this.customContainer = document.createElement('div');
-    this.customContainer.display = 'none';
+    // TODO: use proper components for this (React?)
+    let customContainer = document.createElement('div');
+    customContainer.style.display = 'none';
+    customContainer.className = 'custom-container';
     this.container.appendChild(customContainer);
 
-    let upContainer = this.upContainer = document.createElement('div');
-    this.upContainer.style.display = 'none';
-    this.upContainer.appendChild(document.createTextNode('Maximum uphill incline:'));
-    this.up = document.createElement('input');
-    this.up.className = 'control-slider';
-    this.up.setAttribute('type', 'range');
-    this.up.setAttribute('min', this.options.ideal * 100);
-    this.up.setAttribute('max', 10);
-    this.up.setAttribute('step', 0.1);
-    this.up.setAttribute('value', this.options.maxup * 100);
-    this.upContainer.appendChild(this.up);
-    this.customContainer.appendChild(this.upContainer);
+    let tabs = document.createElement('ul');
+    tabs.className = 'nav nav-tabs';
 
-    let downContainer = this.downContainer = document.createElement('div');
-    this.downContainer.style.display = 'none';
-    this.downContainer.appendChild(document.createTextNode('Maximum downhill incline:'));
-    this.down = document.createElement('input');
-    this.down.className = 'control-slider';
-    this.down.setAttribute('type', 'range');
-    this.down.setAttribute('min', this.options.ideal * 100 * -1);
-    this.down.setAttribute('max', 10);
-    this.down.setAttribute('step', 0.1);
-    this.down.setAttribute('value', this.options.maxdown * 100 * -1);
-    this.downContainer.appendChild(this.down);
-    this.customContainer.appendChild(this.downContainer);
+    let upTab = document.createElement('li');
+    upTab.className = 'active'
+    let upTabLink = document.createElement('a');
+    upTabLink.setAttribute('data-toggle', 'tab');
+    upTabLink.setAttribute('href', '#upcontrol');
+    upTabLink.innerHTML = 'Uphill';
+    upTab.appendChild(upTabLink);
+    tabs.appendChild(upTab);
 
-    let that = this;
+    let downTab = document.createElement('li');
+    let downTabLink = document.createElement('a');
+    downTabLink.setAttribute('data-toggle', 'tab');
+    downTabLink.setAttribute('href', '#downcontrol');
+    downTabLink.innerHTML = 'Downhill';
+    downTab.appendChild(downTabLink);
+    tabs.appendChild(downTab);
+
+    customContainer.appendChild(tabs);
+
+    // Container for tab content
+    let tabContent = document.createElement('div');
+    tabContent.className = 'tab-content';
+
+    // Create input sliders
+    let upContainer = document.createElement('div');
+    upContainer.id = 'upcontrol';
+    upContainer.className = 'tab-pane fade in active';
+    upContainer.appendChild(document.createTextNode('Maximum uphill incline:'));
+    let up = document.createElement('input');
+    up.className = 'control-slider';
+    up.id = 'up-slider';
+    up.setAttribute('type', 'range');
+    up.setAttribute('min', this.options.ideal * 100);
+    up.setAttribute('max', 10);
+    up.setAttribute('step', 0.1);
+    up.setAttribute('value', this.options.maxup * 100);
+    upContainer.appendChild(up);
+    tabContent.appendChild(upContainer);
+
+    let downContainer = document.createElement('div');
+    downContainer.id = 'downcontrol';
+    downContainer.className = 'tab-pane fade';
+    downContainer.appendChild(document.createTextNode('Maximum downhill incline:'));
+    let down = document.createElement('input');
+    down.className = 'control-slider';
+    down.id = 'down-slider';
+    down.setAttribute('type', 'range');
+    down.setAttribute('min', this.options.ideal * 100 * -1);
+    down.setAttribute('max', 10);
+    down.setAttribute('step', 0.1);
+    down.setAttribute('value', this.options.maxdown * 100 * -1);
+    downContainer.appendChild(down);
+    tabContent.appendChild(downContainer);
+
+    let options = this.options;
+    up.addEventListener('input', function(e) {
+      let incline = e.target.valueAsNumber;
+      options.maxup = incline / 100;
+      updateColors();
+    });
+
+    down.addEventListener('input', function(e) {
+      let incline = e.target.valueAsNumber;
+      options.maxdown = -incline / 100;
+      updateColors();
+    });
+
+    let map = this._map;
+    function updateColors() {
+      let data = [{
+        x: 100 * options.maxdown,
+        y: 100,
+        id: 'maxdown'
+      }, {
+        x: 100 * (options.maxdown + options.ideal) / 2,
+        y: 10,
+        id: 'low_mid'
+      }, {
+        x: 100 * options.ideal,
+        y: 0,
+        id: 'ideal'
+      }, {
+        x: 100 * (options.ideal + options.maxup) / 2,
+        y: 10,
+        id: 'high_mid'
+      }, {
+        x: 100 * options.maxup,
+        y: 100,
+        id: 'maxup'
+      }];
+      // Update coloring scheme for map
+      // TODO: have separate modes: uphill vs. downhill. Current method uses
+      // line direction, which has no meaning on the map view
+      function densify(arr) {
+        arr = arr.slice();
+        for (let i = (arr.length - 1); i > 0; i--) {
+          arr.splice(i, 0, {
+            x: (arr[i - 1].x + arr[i].x) / 2,
+            y: (arr[i - 1].y + arr[i].y) / 2
+          });
+        }
+        return arr;
+      }
+
+      let denseData = densify(densify(data));
+
+      let stops = denseData.map(function(d) {
+        let x = 0.01 * d.x;
+        let y = options.colorScale(0.01 * d.y).hex();
+        return [x, y]
+      });
+
+      map.setPaintProperty('sidewalks', 'line-color', {
+        property: 'grade',
+        colorSpace: 'lab',
+        stops: stops
+      });
+    }
+
+    customContainer.appendChild(tabContent);
+
     settingsIcon.addEventListener('click', function() {
       // Toggle displaying custom controls
-      if (upContainer.style.display === 'none') {
-        upContainer.style.display = 'block';
+      if (customContainer.style.display === 'none') {
+        customContainer.style.display = 'block';
       } else {
-        upContainer.style.display = 'none';
-      }
-
-      if (downContainer.style.display === 'none') {
-        downContainer.style.display = 'block';
-      } else {
-        downContainer.style.display = 'none';
-      }
-
-      if (that.svgcontainer === undefined) {
-        that._drawCostPlot();
-      } else {
-        that.customContainer.removeChild(that.svgcontainer);
-        that.svgcontainer = undefined;
+        customContainer.style.display = 'none';
       }
     });
 
+    let that = this;
     directionsIcon.addEventListener('click', function() {
       // Toggle the presence of the 'origin' search box
       if (that._routingMode) {
@@ -194,7 +281,6 @@ AccessMapRoutingControl.prototype = {
         // switch to routing mode
         originEl.style.display = 'block';
         settingsIcon.style.display = 'inline-block';
-        customContainer.style.display = 'block';
 
         // Update the placeholder text
         destinationEl.placeholder = 'Destination location';
@@ -378,174 +464,6 @@ AccessMapRoutingControl.prototype = {
         }
       });
     });
-  },
-
-  _drawCostPlot: function() {
-    let map = this._map;
-
-    // create svg canvas
-    this.svgcontainer = document.createElement('div');
-    this.svgcontainer.className = 'svg-container';
-    this.customContainer.appendChild(this.svgcontainer);
-
-    this.svg = d3.select(this.svgcontainer)
-      .append('svg')
-      .attr('width', this.svgcontainer.clientWidth)
-      .attr('height', 150)
-      .classed('svg-content', true);
-
-    let margin = {top: 20, right: 10, bottom: 20, left: 60};
-    let w = this.svg.attr('width') - margin.left - margin.right;
-    let h = this.svg.attr('height') - margin.top - margin.bottom;
-
-    // set up scales
-    let x = d3.scaleLinear()
-      .domain([-10, 10])
-      .range([0, w])
-      .clamp(true);
-
-    let y = d3.scaleLinear()
-      .domain([0, 100])
-      .range([h, 0])
-      .clamp(true);
-
-
-    let g = this.svg.append('g')
-      .attr('transform', 'translate(' + margin.left / 2 + ',' + margin.top / 2 + ')');
-
-    g.append('g')
-      .attr('class', 'axis axis-x')
-      .attr('transform', 'translate(0,' + h + ')')
-      .call(d3.axisBottom(x));
-
-    g.append('g')
-      .attr('class', 'axis axis-y')
-      .call(d3.axisLeft(y));
-
-    // d3 place initial points
-    // TODO: grab from cookie, if available
-    let line = d3.line()
-      .x(function(d) { return x(d.x) })
-      .y(function(d) { return y(d.y) });
-
-    let data = this.data = [{
-      x: 100 * this.options.maxdown,
-      y: 100,
-      id: 'maxdown'
-    }, {
-      x: 100 * (this.options.maxdown + this.options.ideal) / 2,
-      y: 10,
-      id: 'low_mid'
-    }, {
-      x: 100 * this.options.ideal,
-      y: 0,
-      id: 'ideal'
-    }, {
-      x: 100 * (this.options.ideal + this.options.maxup) / 2,
-      y: 10,
-      id: 'high_mid'
-    }, {
-      x: 100 * this.options.maxup,
-      y: 100,
-      id: 'maxup'
-    }];
-
-    let lines = g.selectAll('lines')
-      .data([data])
-    .enter().append('path')
-      .attr('class', 'lines')
-      .attr('d', function(d) { return line(d) })
-      .style('fill', 'none')
-      .style('stroke', 'blue')
-      .style('stroke-width', '2px');
-
-    let pointGroup = g.append('g')
-      .attr('class', 'points');
-
-    let points = pointGroup.selectAll('points')
-      .data(data)
-    .enter().append('circle')
-      .attr('cx', function(d) { return x(d.x) })
-      .attr('cy', function(d) { return y(d.y) })
-      .attr('r', 5)
-      .attr('class', function(d) { return 'point-' + d.id })
-      .style('fill', 'black');
-
-    function update() {
-      // Recalculate midpoints
-      data[1].x = (data[0].x + data[2].x) / 2
-      data[3].x = (data[2].x + data[4].x) / 2
-
-      // Clear all and redraw
-      let points = pointGroup.selectAll('circle')
-        .data([]);
-
-      points.exit().remove();
-
-      points
-        .data(data)
-      .enter().append('circle')
-        .attr('cx', function(d) { return x(d.x) })
-        .attr('cy', function(d) { return y(d.y) })
-        .attr('r', 5)
-        .style('fill', 'black');
-
-      lines
-        .attr('d', line(data));
-    }
-
-    this.up.addEventListener('input', function(e) {
-      let incline = e.target.valueAsNumber;
-      that.data[4].x = incline;
-      that.options.maxup = incline / 100;
-      update();
-      updateColors(data);
-    });
-
-    this.down.addEventListener('input', function(e) {
-      let incline = e.target.valueAsNumber;
-      that.data[0].x = -incline;
-      that.options.maxdown = -incline / 100;
-      update();
-      updateColors(data);
-    });
-
-    // this.ideal.addEventListener('input', function(e) {
-    //   let ideal = e.target.valueAsNumber;
-    //   data[2].x = ideal;
-    //   update();
-    // });
-
-    let that = this;
-    function updateColors(data) {
-      // Update coloring scheme for map
-      // TODO: have separate modes: uphill vs. downhill. Current method uses
-      // line direction, which has no meaning on the map view
-      function densify(arr) {
-        arr = arr.slice();
-        for (let i = (arr.length - 1); i > 0; i--) {
-          arr.splice(i, 0, {
-            x: (arr[i - 1].x + arr[i].x) / 2,
-            y: (arr[i - 1].y + arr[i].y) / 2
-          });
-        }
-        return arr;
-      }
-
-      let denseData = densify(densify(data));
-
-      let stops = denseData.map(function(d) {
-        let x = 1e-2 * d.x;
-        let y = that.options.colorScale(1e-2 * d.y).hex();
-        return [x, y]
-      });
-
-      map.setPaintProperty('sidewalks', 'line-color', {
-        property: 'grade',
-        colorSpace: 'lab',
-        stops: stops
-      });
-    }
   },
 
   getRoute: function(origin, destination) {
