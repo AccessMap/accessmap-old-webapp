@@ -381,7 +381,7 @@ function App(mapbox_token, routing) {
   let gradeControl = new AccessMapGradeControl({
     colorScale: colorScale
   });
-  map.addControl(gradeControl, 'bottom-right');
+  map.addControl(gradeControl, 'bottom-left');
 
   if (routing) {
     let routingControl = new AccessMapRoutingControl({

@@ -56,9 +56,13 @@ AccessMapRoutingControl.prototype = {
     this._onKeyDownDestination = this._onKeyDownDestination.bind(this);
 
     this._setupLayers();
+    let el = this._setupElements();
+    this._contextMenu();
 
-    // FIXME: Add split screen, apply sidewalk layer coloring
+    return el;
+  },
 
+  _setupElements: function() {
     // Create div(s) to target with d3, input forms
     // To add things like icons, etc. create a span here with a specific
     // class and target with CSS
@@ -136,33 +140,34 @@ AccessMapRoutingControl.prototype = {
       if (typeof that.svgcontainer === 'undefined') {
         // Note: these are repetitive components - should at least make into
         // function
-        let div = document.createElement('div');
-        div.appendChild(document.createTextNode('Maximum uphill incline:'));
-        that.container.appendChild(div);
+        let upContainer = that.upContainer = document.createElement('div');
+        upContainer.appendChild(document.createTextNode('Maximum uphill incline:'));
         that.up = document.createElement('input');
         that.up.className = 'control-slider';
         that.up.setAttribute('type', 'range');
         that.up.setAttribute('min', 0);
         that.up.setAttribute('max', 10);
         that.up.setAttribute('step', 0.1);
-        that.up.setAttribute('value', 8.3);
-        that.container.appendChild(that.up);
+        that.up.setAttribute('value', that.options.maxup * 100);
+        upContainer.appendChild(that.up);
+        that.container.appendChild(upContainer);
 
-        let div2 = document.createElement('div');
-        div2.appendChild(document.createTextNode('Maximum downhill incline:'));
-        that.container.appendChild(div2);
+        let downContainer = that.downContainer = document.createElement('div');
+        downContainer.appendChild(document.createTextNode('Maximum downhill incline:'));
         that.down = document.createElement('input');
         that.down.className = 'control-slider';
         that.down.setAttribute('type', 'range');
         that.down.setAttribute('min', 0);
         that.down.setAttribute('max', 10);
         that.down.setAttribute('step', 0.1);
-        that.down.setAttribute('value', 9);
-        that.container.appendChild(that.down);
+        that.down.setAttribute('value', that.options.maxdown * 100);
+        downContainer.appendChild(that.down);
+        that.container.appendChild(downContainer);
 
         that._drawCostPlot();
       } else {
-        that.container.removeChild(that.up);
+        that.container.removeChild(that.upContainer);
+        that.container.removeChild(that.downContainer);
         that.container.removeChild(that.svgcontainer);
         that.svgcontainer = undefined;
       }
@@ -180,8 +185,6 @@ AccessMapRoutingControl.prototype = {
     this._destinationTypeahead = new Typeahead(destinationEl, [],
                                                { filter: false });
     this._destinationTypeahead.getItemValue = function(item) { return item.place_name; };
-
-    this._contextMenu();
 
     return el;
   },
