@@ -12,7 +12,7 @@ function AccessMapGradeControl(options) {
 AccessMapGradeControl.prototype = {
 
   options: {
-    xlabel: 'grade (%)',
+    xlabel: 'incline (%)',
     domain: [0, 5, 10],
     colorScale: chroma.scale(['lime', 'yellow', 'red']).mode('lab')
   },

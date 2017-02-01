@@ -8,6 +8,9 @@ import MapboxClient from 'mapbox/lib/services/geocoding';
 import turfBbox from '@turf/bbox';
 import mapboxgl from 'mapbox-gl';
 
+import Slider from 'bootstrap-slider';
+import '!style!css!bootstrap-slider/dist/css/bootstrap-slider.min.css';
+
 import '!style!css!./AccessMapRoutingControl.css';
 
 // FIXME: the Typeahead class fires an extra 'change' event on click. This
@@ -160,48 +163,100 @@ AccessMapRoutingControl.prototype = {
     // Container for tab content
     let tabContent = document.createElement('div');
     tabContent.className = 'tab-content';
+    tabContent.style.padding = '10px';
 
+    //
     // Create input sliders
+    //
+
+    // Up slider
     let upContainer = document.createElement('div');
     upContainer.id = 'upcontrol';
     upContainer.className = 'tab-pane fade in active';
-    upContainer.appendChild(document.createTextNode('Maximum uphill incline:'));
-    let up = document.createElement('input');
-    up.className = 'control-slider';
-    up.id = 'up-slider';
-    up.setAttribute('type', 'range');
-    up.setAttribute('min', this.options.ideal * 100);
-    up.setAttribute('max', 10);
-    up.setAttribute('step', 0.1);
-    up.setAttribute('value', this.options.maxup * 100);
-    upContainer.appendChild(up);
     tabContent.appendChild(upContainer);
 
+    let upTitle = document.createElement('div');
+    upTitle.innerHTML = 'Maximum uphill incline';
+    upContainer.appendChild(upTitle);
+
+    let upContainerControl = document.createElement('div');
+    upContainer.appendChild(upContainerControl);
+
+    let upMin = document.createElement('div')
+    upMin.innerHTML = (this.options.ideal * 100).toString() + '%';
+    upMin.style.display = 'inline-block';
+    upMin.style.margin = '0 10px 0 0';
+    upContainerControl.appendChild(upMin);
+
+    let upSliderContainer = document.createElement('div');
+    upSliderContainer.style.display = 'inline-block';
+    upContainerControl.appendChild(upSliderContainer);
+
+    let upMax = document.createElement('div')
+    upMax.innerHTML = '10%';
+    upMax.style.display = 'inline-block';
+    upMax.style.margin = '0 0 0 10px';
+    upContainerControl.appendChild(upMax);
+
+    let up = new Slider(upSliderContainer, {
+      id: 'up-slider',
+      min: this.options.ideal * 100,
+      max: 10,
+      step: 0.1,
+      value: this.options.maxup * 100
+    });
+
+    // Down slider
     let downContainer = document.createElement('div');
     downContainer.id = 'downcontrol';
     downContainer.className = 'tab-pane fade';
-    downContainer.appendChild(document.createTextNode('Maximum downhill incline:'));
-    let down = document.createElement('input');
-    down.className = 'control-slider';
-    down.id = 'down-slider';
-    down.setAttribute('type', 'range');
-    down.setAttribute('min', this.options.ideal * 100 * -1);
-    down.setAttribute('max', 10);
-    down.setAttribute('step', 0.1);
-    down.setAttribute('value', this.options.maxdown * 100 * -1);
-    downContainer.appendChild(down);
     tabContent.appendChild(downContainer);
 
+    let downTitle = document.createElement('div');
+    downTitle.innerHTML = 'Maximum downhill incline';
+    downContainer.appendChild(downTitle);
+
+    let downContainerControl = document.createElement('div');
+    downContainer.appendChild(downContainerControl);
+
+    let downMin = document.createElement('div')
+    downMin.innerHTML = (this.options.ideal * 100).toString() + '%';
+    downMin.style.display = 'inline-block';
+    downMin.style.margin = '0 10px 0 0';
+    downContainerControl.appendChild(downMin);
+
+    let downSliderContainer = document.createElement('div');
+    downSliderContainer.style.display = 'inline-block';
+    downContainerControl.appendChild(downSliderContainer);
+
+    let downMax = document.createElement('div')
+    downMax.innerHTML = '10%';
+    downMax.style.display = 'inline-block';
+    downMax.style.margin = '0 0 0 10px';
+    downContainerControl.appendChild(downMax);
+
+    let down = new Slider(downSliderContainer, {
+      id: 'down-slider',
+      min: this.options.ideal * 100 * -1,
+      max: 10,
+      step: 0.1,
+      value: this.options.maxdown * 100 * -1
+    });
+
+    // Fix CSS issues with bootstrap-slider: initialized offset is wrong?
+    let upTip = up.sliderElem.getElementsByClassName('tooltip-main')[0];
+    let downTip = down.sliderElem.getElementsByClassName('tooltip-main')[0];
+    upTip.style['margin-left'] = '-16px';
+    downTip.style['margin-left'] = '-16px';
+
     let options = this.options;
-    up.addEventListener('input', function(e) {
-      let incline = e.target.valueAsNumber;
-      options.maxup = incline / 100;
+    up.on('slide', function(newVal) {
+      options.maxup = newVal / 100;
       updateColors();
     });
 
-    down.addEventListener('input', function(e) {
-      let incline = e.target.valueAsNumber;
-      options.maxdown = -incline / 100;
+    down.on('slide', function(newVal) {
+      options.maxdown = -newVal / 100;
       updateColors();
     });
 
