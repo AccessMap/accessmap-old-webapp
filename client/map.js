@@ -78,7 +78,7 @@ function App(mapbox_token, routing) {
       paint: {
         'circle-color': '#ffbb00',
         'circle-radius': {
-          stops: [[12, 1], [15, 4], [20, 14]]
+          stops: [[12, 1], [15, 4], [20, 22]]
         },
         'circle-opacity': {
           stops: [[0, 0], [12, 0.1], [15, 0.8], [20, 1]]
@@ -183,7 +183,7 @@ function App(mapbox_token, routing) {
           stops: [[12, 0.5], [16, 3], [20, 30]]
         },
         'line-opacity': {
-          stops: [[8, 0.0], [zoomStart, 0.7], [20, 0.5]]
+          stops: [[8, 0.0], [zoomStart, 0.7], [20, 0.6]]
         }
       },
       layout: {
@@ -243,10 +243,9 @@ function App(mapbox_token, routing) {
     });
 
     let geolocator = new mapboxgl.GeolocateControl({
-      position: 'top-left'
+      position: 'top-right'
     });
     map.addControl(geolocator);
-
     function drawGeolocation(position) {
       let coords = [position.coords.longitude, position.coords.latitude];
       let location = {
@@ -299,19 +298,17 @@ function App(mapbox_token, routing) {
       if (construction.length) {
         let selected = construction[0];
         let props = selected.properties;
-        let closed = props.closed === 'Y' ? 'Yes' : 'No';
 
         let permitNumber = props.permit_number;
         let permitsUrl = 'https://data.seattle.gov/resource/hyub-wfuv.json';
         permitsUrl += '?permit_no_num=' + permitNumber;
-        let permitsMarkup = '<a href="' + permitsUrl + '">' + permitNumber + '</a>';
+        let permitsMarkup = '<a href="' + permitsUrl + '" target="_blank">Permit</a>';
 
         let message = '<h4 style="text-align: center;"><b>Construction</b></h4>';
-        message += '<h4><b>Sidewalk closed:</b> ' + closed + '</h4>';
-        message += '<h4><b>Address:</b> ' + props.address + '</h4>';
-        message += '<h4><b>Started:</b> ' + props.start_date + '</h4>';
-        message += '<h4><b>Ends:</b> ' + props.end_date + '</h4>';
-        message += '<h4><b>SDOT Permit:</b> ' + permitsMarkup + '</h4>';
+        message += '<h4><b>' + permitsMarkup + '</b></h4>';
+        message += '<h4><b>Address: </b> ' + props.address + '</h4>';
+        message += '<h4><b>Started: </b> ' + props.start_date + '</h4>';
+        message += '<h4><b>Ends: </b> ' + props.end_date + '</h4>';
 
         let popup = new mapboxgl.Popup()
           .setLngLat(e.lngLat)

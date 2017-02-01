@@ -51,7 +51,7 @@ AccessMapRoutingControl.prototype = {
     this._map = map;
     this._mapboxClient = new MapboxClient(this.options.accessToken);
 
-    this._routingMode = false;
+    this._mode = 'view';
 
     // Bind this object to event-called functions
     this._onChange = this._onChange.bind(this);
@@ -69,6 +69,8 @@ AccessMapRoutingControl.prototype = {
     // Create div(s) to target with d3, input forms
     // To add things like icons, etc. create a span here with a specific
     // class and target with CSS
+    let defaultStyle = this._defaultMapStyle.bind(this);
+
     let el = this.container = document.createElement('div');
     el.className = 'mapboxgl-ctrl-accessmaproutingcontrol mapboxgl-ctrl';
 
@@ -150,6 +152,37 @@ AccessMapRoutingControl.prototype = {
     upTab.appendChild(upTabLink);
     tabs.appendChild(upTab);
 
+    let map = this._map;
+    let options = this.options;
+    let colorScale = this.options.colorScale;
+    function uphillUpdate() {
+      // Modify map style to make everything uphill-shaded
+      let mid = (options.maxup + options.ideal) / 2;
+      // Need to solve linear equation to get x-intercept, which is equivalent
+      // to 'b' in mx + b for equation for line from ideal to midpoint
+      // b is in the domain [0, 0.01]
+      let dy = 0.1;
+      let dx = mid - options.ideal;
+      let m = dy / dx;
+      let b = 0.1 - m * mid;
+
+      let stops = [
+        [options.maxup * -1, colorScale(1).hex()],
+        [mid * -1, colorScale(0.1).hex()],
+        [0, colorScale(b).hex()],
+        [mid, colorScale(0.1).hex()],
+        [options.maxup, colorScale(1).hex()]
+      ];
+
+      map.setPaintProperty('sidewalks', 'line-color', {
+        property: 'grade',
+        colorSpace: 'lab',
+        stops: stops
+      });
+    }
+
+    upTabLink.addEventListener('click', uphillUpdate);
+
     let downTab = document.createElement('li');
     let downTabLink = document.createElement('a');
     downTabLink.setAttribute('data-toggle', 'tab');
@@ -166,6 +199,29 @@ AccessMapRoutingControl.prototype = {
     barriersTabLink.innerHTML = 'Barriers';
     barriersTab.appendChild(barriersTabLink);
     tabs.appendChild(barriersTab);
+
+    barriersTabLink.addEventListener('click', defaultStyle);
+
+    function downhillUpdate() {
+      // Modify map style to make everything uphill-shaded
+      let mid = (options.maxdown + options.ideal) / 2;
+      let stops = [
+        [options.maxdown, colorScale(1).hex()],
+        [mid, colorScale(0.1).hex()],
+        [-0.01, colorScale(0).hex()],
+        [0.01, colorScale(0).hex()],
+        [mid * -1, colorScale(0.1).hex()],
+        [options.maxdown * -1, colorScale(1).hex()]
+      ];
+
+      map.setPaintProperty('sidewalks', 'line-color', {
+        property: 'grade',
+        colorSpace: 'lab',
+        stops: stops
+      });
+    }
+
+    downTabLink.addEventListener('click', downhillUpdate);
 
     customContainer.appendChild(tabs);
 
@@ -192,7 +248,7 @@ AccessMapRoutingControl.prototype = {
     upContainer.appendChild(upContainerControl);
 
     let upMin = document.createElement('div')
-    upMin.innerHTML = (this.options.ideal * 100).toString() + '%';
+    upMin.innerHTML = '1%';
     upMin.style.display = 'inline-block';
     upMin.style.margin = '0 10px 0 0';
     upContainerControl.appendChild(upMin);
@@ -209,7 +265,7 @@ AccessMapRoutingControl.prototype = {
 
     let up = new Slider(upSliderContainer, {
       id: 'up-slider',
-      min: this.options.ideal * 100,
+      min: 1,
       max: 10,
       step: 0.1,
       value: this.options.maxup * 100
@@ -258,18 +314,16 @@ AccessMapRoutingControl.prototype = {
     upTip.style['margin-left'] = '-16px';
     downTip.style['margin-left'] = '-16px';
 
-    let options = this.options;
     up.on('slide', function(newVal) {
       options.maxup = newVal / 100;
-      updateColors();
+      uphillUpdate();
     });
 
     down.on('slide', function(newVal) {
       options.maxdown = -newVal / 100;
-      updateColors();
+      downhillUpdate();
     });
 
-    let map = this._map;
     function updateColors() {
       let data = [{
         x: 100 * options.maxdown,
@@ -361,20 +415,23 @@ AccessMapRoutingControl.prototype = {
       // Toggle displaying custom controls
       if (customContainer.style.display === 'none') {
         customContainer.style.display = 'block';
+        uphillUpdate();
       } else {
         customContainer.style.display = 'none';
+        defaultStyle();
       }
     });
 
     let that = this;
     directionsIcon.addEventListener('click', function() {
       // Toggle the presence of the 'origin' search box
-      if (that._routingMode) {
+      if (that._mode === 'routing') {
         // switch to search-only mode
         originEl.style.display = 'none';
         settingsIcon.style.display = 'none';
         customContainer.style.display = 'none';
-        that._routingMode = false;
+        that._mode = 'view';
+        defaultStyle();
       } else {
         // switch to routing mode
         originEl.style.display = 'block';
@@ -383,11 +440,26 @@ AccessMapRoutingControl.prototype = {
         // Update the placeholder text
         destinationEl.placeholder = 'Destination location';
         destinationEl.title = 'Destination location';
-        that._routingMode = true;
+        that._mode = 'routing';
       }
     });
 
     return el;
+  },
+
+  _defaultMapStyle: function() {
+    let options = this.options;
+    this._map.setPaintProperty('sidewalks', 'line-color', {
+      property: 'grade',
+      colorSpace: 'lab',
+      stops: [
+        [-0.1, options.colorScale(1).hex()],
+        [-0.055, options.colorScale(0.1).hex()],
+        [-0.01, options.colorScale(0).hex()],
+        [0.0366, options.colorScale(0.1).hex()],
+        [0.0833, options.colorScale(1).hex()]
+      ]
+    });
   },
 
   _contextMenu: function() {
@@ -396,7 +468,7 @@ AccessMapRoutingControl.prototype = {
     map.on('contextmenu', function(e) {
       let html = `
       <div id="contextmenu">
-      <ul>
+      <ul style="list-style-type: none; padding-left: 0;">
       <li id="origin">
         <a>Set Origin</a>
       </li>
@@ -781,7 +853,7 @@ AccessMapRoutingControl.prototype = {
       }
     }
 
-    if (this._routingMode) {
+    if (this._mode === 'routing') {
       // Did the user select start and end locations?
       let originSelected = this._originTypeahead.selected;
       let destSelected = this._destinationTypeahead.selected;
