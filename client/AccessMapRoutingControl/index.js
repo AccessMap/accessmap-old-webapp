@@ -158,6 +158,15 @@ AccessMapRoutingControl.prototype = {
     downTab.appendChild(downTabLink);
     tabs.appendChild(downTab);
 
+    // Barrier settings - checkboxes
+    let barriersTab = document.createElement('li');
+    let barriersTabLink = document.createElement('a');
+    barriersTabLink.setAttribute('data-toggle', 'tab');
+    barriersTabLink.setAttribute('href', '#barrierscontrol');
+    barriersTabLink.innerHTML = 'Barriers';
+    barriersTab.appendChild(barriersTabLink);
+    tabs.appendChild(barriersTab);
+
     customContainer.appendChild(tabs);
 
     // Container for tab content
@@ -311,6 +320,40 @@ AccessMapRoutingControl.prototype = {
         stops: stops
       });
     }
+
+    // Barriers tab content - checkboxes for e.g. construction
+    let barriersContainer = document.createElement('div');
+    barriersContainer.id = 'barrierscontrol';
+    barriersContainer.className = 'tab-pane fade';
+    tabContent.appendChild(barriersContainer);
+
+    // Form container for inputs
+    let barriersForm = document.createElement('form');
+    barriersContainer.appendChild(barriersForm);
+
+    let constructionDiv = document.createElement('div');
+    constructionDiv.className = 'checkbox';
+    barriersForm.appendChild(constructionDiv);
+    let constructionLabel = document.createElement('label');
+    constructionDiv.appendChild(constructionLabel);
+    let construction = this.construction = document.createElement('input');
+    construction.type = 'checkbox';
+    construction.checked = true;
+    construction.value = '';
+    constructionLabel.appendChild(construction);
+    constructionLabel.appendChild(document.createTextNode('Avoid Construction'));
+
+    let curbsDiv = document.createElement('div');
+    curbsDiv.className = 'checkbox';
+    barriersForm.appendChild(curbsDiv);
+    let curbsLabel = document.createElement('label');
+    curbsDiv.appendChild(curbsLabel);
+    let curbs = this.curbs = document.createElement('input');
+    curbs.type = 'checkbox';
+    curbs.checked = true;
+    curbs.value = '';
+    curbsLabel.appendChild(curbs);
+    curbsLabel.appendChild(document.createTextNode('Require curb ramps'));
 
     customContainer.appendChild(tabContent);
 
@@ -601,13 +644,20 @@ AccessMapRoutingControl.prototype = {
     // Prepare routing preferences
     // TODO: extract these from user interface
     let cost = {
-      avoid: ['curbs', 'construction'].join('|'),
       maxdown: this.options.maxdown,
       ideal: this.options.ideal,
       maxup: this.options.maxup,
       origin: origin.slice().reverse(),
       destination: destination.slice().reverse()
     };
+    let avoid = [];
+    if (this.curbs.checked) {
+      avoid.push('curbs');
+    }
+    if (this.construction.checked) {
+      avoid.push('construction');
+    }
+    cost['avoid'] = avoid.join('|');
 
     // Convert unnested JSON to encoded GET querystring
     let paramArray = [];
