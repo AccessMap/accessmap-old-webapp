@@ -1,9 +1,8 @@
-import * as d3 from 'd3';
 import chroma from 'chroma-js';
 import $ from 'jquery';
 import extend from 'xtend';
 import debounce from 'lodash.debounce';
-import Typeahead from 'suggestions';
+import Typeahead from './components/typeahead';
 import MapboxClient from 'mapbox/lib/services/geocoding';
 import turfBbox from '@turf/bbox';
 import mapboxgl from 'mapbox-gl';
@@ -12,14 +11,6 @@ import Slider from 'bootstrap-slider';
 import '!style!css!bootstrap-slider/dist/css/bootstrap-slider.min.css';
 
 import '!style!css!./AccessMapRoutingControl.css';
-
-// FIXME: the Typeahead class fires an extra 'change' event on click. This
-// is bad - it launches two route requests. This is a messy hack around
-// that copied from version 1.3.1
-Typeahead.prototype.value = function(value) {
-  this.selected = value;
-  this.el.value = this.getItemValue(value);
-};
 
 /**
  * A pedestrian routing control for Accessmap. Not yet suited for use away from
@@ -55,11 +46,6 @@ AccessMapRoutingControl.prototype = {
 
     this._mode = 'view';
 
-    // Bind this object to event-called functions
-    this._onChange = this._onChange.bind(this);
-    this._onKeyDownOrigin = this._onKeyDownOrigin.bind(this);
-    this._onKeyDownDestination = this._onKeyDownDestination.bind(this);
-
     this._setupLayers();
     let el = this._setupElements();
     this._contextMenu();
@@ -80,36 +66,45 @@ AccessMapRoutingControl.prototype = {
     let searchContainer = document.createElement('div');
     searchContainer.className = 'geocoder-container';
 
-    let originEl = this._originEl = document.createElement('input');
-    this._originEl.className = 'geocoder-input geocoder-input-origin';
-    this._originEl.type = 'text';
-    this._originEl.placeholder = 'Starting location';
-    this._originEl.title = 'Starting location';
-    this._originEl.style.display = 'none';
-    this._originEl.addEventListener('keydown', this._onKeyDownOrigin);
-    this._originEl.addEventListener('change', () => {
-      this._onChange(this._originTypeahead);
-    });
-
-    let destinationEl = this._destinationEl = document.createElement('input');
-    this._destinationEl.className = 'geocoder-input geocoder-input-destination';
-    this._destinationEl.type = 'text';
-    this._destinationEl.title = 'Destination location';
-    this._destinationEl.placeholder = 'Search address';
-    this._destinationEl.addEventListener('keydown', this._onKeyDownDestination);
-    this._destinationEl.addEventListener('change', () => {
-      this._onChange(this._destinationTypeahead);
-    });
-
     let originContainer = this._originContainer = document.createElement('div');
-    this._originContainer.className = 'geocoder-origin-container';
-    this._destinationContainer = document.createElement('div');
-    this._destinationContainer.className = 'geocoder-destination-container';
+    originContainer.className = 'geocoder-origin-container';
+    originContainer.style.display = 'none';
 
-    this._originContainer.appendChild(this._destinationEl);
-    this._destinationContainer.appendChild(this._destinationEl);
+    let destinationContainer = this._destinationContainer = document.createElement('div');
+    destinationContainer.className = 'geocoder-destination-container';
+
     searchContainer.appendChild(this._originContainer);
     searchContainer.appendChild(this._destinationContainer);
+
+    let destTypeahead = new Typeahead(this._destinationContainer, {
+      placeholder: 'Search location',
+      accessToken: that.options.accessToken
+    });
+    destTypeahead.on('change', function(e, selected) {
+      if (!selected) return;
+
+      that._destination = selected.center;
+      if (that._origin && that._destination) {
+        that.getRoute(that._origin, that._destination)
+      } else {
+        that.flyTo(selected);
+      }
+    });
+
+    let originTypeahead = new Typeahead(this._originContainer, {
+      accessToken: that.options.accessToken,
+      placeholder: 'Start location',
+    });
+    originTypeahead.on('change', function(e, selected) {
+      if (!selected) return;
+
+      that._origin = selected.center;
+      if (this._origin && this._destination) {
+        that.getRoute(that._origin, that._destination)
+      } else {
+        that.flyTo(selected);
+      }
+    });
 
     // TODO: Icon is bound to `this` to make clickable later
     let searchIcon = document.createElement('div');
@@ -144,18 +139,10 @@ AccessMapRoutingControl.prototype = {
     profilesGroup.appendChild(customIcon);
     customIcon.className = 'btn btn-default geocoder-icon geocoder-preset geocoder-icon-custom';
 
-    originContainer.appendChild(originEl);
     el.appendChild(searchIcon);
     el.appendChild(searchContainer);
     el.appendChild(directionsIcon);
     el.appendChild(profilesGroup);
-
-    this._originTypeahead = new Typeahead(originEl, [], { filter: false });
-    this._originTypeahead.getItemValue = function(item) { return item.place_name; };
-
-    this._destinationTypeahead = new Typeahead(destinationEl, [],
-                                               { filter: false });
-    this._destinationTypeahead.getItemValue = function(item) { return item.place_name; };
 
     // Custom route controls
     // TODO: use proper components for this (React?)
@@ -513,24 +500,42 @@ AccessMapRoutingControl.prototype = {
       // Toggle the presence of the 'origin' search box
       if (that._mode === 'routing') {
         // switch to search-only mode
-        originEl.style.display = 'none';
+        destTypeahead.updatePlaceholder('Search location');
+        originContainer.style.display = 'none';
         profilesGroup.style.display = 'none';
         customContainer.style.display = 'none';
         that._mode = 'view';
         defaultStyle();
       } else {
         // switch to routing mode
-        originEl.style.display = 'block';
+        destTypeahead.updatePlaceholder('Destination location');
+        originContainer.style.display = 'block';
         profilesGroup.style.display = 'block';
 
         // Update the placeholder text
-        destinationEl.placeholder = 'Destination location';
-        destinationEl.title = 'Destination location';
         that._mode = 'routing';
       }
     });
 
     return el;
+  },
+
+  flyTo(selected) {
+    function zoomToSelection(selected) {
+      if (selected.bbox && selected.context && selected.context.length <= 3
+          || selected.bbox && !selected.context) {
+        let bbox = selected.bbox;
+        this._map.fitBounds([[bbox[0], bbox[1]],[bbox[2], bbox[3]]]);
+      } else {
+        this._map.flyTo({
+          center: selected.center,
+          zoom: this.options.zoom
+        });
+      }
+    }
+    zoomToSelection = zoomToSelection.bind(this);
+
+    zoomToSelection.call(this, selected);
   },
 
   _defaultMapStyle: function() {
@@ -571,25 +576,13 @@ AccessMapRoutingControl.prototype = {
         .addTo(map);
 
       // Set up choice listeners
-      let originEl = document.getElementById('origin');
-      let destinationEl = document.getElementById('destination');
+      // let originEl = document.getElementById('origin');
 
-      originEl.addEventListener('click', () => {
-        that.getRoute([e.lngLat.lng, e.lngLat.lat], that._destination);
-        this._contextPopup.remove();
-      });
-
-      destinationEl.addEventListener('click', () => {
-        that.getRoute(that._origin, [e.lngLat.lng, e.lngLat.lat]);
-        this._contextPopup.remove();
-      });
+      // originEl.addEventListener('click', () => {
+      //   that.getRoute([e.lngLat.lng, e.lngLat.lat], that._destination);
+      //   this._contextPopup.remove();
+      // });
     });
-  },
-
-
-  _enableOrigin: function() {
-    this._originTypeahead = new Typeahead(originEl, [], { filter: false });
-    this._originTypeahead.getItemValue = function(item) { return item.place_name; };
   },
 
   onRemove: function() {
@@ -724,7 +717,6 @@ AccessMapRoutingControl.prototype = {
 
   getRoute: function(origin, destination) {
     // Origin and destination are [lng, lat] arrays
-
     let map = this._map;
 
     //
@@ -906,71 +898,7 @@ AccessMapRoutingControl.prototype = {
 
       map.fitBounds([[bbox[0], bbox[1]],[bbox[2], bbox[3]]]);
     }
-  },
-
-  _geocode: function(searchInput, target) {
-    if (!searchInput) return;
-    let request = this._mapboxClient.geocodeForward(searchInput, {
-      // Bounding box for Seattle area
-      bbox: [-122.4325535, 47.4837601, -122.2273287, 47.7390944],
-      county: 'us'
-    });
-
-    request.then(function(response) {
-      let res = response.entity;
-      target.update(res.features);
-    }.bind(this));
-  },
-
-  _onChange: function(target) {
-    let selected = target.selected;
-    if (!selected) return;
-
-    function zoomToSelection(selected) {
-      if (selected.bbox && selected.context && selected.context.length <= 3
-          || selected.bbox && !selected.context) {
-        let bbox = selected.bbox;
-        this._map.fitBounds([[bbox[0], bbox[1]],[bbox[2], bbox[3]]]);
-      } else {
-        this._map.flyTo({
-          center: selected.center,
-          zoom: this.options.zoom
-        });
-      }
-    }
-
-    if (this._mode === 'routing') {
-      // Did the user select start and end locations?
-      let originSelected = this._originTypeahead.selected;
-      let destSelected = this._destinationTypeahead.selected;
-      if ((originSelected !== null) && (destSelected !== null)) {
-        this.getRoute(originSelected.center, destSelected.center);
-      } else {
-        // Only one has been selected - route to it
-        zoomToSelection.call(this, selected);
-      }
-    } else {
-      zoomToSelection.call(this, selected);
-    }
-  },
-
-  // FIXME: these are redundant patterns (separate functions for
-  // origin/destination) - fix that
-  _onKeyDownOrigin: debounce(function(e) {
-    // Ignore tab, esc, left, right, enter, up, down
-    if (e.metakey || [9, 27, 37, 39, 13, 38, 40].indexOf(e.keyCode) !== -1) {
-      return;
-    }
-    this._geocode(e.target.value, this._originTypeahead);
-  }, 200),
-
-  _onKeyDownDestination: debounce(function(e) {
-    // Ignore tab, esc, left, right, enter, up, down
-    if (e.metakey || [9, 27, 37, 39, 13, 38, 40].indexOf(e.keyCode) !== -1) {
-      return;
-    }
-    this._geocode(e.target.value, this._destinationTypeahead);
-  }, 200)
+  }
 };
 
 module.exports = AccessMapRoutingControl;

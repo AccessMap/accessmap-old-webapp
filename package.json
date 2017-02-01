@@ -37,6 +37,7 @@
     "file-loader": "^0.9.0",
     "history": "^1.12.6",
     "jade": "~1.11.0",
+    "lodash.assign": "^4.2.0",
     "morgan": "~1.6.1",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
