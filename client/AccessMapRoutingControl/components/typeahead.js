@@ -6,10 +6,10 @@ import MapboxClient from 'mapbox/lib/services/geocoding';
 // FIXME: the Typeahead class fires an extra 'change' event on click. This
 // is bad - it launches two route requests. This is a messy hack around
 // that copied from version 1.3.1
-Suggestions.prototype.value = function(value) {
-  this.selected = value;
-  this.el.value = this.getItemValue(value);
-};
+// Suggestions.prototype.value = function(value) {
+//   this.selected = value;
+//   this.el.value = this.getItemValue(value);
+// };
 
 class Typeahead {
   constructor(el, opts) {

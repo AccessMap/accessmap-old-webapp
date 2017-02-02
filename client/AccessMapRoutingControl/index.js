@@ -576,12 +576,12 @@ AccessMapRoutingControl.prototype = {
         .addTo(map);
 
       // Set up choice listeners
-      // let originEl = document.getElementById('origin');
+      let originEl = document.getElementById('origin');
 
-      // originEl.addEventListener('click', () => {
-      //   that.getRoute([e.lngLat.lng, e.lngLat.lat], that._destination);
-      //   this._contextPopup.remove();
-      // });
+      originEl.addEventListener('click', () => {
+        that.getRoute([e.lngLat.lng, e.lngLat.lat], that._destination);
+        that._contextPopup.remove();
+      });
     });
   },
 
