@@ -575,12 +575,24 @@ AccessMapRoutingControl.prototype = {
         .setHTML(html)
         .addTo(map);
 
-      // Set up choice listeners
+      let contextPopup = this._contextPopup;
+      // Set up listeners for click events
       let originEl = document.getElementById('origin');
+      let destinationEl = document.getElementById('destination');
 
       originEl.addEventListener('click', () => {
-        that.getRoute([e.lngLat.lng, e.lngLat.lat], that._destination);
-        that._contextPopup.remove();
+        that._origin = [e.lngLat.lng, e.lngLat.lat];
+        if (that._origin && that._destination) {
+          that.getRoute(that._origin, that._destination);
+        }
+        contextPopup.remove();
+      });
+      destinationEl.addEventListener('click', () => {
+        that._destination = [e.lngLat.lng, e.lngLat.lat];
+        if (that._origin && that._destination) {
+          that.getRoute(that._origin, that._destination);
+        }
+        contextPopup.remove();
       });
     });
   },
