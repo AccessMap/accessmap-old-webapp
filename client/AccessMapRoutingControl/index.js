@@ -88,6 +88,7 @@ AccessMapRoutingControl.prototype = {
         that.getRoute(that._origin, that._destination)
       } else {
         that.flyTo(selected);
+        that.updateMarker('destination', '');
       }
     });
 
@@ -103,6 +104,7 @@ AccessMapRoutingControl.prototype = {
         that.getRoute(that._origin, that._destination)
       } else {
         that.flyTo(selected);
+        that.updateMarker('origin', '');
       }
     });
 
@@ -582,6 +584,7 @@ AccessMapRoutingControl.prototype = {
 
       originEl.addEventListener('click', () => {
         that._origin = [e.lngLat.lng, e.lngLat.lat];
+        that.updateMarker('origin');
         if (that._origin && that._destination) {
           that.getRoute(that._origin, that._destination);
         }
@@ -589,6 +592,7 @@ AccessMapRoutingControl.prototype = {
       });
       destinationEl.addEventListener('click', () => {
         that._destination = [e.lngLat.lng, e.lngLat.lat];
+        that.updateMarker('destination');
         if (that._origin && that._destination) {
           that.getRoute(that._origin, that._destination);
         }
@@ -727,18 +731,7 @@ AccessMapRoutingControl.prototype = {
     });
   },
 
-  getRoute: function(origin, destination) {
-    // Origin and destination are [lng, lat] arrays
-    let map = this._map;
-
-    //
-    // handle marker state
-    //
-
-    // store new marker locations (copy values to be safe)
-    this._origin = origin.slice();
-    this._destination = destination.slice();
-
+  updateMarker(type, text) {
     let markerSVG = `
     <svg id="origin-marker" viewBox="0 0 400 600">
       <g>
@@ -763,45 +756,63 @@ AccessMapRoutingControl.prototype = {
       </g>
     </svg>
     `;
-    let markerNames = ['origin', 'destination']
-    for (var i = 0; i < markerNames.length; i++) {
-      let div = document.createElement('div');
-      div.insertAdjacentHTML('beforeend', markerSVG);
-      div.className = 'marker';
 
-      let width = 30
-      div.style.width = width + 'px';
+    let div = document.createElement('div');
+    div.insertAdjacentHTML('beforeend', markerSVG);
+    div.className = 'marker';
 
-      let fill = div.getElementsByTagName('path')[0];
-      var name,
-          coords,
-          tspan;
-      if (i === 0) {
-        name = 'origin';
-        coords = origin;
-        tspan = div.getElementsByTagName('tspan')[0];
-        tspan.innerHTML = 'A';
-        fill.setAttribute('fill', '#ff88bb');
-      } else {
-        name = 'destination';
-        coords = destination;
-        tspan = div.getElementsByTagName('tspan')[0];
-        tspan.innerHTML = 'B';
-        fill.setAttribute('fill', '#bbaaff');
-      }
+    let width = 30
+    div.style.width = width + 'px';
 
-      let markerVar = '_' + name + 'Marker';
+    let fill = div.getElementsByTagName('path')[0];
 
-      if (this[markerVar]) this[markerVar].remove();
-
-      this[markerVar] = new mapboxgl.Marker(div, {
-        offset: [-(width / 2), -(600 / 400) * (width)]
-      });
-
-      this[markerVar]
-        .setLngLat(coords)
-        .addTo(map);
+    var name,
+        coords,
+        tspan;
+    if (type === 'origin') {
+      name = 'origin';
+      coords = this._origin.slice();
+      tspan = div.getElementsByTagName('tspan')[0];
+      tspan.innerHTML = 'A';
+      fill.setAttribute('fill', '#ff88bb');
+    } else if (type === 'destination') {
+      name = 'destination';
+      coords = this._destination.slice();
+      tspan = div.getElementsByTagName('tspan')[0];
+      tspan.innerHTML = 'B';
+      fill.setAttribute('fill', '#bbaaff');
     }
+
+    if (text !== undefined) {
+      tspan.innerHTML = text;
+    }
+
+    let markerVar = '_' + name + 'Marker';
+
+    if (this[markerVar]) this[markerVar].remove();
+
+    this[markerVar] = new mapboxgl.Marker(div, {
+      offset: [-(width / 2), -(600 / 400) * (width)]
+    });
+
+    this[markerVar]
+      .setLngLat(coords)
+      .addTo(this._map);
+  },
+
+  getRoute: function(origin, destination) {
+    // Origin and destination are [lng, lat] arrays
+    let map = this._map;
+
+    // store new marker locations (copy values to be safe)
+    this._origin = origin.slice();
+    this._destination = destination.slice();
+
+    //
+    // Update markers from state
+    //
+    this.updateMarker('origin');
+    this.updateMarker('destination');
 
     // Prepare routing preferences
     // TODO: extract these from user interface
