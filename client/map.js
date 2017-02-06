@@ -5,6 +5,7 @@ import chroma from 'chroma-js';
 import bufferPoint from './bufferpoint';
 import AccessMapRoutingControl from './AccessMapRoutingControl';
 import AccessMapGradeControl from './AccessMapGradeControl';
+import longpressToContextMenu from './longpress';
 
 
 function App(mapbox_token, routing) {
@@ -372,26 +373,25 @@ function App(mapbox_token, routing) {
 
       map.getCanvas().style.cursor = (clickables.length) ? 'pointer': '';
     });
-
   });
 
+  // Grade control - shows legend for incline colors
   let gradeControl = new AccessMapGradeControl({
     colorScale: colorScale
   });
   map.addControl(gradeControl, 'bottom-left');
 
-  if (routing) {
-    let routingControl = new AccessMapRoutingControl({
-      accessToken: mapbox_token,
-      api: 'api/v2/route.json',
-      colorScale: colorScale
-    });
-    map.addControl(routingControl);
-    // map.on('load', function() {
-    //   routingControl.getRoute([-122.336158, 47.606637],
-    //                           [-122.330572, 47.603704]);
-    // });
-  }
+  // Routing control - handles user input for routing requests
+  let routingControl = new AccessMapRoutingControl({
+    accessToken: mapbox_token,
+    api: 'api/v2/route.json',
+    colorScale: colorScale
+  });
+  map.addControl(routingControl);
+
+  // Long press hack - mapbox-gl-js does not seem to catch long press events,
+  // so we do so on mobile using 'touchstart' and 'touchend' events + timers.
+  longpressToContextMenu(map);
 }
 
 module.exports = App;
