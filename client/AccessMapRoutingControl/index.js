@@ -47,6 +47,10 @@ AccessMapRoutingControl.prototype = {
     this._mode = 'view';
 
     this._setupLayers();
+    let setMapStyle = this._defaultMapStyle.bind(this);
+    this._map.on('load', () => {
+      setMapStyle();
+    });
     let el = this._setupElements();
     this._contextMenu();
 
@@ -171,6 +175,7 @@ AccessMapRoutingControl.prototype = {
     function uphillUpdate() {
       // Modify map style to make everything uphill-shaded
       let mid = (options.maxup + options.ideal) / 2;
+      let midUp = (options.maxup + mid) / 2;
       // Need to solve linear equation to get x-intercept, which is equivalent
       // to 'b' in mx + b for equation for line from ideal to midpoint
       // b is in the domain [0, 0.01]
@@ -181,9 +186,11 @@ AccessMapRoutingControl.prototype = {
 
       let stops = [
         [options.maxup * -1, colorScale(1).hex()],
+        [midUp * -1, colorScale(0.5).hex()],
         [mid * -1, colorScale(0.1).hex()],
         [0, colorScale(b).hex()],
         [mid, colorScale(0.1).hex()],
+        [midUp, colorScale(0.5).hex()],
         [options.maxup, colorScale(1).hex()]
       ];
 
@@ -218,12 +225,15 @@ AccessMapRoutingControl.prototype = {
     function downhillUpdate() {
       // Modify map style to make everything uphill-shaded
       let mid = (options.maxdown + options.ideal) / 2;
+      let midDown = (options.maxdown + mid) / 2;
       let stops = [
         [options.maxdown, colorScale(1).hex()],
+        [midDown, colorScale(0.5).hex()],
         [mid, colorScale(0.1).hex()],
         [-0.01, colorScale(0).hex()],
         [0.01, colorScale(0).hex()],
         [mid * -1, colorScale(0.1).hex()],
+        [midDown * -1, colorScale(0.5).hex()],
         [options.maxdown * -1, colorScale(1).hex()]
       ];
 
@@ -542,16 +552,37 @@ AccessMapRoutingControl.prototype = {
 
   _defaultMapStyle: function() {
     let options = this.options;
+    let colorScale = options.colorScale;
+
+    // Find average between uphill/downhill for default profile (manual
+    // wheelchair), add color stops at important points:
+    // 1) Max colorscale at extremes average (maxdown, maxup)
+    // 2) Uphill ideal is 0. Downhill is 'ideal'. So min colorscale from
+    //    'ideal' to 0.
+    // 3) 'midpoint' critical points are averaged based on
+    //    (ideal avg + max avg) / 2
+    // 4) Point between 'midpoint' point and max is mid (0.5) colorscale
+
+    // Note: max and mid are positive values
+    let max = (options.maxdown * -1 + options.maxup) / 2;
+    let ideal = (options.ideal + 0) / 2;
+    let mid = (max + ideal) / 2;
+    let midMid = (mid + max) / 2;
+
+    let stops = [
+      [max * -1, colorScale(1).hex()],
+      [midMid * -1, colorScale(0.5).hex()],
+      [mid * -1, colorScale(0.1).hex()],
+      [ideal, colorScale(0).hex()],
+      [mid, colorScale(0.1).hex()],
+      [midMid, colorScale(0.5).hex()],
+      [max, colorScale(1).hex()]
+    ];
+
     this._map.setPaintProperty('sidewalks', 'line-color', {
       property: 'grade',
       colorSpace: 'lab',
-      stops: [
-        [-0.1, options.colorScale(1).hex()],
-        [-0.055, options.colorScale(0.1).hex()],
-        [-0.01, options.colorScale(0).hex()],
-        [0.0366, options.colorScale(0.1).hex()],
-        [0.0833, options.colorScale(1).hex()]
-      ]
+      stops: stops
     });
   },
 
