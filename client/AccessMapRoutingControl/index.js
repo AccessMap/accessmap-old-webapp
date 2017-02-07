@@ -687,7 +687,7 @@ AccessMapRoutingControl.prototype = {
             stops: [
               [12, 4],
               [15, 6],
-              [20, 16]
+              [20, 18]
             ]
           },
           'line-dasharray': {
@@ -713,8 +713,8 @@ AccessMapRoutingControl.prototype = {
           'line-gap-width': {
             stops: [
               [12, 3],
-              [15, 7],
-              [20, 23]
+              [15, 6],
+              [20, 30]
             ]
           },
           'line-width': {
@@ -749,8 +749,8 @@ AccessMapRoutingControl.prototype = {
           'line-width': {
             stops: [
               [12, 4],
-              [15, 8],
-              [20, 24]
+              [15, 6],
+              [20, 30]
             ]
           }
         },
