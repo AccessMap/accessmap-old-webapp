@@ -940,11 +940,11 @@ AccessMapRoutingControl.prototype = {
       map.getSource('route-segments').setData(segments);
       map.getSource('route-waypointpaths').setData(waypointPaths);
 
-      // Zoom to the new route - route extent + 20%
+      // Zoom to the new route - route extent + 30%
       let bbox = turfBbox(map.getSource('route-path')._data);
       let dx = bbox[3] - bbox[1];
       let dy = bbox[2] - bbox[0];
-      let zoomOut = 0.2;
+      let zoomOut = 0.3;
       bbox = [bbox[0] - zoomOut * dy,
               bbox[1] - zoomOut * dx,
               bbox[2] + zoomOut * dy,
